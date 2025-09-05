@@ -22,11 +22,11 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import type { Product } from '@/lib/types';
-import { useState } from 'react';
+import type { Product, SiteInfo } from '@/lib/types';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import { HowToPayContent } from './how-to-pay';
-import { addPurchase } from '@/lib/firestore-service';
+import { getSiteInfo } from '@/lib/firestore-service';
 
 const formSchema = z.object({
   bkashTxnId: z.string().min(5, { message: 'Transaction ID must be at least 5 characters.' }),
@@ -42,6 +42,17 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showHowToPay, setShowHowToPay] = useState(false);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+
+  useEffect(() => {
+    async function fetchInfo() {
+      if (isOpen) {
+        const info = await getSiteInfo();
+        setSiteInfo(info);
+      }
+    }
+    fetchInfo();
+  }, [isOpen]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,23 +62,81 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!product) return;
-    setIsSubmitting(true);
-    
-    try {
-      await addPurchase({ bkashTxnId: values.bkashTxnId, product });
+    if (!product || !siteInfo?.paymentApiBaseUrl || !siteInfo?.paymentApiKey || !siteInfo?.couponApiBaseUrl || !siteInfo?.couponApiKey) {
       toast({
-        title: 'Purchase Submitted',
-        description: 'Your purchase is pending verification. You will receive a coupon code upon approval.',
+        variant: 'destructive',
+        title: 'Configuration Error',
+        description: 'The site is not configured for automated payments. Please contact support.',
+      });
+      return;
+    }
+    setIsSubmitting(true);
+    const txnId = values.bkashTxnId.toUpperCase();
+    const productPrice = product.discountedPrice ?? product.regularPrice;
+
+    try {
+      // 1. Verify Transaction
+      const verifyUrl = `${siteInfo.paymentApiBaseUrl}/api/payment/${txnId}?apiKey=${siteInfo.paymentApiKey}`;
+      const verifyRes = await fetch(verifyUrl);
+      const verifyData = await verifyRes.json();
+
+      if (verifyData.error || !verifyData.id) {
+        throw new Error('Invalid Transaction ID.');
+      }
+      if (verifyData.is_redeemed) {
+        throw new Error('This Transaction ID has already been used.');
+      }
+
+      // 2. Match Amount
+      const transactionAmount = Number(verifyData.amount);
+      if (transactionAmount < productPrice) {
+        throw new Error(`The paid amount (৳${transactionAmount}) is less than the product price (৳${productPrice}).`);
+      }
+      
+      // 3. Create Coupon
+      const validityDate = new Date();
+      validityDate.setDate(validityDate.getDate() + (product.subscriptionDays || 30));
+      
+      const couponBody = {
+        code: txnId,
+        validity: validityDate.toISOString(),
+        coin_amount: product.type === 'subscription' ? 1 : product.coinAmount,
+        type: 'single',
+        show_ads: product.type !== 'subscription',
+        note: `Purchased: ${product.name}`,
+      };
+
+      const couponUrl = `${siteInfo.couponApiBaseUrl}/api/bsc?apiKey=${siteInfo.couponApiKey}`;
+      const couponRes = await fetch(couponUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(couponBody),
+      });
+
+      const couponData = await couponRes.json();
+      if (!couponData.success) {
+        throw new Error(couponData.message || 'Failed to create coupon.');
+      }
+
+      // 4. Mark as Redeemed
+      const redeemUrl = `${siteInfo.paymentApiBaseUrl}/api/payment/${txnId}?apiKey=${siteInfo.paymentApiKey}`;
+      await fetch(redeemUrl, { method: 'PUT' });
+
+      // 5. Success
+      toast({
+        title: 'Verification Successful!',
+        description: `Your coupon code is ${txnId}. You can now use this to redeem your purchase.`,
+        duration: 9000,
       });
       form.reset();
       onOpenChange(false);
-    } catch (error) {
-      console.error('Error submitting purchase', error);
+
+    } catch (error: any) {
        toast({
         variant: 'destructive',
-        title: 'Submission Failed',
-        description: 'An unexpected error occurred.',
+        title: 'Verification Failed',
+        description: error.message || 'An unexpected error occurred.',
+        duration: 9000,
       });
     } finally {
         setIsSubmitting(false);

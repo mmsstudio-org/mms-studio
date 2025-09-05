@@ -21,6 +21,10 @@ const siteInfoSchema = z.object({
   webDescription: z.string().min(10, 'Description must be at least 10 characters.'),
   bkashNumber: z.string().min(11, 'bKash number must be at least 11 characters.'),
   bkashQrCodeUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  paymentApiBaseUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  paymentApiKey: z.string().optional(),
+  couponApiBaseUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  couponApiKey: z.string().optional(),
 });
 
 const featureSchema = z.object({
@@ -51,6 +55,10 @@ export default function SiteInfoPage() {
       webDescription: '',
       bkashNumber: '',
       bkashQrCodeUrl: '',
+      paymentApiBaseUrl: '',
+      paymentApiKey: '',
+      couponApiBaseUrl: '',
+      couponApiKey: '',
     },
   });
 
@@ -152,8 +160,8 @@ export default function SiteInfoPage() {
       <div className="grid gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>General & Payment</CardTitle>
-            <CardDescription>Update your website's main details and bKash payment information.</CardDescription>
+            <CardTitle>General, Payment & API</CardTitle>
+            <CardDescription>Update your website's main details, bKash info, and API configurations.</CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...siteInfoForm}>
@@ -210,9 +218,63 @@ export default function SiteInfoPage() {
                     </FormItem>
                   )}
                 />
+                <h3 className="text-lg font-semibold pt-4 border-t">API Settings</h3>
+                <FormField
+                  control={siteInfoForm.control}
+                  name="paymentApiBaseUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment API Base URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://your-payment-api.com" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={siteInfoForm.control}
+                  name="paymentApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Payment API Key</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={siteInfoForm.control}
+                  name="couponApiBaseUrl"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Coupon API Base URL</FormLabel>
+                      <FormControl>
+                        <Input {...field} placeholder="https://your-coupon-api.com" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                 <FormField
+                  control={siteInfoForm.control}
+                  name="couponApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Coupon API Key</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Save General Info
+                  Save All Info
                 </Button>
               </form>
             </Form>

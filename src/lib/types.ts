@@ -49,4 +49,8 @@ export interface SiteInfo {
   webDescription?: string;
   bkashNumber?: string;
   bkashQrCodeUrl?: string;
+  paymentApiBaseUrl?: string;
+  paymentApiKey?: string;
+  couponApiBaseUrl?: string;
+  couponApiKey?: string;
 }

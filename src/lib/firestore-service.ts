@@ -67,8 +67,9 @@ export async function getFeatures(): Promise<Feature[]> {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Feature));
 }
 
-export async function addFeature(feature: Omit<Feature, 'id'>): Promise<void> {
-    await addDoc(featuresCollection, feature);
+export async function addFeature(feature: Omit<Feature, 'id'>): Promise<string> {
+    const docRef = await addDoc(featuresCollection, feature);
+    return docRef.id;
 }
 
 export async function updateFeature(featureId: string, feature: Partial<Feature>): Promise<void> {
