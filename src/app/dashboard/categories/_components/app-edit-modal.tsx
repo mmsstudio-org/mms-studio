@@ -31,7 +31,7 @@ import { addApp, updateApp } from '@/lib/firestore-service';
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
-  icon: z.string().optional().or(z.literal('')),
+  icon: z.union([z.string().url(), z.string().length(0), z.string().refine(s => !s.startsWith('http'))]).optional(),
 });
 
 type AppEditModalProps = {
