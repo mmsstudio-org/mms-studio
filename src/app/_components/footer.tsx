@@ -1,17 +1,22 @@
-'use client';
-import Link from 'next/link';
-import { Github, Home, Instagram, HelpCircle } from 'lucide-react';
-import { useState } from 'react';
-import HelpCenterModal from './help-center-modal';
+"use client";
+import Link from "next/link";
+import { Github, Home, Instagram, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import HelpCenterModal from "./help-center-modal";
 
 export default function Footer() {
   const [isHelpOpen, setHelpOpen] = useState(false);
 
   const footerLinks = [
-    { href: '/', icon: Home, label: 'Home' },
-    { href: 'https://instagram.com', icon: Instagram, label: 'Instagram' },
-    { href: 'https://github.com', icon: Github, label: 'GitHub' },
-    { href: 'https://sabbirmms.github.io', label: 'Admin' },
+    { href: "/", icon: Home, label: "Home", target: 0 },
+    {
+      href: "https://instagram.com/sabbirmms",
+      icon: Instagram,
+      label: "Instagram",
+      target: 1,
+    },
+    { href: "https://github.com/sabbirmms", icon: Github, label: "GitHub", target: 1 },
+    { href: "https://sabbirmms.github.io", label: "Admin", target: 1 },
   ];
 
   return (
@@ -22,7 +27,10 @@ export default function Footer() {
             © {new Date().getFullYear()} MMS Studio. All rights reserved.
           </p>
           <div className="flex items-center gap-4">
-            <button onClick={() => setHelpOpen(true)} className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
+            <button
+              onClick={() => setHelpOpen(true)}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            >
               <HelpCircle className="h-5 w-5" />
               <span className="sr-only">How to Pay</span>
             </button>
@@ -30,6 +38,7 @@ export default function Footer() {
               <Link
                 key={link.label}
                 href={link.href}
+                target={link.target === 1 ? "_blank" : "_parent"}
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 {link.icon ? <link.icon className="h-5 w-5" /> : link.label}

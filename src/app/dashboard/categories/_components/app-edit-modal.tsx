@@ -75,8 +75,8 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
     
     const appData = {
         ...values,
-        description: values.description || undefined,
-        icon: values.icon || undefined,
+        description: values.description || "",
+        icon: values.icon || "",
     }
 
     try {

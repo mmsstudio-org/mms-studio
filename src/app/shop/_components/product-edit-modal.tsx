@@ -134,11 +134,11 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
     
     const productData = {
         ...values,
-        description: values.description || undefined,
-        discountedPrice: values.discountedPrice ? Number(values.discountedPrice) : undefined,
-        imageUrl: values.imageUrl || undefined,
-        coinAmount: values.coinAmount ? Number(values.coinAmount) : undefined,
-        subscriptionDays: values.subscriptionDays ? Number(values.subscriptionDays) : undefined,
+        description: values.description || "",
+        discountedPrice: values.discountedPrice ? Number(values.discountedPrice) : 0,
+        imageUrl: values.imageUrl || "",
+        coinAmount: values.coinAmount ? Number(values.coinAmount) : 0,
+        subscriptionDays: values.subscriptionDays ? Number(values.subscriptionDays) : 30,
     }
 
     try {
@@ -152,7 +152,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         onProductUpdate();
         onOpenChange(false);
     } catch (error) {
-        console.error("Error saving product:", error);
+        console.error("Error saving product:", error, product);
         toast({ variant: 'destructive', title: 'Save Failed', description: 'An unexpected error occurred.' });
     } finally {
         setIsSubmitting(false);

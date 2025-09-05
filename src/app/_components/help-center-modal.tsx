@@ -30,7 +30,7 @@ const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email.' }),
   message: z.string().min(10, { message: 'Message must be at least 10 characters.' }),
-  walletId: z.string().optional(),
+  transaction_ID: z.string().optional(),
 });
 
 type HelpCenterModalProps = {
@@ -47,7 +47,7 @@ export default function HelpCenterModal({ isOpen, onOpenChange }: HelpCenterModa
       name: '',
       email: '',
       message: '',
-      walletId: '',
+      transaction_ID: '',
     },
   });
 
@@ -59,8 +59,8 @@ export default function HelpCenterModal({ isOpen, onOpenChange }: HelpCenterModa
     formData.append("name", values.name);
     formData.append("email", values.email);
     formData.append("message", values.message);
-    if(values.walletId) {
-      formData.append("walletId", values.walletId);
+    if(values.transaction_ID) {
+      formData.append("transaction_ID", values.transaction_ID);
     }
     formData.append("subject", "New Support Ticket from MMS Studio");
     formData.append("from_name", "MMS Studio Contact Form");
@@ -153,12 +153,13 @@ export default function HelpCenterModal({ isOpen, onOpenChange }: HelpCenterModa
             />
             <FormField
               control={form.control}
-              name="walletId"
+              name="transaction_ID"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Web3 Wallet ID (Optional)</FormLabel>
+                  {/* <FormLabel>Web3 Wallet ID (Optional)</FormLabel> */}
+                  <FormLabel>Transaction ID (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="0x..." {...field} />
+                    <Input placeholder="CI..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
