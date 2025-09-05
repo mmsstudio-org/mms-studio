@@ -19,9 +19,12 @@ export default function ShopPage() {
             <Card className="group overflow-hidden transition-all duration-300 hover:border-accent neon-glow">
               <CardHeader>
                 <div className="flex justify-between items-start">
-                  <div>
-                    <CardTitle className="text-2xl font-bold">{app.name}</CardTitle>
-                    <CardDescription className="mt-2">{app.description}</CardDescription>
+                  <div className="flex items-center gap-4">
+                    {app.icon && <app.icon className="h-8 w-8 text-accent" />}
+                    <div>
+                      <CardTitle className="text-2xl font-bold">{app.name}</CardTitle>
+                      <CardDescription className="mt-2">{app.description}</CardDescription>
+                    </div>
                   </div>
                   <ArrowRight className="h-5 w-5 text-muted-foreground transition-transform duration-300 group-hover:translate-x-1 group-hover:text-accent" />
                 </div>

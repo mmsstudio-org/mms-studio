@@ -7,7 +7,7 @@ export default function Footer() {
     { href: '/shop', icon: HelpCircle, label: 'How to Pay' },
     { href: 'https://instagram.com', icon: Instagram, label: 'Instagram' },
     { href: 'https://github.com', icon: Github, label: 'GitHub' },
-    { href: '/portfolio', label: 'Admin' },
+    { href: 'https://sabbirmms.github.io', label: 'Admin' },
   ];
 
   return (

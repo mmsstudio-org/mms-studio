@@ -1,4 +1,5 @@
-import type { AppDetail, Product } from './types';
+import type { AppDetail } from './types';
+import { Smartphone, MessageSquare, Code } from 'lucide-react';
 
 // This file will be deprecated in favor of Firestore.
 // For now, it provides mock data for UI development.
@@ -6,18 +7,21 @@ import type { AppDetail, Product } from './types';
 export const APPS: AppDetail[] = [
   {
     id: 'bcs',
-    name: 'BCS',
+    name: 'বিসিএস প্রশ্ন ব্যাংক ও সমাধান',
     description: 'Explore exclusive subscription packages and coin packs for our BCS app.',
+    icon: Smartphone,
   },
   {
     id: 'bnc',
-    name: 'BNC',
+    name: 'বাংলা স্ট্যাটাস ও ক্যাপশন',
     description: 'Get the best deals on coin packs for the BNC application.',
+    icon: MessageSquare,
   },
   {
     id: 'api',
     name: 'API',
     description: 'Purchase API credits and access tiers to power your applications.',
+    icon: Code,
   },
 ];
 

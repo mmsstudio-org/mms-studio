@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
     extend: {
+      backgroundImage: {
+        'futuristic-gradient': 'linear-gradient(to right, hsl(var(--background)) 80%, hsl(var(--primary) / 0.1), hsl(var(--accent) / 0.2))',
+      },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Inter', 'sans-serif'],

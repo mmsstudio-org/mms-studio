@@ -1,3 +1,5 @@
+import { LucideIcon } from "lucide-react";
+
 export interface Product {
   id: string;
   appId: 'bcs' | 'bnc' | 'api';
@@ -13,6 +15,7 @@ export interface AppDetail {
   id: 'bcs' | 'bnc' | 'api';
   name: string;
   description: string;
+  icon?: LucideIcon;
 }
 
 export interface Purchase {
