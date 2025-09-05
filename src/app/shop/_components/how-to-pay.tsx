@@ -1,7 +1,6 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from "next/image";
-import { CONFIG } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -13,23 +12,55 @@ import {
 } from "@/components/ui/accordion"
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Link from 'next/link';
+import { getSiteInfo } from '@/lib/firestore-service';
+import type { SiteInfo } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const HowToPayContent = ({ productPrice }: { productPrice?: number }) => {
     const { toast } = useToast();
+    const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchInfo() {
+            const info = await getSiteInfo();
+            setSiteInfo(info);
+            setLoading(false);
+        }
+        fetchInfo();
+    }, []);
+
     const copyToClipboard = () => {
-        navigator.clipboard.writeText(CONFIG.bkash_number);
+        if (!siteInfo?.bkashNumber) return;
+        navigator.clipboard.writeText(siteInfo.bkashNumber);
         toast({
             title: "Copied!",
             description: "bKash number copied to clipboard.",
         });
     };
 
+    if (loading) {
+        return (
+            <div className="space-y-4">
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-4 w-1/4 mx-auto" />
+                <Skeleton className="h-48 w-full" />
+                <Skeleton className="h-12 w-full" />
+                <Skeleton className="h-24 w-full" />
+            </div>
+        )
+    }
+
+    if (!siteInfo || !siteInfo.bkashNumber) {
+        return <div className="text-center text-muted-foreground">Payment information is not available at the moment.</div>
+    }
+
     return (
         <div className="space-y-4">
             <div className="p-4 border rounded-lg">
                 <p className="font-bold text-lg">Send Money to:</p>
                 <div className="flex items-center justify-between mt-2">
-                    <span className="text-xl font-mono text-accent">{CONFIG.bkash_number}</span>
+                    <span className="text-xl font-mono text-accent">{siteInfo.bkashNumber}</span>
                     <Button variant="ghost" size="icon" onClick={copyToClipboard}>
                         <Copy className="h-5 w-5" />
                     </Button>
@@ -39,13 +70,16 @@ export const HowToPayContent = ({ productPrice }: { productPrice?: number }) => 
                 )}
             </div>
 
-            <div className="text-center text-sm text-muted-foreground">OR</div>
-
-            <div className="flex flex-col items-center p-4 border rounded-lg">
-                <p className="font-bold text-lg mb-2">Scan QR Code</p>
-                <Image src={CONFIG.bkash_qr_code_url} alt="bKash QR Code" width={150} height={150} className="rounded-md" data-ai-hint="qr code payment" />
-                <p className="text-xs text-muted-foreground mt-2">Use the bKash app to scan and pay.</p>
-            </div>
+            {siteInfo.bkashQrCodeUrl && (
+              <>
+                <div className="text-center text-sm text-muted-foreground">OR</div>
+                <div className="flex flex-col items-center p-4 border rounded-lg">
+                    <p className="font-bold text-lg mb-2">Scan QR Code</p>
+                    <Image src={siteInfo.bkashQrCodeUrl} alt="bKash QR Code" width={150} height={150} className="rounded-md" data-ai-hint="qr code payment" />
+                    <p className="text-xs text-muted-foreground mt-2">Use the bKash app to scan and pay.</p>
+                </div>
+              </>
+            )}
 
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-1">

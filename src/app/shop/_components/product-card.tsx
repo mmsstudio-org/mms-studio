@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { ShoppingCart, Pencil } from 'lucide-react';
+import { ShoppingCart, Pencil, Package, CircleDollarSign } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 type ProductCardProps = {
@@ -14,17 +14,29 @@ type ProductCardProps = {
 export default function ProductCard({ product, onPurchaseClick, onEditClick }: ProductCardProps) {
   const { user } = useAuth();
   
+  const placeholderImage = product.type === 'subscription' 
+    ? "https://placehold.co/600x400/7c3aed/ffffff?text=Subscription" 
+    : "https://placehold.co/600x400/f59e0b/ffffff?text=Coins";
+
+  const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
+
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-accent neon-glow h-full">
-      <div className="relative w-full aspect-video">
-        <Image
-          src={product.imageUrl || 'https://picsum.photos/600/400'}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="object-cover"
-          data-ai-hint="digital product"
-        />
+      <div className="relative w-full aspect-video bg-muted flex items-center justify-center">
+        {product.imageUrl ? (
+          <Image
+            src={product.imageUrl}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover"
+            data-ai-hint={dataAiHint}
+          />
+        ) : (
+            product.type === 'subscription' 
+                ? <Package className="h-24 w-24 text-muted-foreground" />
+                : <CircleDollarSign className="h-24 w-24 text-muted-foreground" />
+        )}
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>

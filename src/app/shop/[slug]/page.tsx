@@ -1,39 +1,50 @@
 'use client';
-import { APPS } from '@/lib/store';
 import { notFound, useParams } from 'next/navigation';
 import ProductList from '../_components/product-list';
 import { useEffect, useState, useCallback } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product, AppDetail } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getProductsForApp } from '@/lib/firestore-service';
+import { getProductsForApp, getApp } from '@/lib/firestore-service';
 
 export default function ShopSlugPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const [app, setApp] = useState<any>(null);
+  const [app, setApp] = useState<AppDetail | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
-    const appProducts = await getProductsForApp(slug);
-    setProducts(appProducts);
+    const appDetails = await getApp(slug);
+    if (appDetails) {
+      setApp(appDetails);
+      const appProducts = await getProductsForApp(slug);
+      setProducts(appProducts);
+    } else {
+      notFound();
+    }
     setLoading(false);
   }, [slug]);
 
 
   useEffect(() => {
-    const foundApp = APPS.find((app) => app.id === slug);
-    if (foundApp) {
-      setApp(foundApp);
-      fetchProducts();
-    } else {
-      notFound();
-    }
+    fetchProducts();
   }, [slug, fetchProducts]);
 
-  if (!app) {
-    return null; // Or a loading state
+  if (loading || !app) {
+     return (
+        <div className="container mx-auto py-10">
+            <div className="text-center mb-12">
+                <Skeleton className="h-10 w-1/2 mx-auto" />
+                <Skeleton className="h-6 w-3/4 mx-auto mt-4" />
+            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <Skeleton className="h-[400px] w-full" />
+                <Skeleton className="h-[400px] w-full" />
+                <Skeleton className="h-[400px] w-full" />
+            </div>
+        </div>
+     )
   }
   
   const subscriptions = products.filter(p => p.type === 'subscription');
@@ -50,13 +61,6 @@ export default function ShopSlugPage() {
         </p>
       </div>
       
-      {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Skeleton className="h-[400px] w-full" />
-            <Skeleton className="h-[400px] w-full" />
-            <Skeleton className="h-[400px] w-full" />
-        </div>
-      ) : (
         <div className="space-y-16">
           {subscriptions.length > 0 && (
             <section>
@@ -72,13 +76,12 @@ export default function ShopSlugPage() {
             </section>
           )}
 
-          {products.length === 0 && (
+          {products.length === 0 && !loading && (
             <div className="text-center py-20 border-2 border-dashed rounded-lg">
                 <p className="text-muted-foreground">No products available for this app yet.</p>
             </div>
           )}
         </div>
-      )}
     </div>
   );
 }

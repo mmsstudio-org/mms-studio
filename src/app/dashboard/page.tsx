@@ -1,23 +1,38 @@
 'use client';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import ProductEditModal from '../shop/_components/product-edit-modal';
 import Link from 'next/link';
+import type { AppDetail } from '@/lib/types';
+import { getApps } from '@/lib/firestore-service';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
   const [isModalOpen, setModalOpen] = useState(false);
+  const [apps, setApps] = useState<AppDetail[]>([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+
+  const fetchApps = useCallback(async () => {
+    setLoadingApps(true);
+    const fetchedApps = await getApps();
+    setApps(fetchedApps);
+    setLoadingApps(false);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
-  }, [user, loading, router]);
+    if (user) {
+      fetchApps();
+    }
+  }, [user, loading, router, fetchApps]);
 
   if (loading || !user) {
     return <div className="container py-10 text-center">Loading...</div>;
@@ -26,6 +41,11 @@ export default function DashboardPage() {
   const handleLogout = async () => {
     await logout();
     router.push('/');
+  }
+
+  const onProductUpdate = () => {
+    // You could add logic here to refresh specific app data if needed
+    setModalOpen(false);
   }
 
   return (
@@ -48,40 +68,46 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <Link href="/shop/bcs">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader>
-                <CardTitle>Manage BCS Products</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Add, edit, or remove products for the BCS app.</CardDescription>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/shop/bnc">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader>
-                <CardTitle>Manage BNC Products</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Add, edit, or remove products for the BNC app.</CardDescription>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link href="/shop/api">
-            <Card className="hover:border-primary transition-colors">
-              <CardHeader>
-                <CardTitle>Manage API Products</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Add, edit, or remove products for the API service.</CardDescription>
-              </CardContent>
-            </Card>
-          </Link>
+          {loadingApps ? (
+            <>
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-32 w-full" />
+            </>
+          ) : (
+             apps.map(app => (
+              <Link href={`/shop/${app.id}`} key={app.id}>
+                <Card className="hover:border-primary transition-colors">
+                  <CardHeader>
+                    <CardTitle>Manage {app.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription>Add, edit, or remove products for {app.name}.</CardDescription>
+                  </CardContent>
+                </Card>
+              </Link>
+            ))
+          )}
+           <Card>
+            <CardHeader>
+              <CardTitle>Manage Site Info</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Edit site name, features, and payment info. (Coming soon)</CardDescription>
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle>Manage App Categories</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <CardDescription>Add or remove shop categories. (Coming soon)</CardDescription>
+            </CardContent>
+          </Card>
           <Card>
             <CardHeader>
               <CardTitle>View Purchases</CardTitle>
-            </CardHeader>
+            </Header>
             <CardContent>
               <CardDescription>See pending and approved purchases. (Coming soon)</CardDescription>
             </CardContent>
@@ -92,10 +118,7 @@ export default function DashboardPage() {
         isOpen={isModalOpen}
         onOpenChange={setModalOpen}
         product={null}
-        onProductUpdate={() => {
-            // we could trigger a re-fetch of data here if we were displaying it
-            setModalOpen(false)
-        }}
+        onProductUpdate={onProductUpdate}
       />
     </>
   );

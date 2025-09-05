@@ -2,20 +2,20 @@ import { LucideIcon } from "lucide-react";
 
 export interface Product {
   id?: string; // Optional for new products
-  appId: 'bcs' | 'bnc' | 'api';
+  appId: string; // Now a generic string
   type: 'subscription' | 'coins';
   name: string;
   description: string;
   regularPrice: number;
   discountedPrice?: number;
-  imageUrl: string;
+  imageUrl?: string; // Image is now optional
 }
 
 export interface AppDetail {
-  id: 'bcs' | 'bnc' | 'api';
+  id: string; // Firestore document ID
   name: string;
   description: string;
-  icon?: LucideIcon;
+  icon?: string; // URL to an icon
 }
 
 export interface Purchase {
@@ -32,4 +32,18 @@ export interface SupportTicket {
     email: string;
     message: string;
     walletId?: string;
+}
+
+export interface Feature {
+  id?: string;
+  icon: string; // Lucide icon name as string
+  title: string;
+  description: string;
+}
+
+export interface SiteInfo {
+  webName?: string;
+  webDescription?: string;
+  bkashNumber?: string;
+  bkashQrCodeUrl?: string;
 }

@@ -1,57 +1,88 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Cog, Palette, ShieldCheck } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import Link from 'next/link';
 import AiPageGenerator from './_components/ai-page-generator';
+import { useEffect, useState } from 'react';
+import { getFeatures, getSiteInfo } from '@/lib/firestore-service';
+import type { Feature, SiteInfo } from '@/lib/types';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const Icon = ({ name, className }: { name: string; className: string }) => {
+  const LucideIcon = (LucideIcons as any)[name];
+  if (!LucideIcon) {
+    return <LucideIcons.HelpCircle className={className} />;
+  }
+  return <LucideIcon className={className} />;
+};
+
 
 export default function Home() {
-  const features = [
-    {
-      icon: <Cog className="h-10 w-10 text-accent" />,
-      title: 'Powerful APIs',
-      description: 'Integrate our services seamlessly into your applications with our robust and well-documented APIs.',
-    },
-    {
-      icon: <Palette className="h-10 w-10 text-accent" />,
-      title: 'Futuristic UI/UX',
-      description: 'Experience a sleek, modern interface designed for efficiency and a great user experience.',
-    },
-    {
-      icon: <ShieldCheck className="h-10 w-10 text-accent" />,
-      title: 'Secure & Reliable',
-      description: 'Built on top of Firebase, ensuring your data is secure and the service is always available.',
-    },
-  ];
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      const [fetchedFeatures, fetchedSiteInfo] = await Promise.all([
+        getFeatures(),
+        getSiteInfo(),
+      ]);
+      setFeatures(fetchedFeatures);
+      setSiteInfo(fetchedSiteInfo);
+      setLoading(false);
+    }
+    fetchData();
+  }, []);
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-16">
       <section className="text-center py-20">
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-          MMS Studio
-        </h1>
-        <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-          Your Gateway to the Future of Digital Assets. Explore our services and tools designed for the next generation of the web.
-        </p>
-        <div className="flex justify-center gap-4">
-          <Button asChild size="lg" className="neon-glow bg-primary hover:bg-primary/90">
-            <Link href="/shop">Explore The Shop</Link>
-          </Button>
-        </div>
+        {loading ? (
+            <>
+                <Skeleton className="h-20 w-3/4 mx-auto" />
+                <Skeleton className="h-8 w-1/2 mx-auto mt-4" />
+                <Skeleton className="h-12 w-48 mx-auto mt-8" />
+            </>
+        ) : (
+            <>
+                <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                {siteInfo?.webName || 'MMS Studio'}
+                </h1>
+                <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+                {siteInfo?.webDescription || 'Your Gateway to the Future of Digital Assets. Explore our services and tools designed for the next generation of the web.'}
+                </p>
+                <div className="flex justify-center gap-4">
+                <Button asChild size="lg" className="neon-glow bg-primary hover:bg-primary/90">
+                    <Link href="/shop">Explore The Shop</Link>
+                </Button>
+                </div>
+            </>
+        )}
       </section>
 
       <section className="py-20">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature) => (
-            <Card key={feature.title} className="bg-card/50 backdrop-blur-sm border-border/50 text-center">
-              <CardHeader className="items-center">
-                {feature.icon}
-                <CardTitle className="mt-4 text-2xl font-bold">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+          {loading ? (
+            <>
+                <Skeleton className="h-56 w-full" />
+                <Skeleton className="h-56 w-full" />
+                <Skeleton className="h-56 w-full" />
+            </>
+          ) : (
+            features.map((feature) => (
+                <Card key={feature.id} className="bg-card/50 backdrop-blur-sm border-border/50 text-center">
+                <CardHeader className="items-center">
+                    <Icon name={feature.icon} className="h-10 w-10 text-accent" />
+                    <CardTitle className="mt-4 text-2xl font-bold">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+                </Card>
+            ))
+          )}
         </div>
       </section>
 

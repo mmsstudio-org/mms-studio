@@ -23,10 +23,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import type { Product } from '@/lib/types';
+import type { Product, AppDetail } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { addProduct, updateProduct, deleteProduct } from '@/lib/firestore-service';
+import { addProduct, updateProduct, deleteProduct, getApps } from '@/lib/firestore-service';
 import {
   Select,
   SelectContent,
@@ -34,15 +34,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { APPS } from '@/lib/store';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
   regularPrice: z.coerce.number().positive(),
-  discountedPrice: z.coerce.number().optional(),
-  imageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
-  appId: z.enum(['bcs', 'bnc', 'api']),
+  discountedPrice: z.coerce.number().optional().or(z.literal('')),
+  imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
+  appId: z.string().min(1, { message: 'Please select an application.' }),
   type: z.enum(['subscription', 'coins']),
 });
 
@@ -57,6 +56,15 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [apps, setApps] = useState<AppDetail[]>([]);
+
+  useEffect(() => {
+    async function fetchApps() {
+        const fetchedApps = await getApps();
+        setApps(fetchedApps);
+    }
+    fetchApps();
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,24 +72,28 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         name: '',
         description: '',
         regularPrice: 0,
-        discountedPrice: undefined,
+        discountedPrice: '',
         imageUrl: '',
-        appId: 'bcs',
+        appId: '',
         type: 'subscription',
     },
   });
 
   useEffect(() => {
     if (product) {
-      form.reset(product);
+      form.reset({
+        ...product,
+        discountedPrice: product.discountedPrice || '',
+        imageUrl: product.imageUrl || '',
+      });
     } else {
         form.reset({
             name: '',
             description: '',
             regularPrice: 0,
-            discountedPrice: undefined,
+            discountedPrice: '',
             imageUrl: '',
-            appId: 'bcs',
+            appId: '',
             type: 'subscription',
         });
     }
@@ -89,12 +101,19 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
+    
+    const productData: Omit<Product, 'id'> & { id?: string } = {
+        ...values,
+        discountedPrice: values.discountedPrice ? Number(values.discountedPrice) : undefined,
+        imageUrl: values.imageUrl || undefined,
+    }
+
     try {
         if (product && product.id) {
-            await updateProduct(product.id, values);
+            await updateProduct(product.id, productData);
             toast({ title: 'Product Updated', description: 'The product has been successfully updated.' });
         } else {
-            await addProduct(values);
+            await addProduct(productData as Product);
             toast({ title: 'Product Added', description: 'The new product has been successfully added.' });
         }
         onProductUpdate();
@@ -180,7 +199,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                     name="discountedPrice"
                     render={({ field }) => (
                         <FormItem>
-                        <FormLabel>Discounted Price (৳)</FormLabel>
+                        <FormLabel>Discounted Price (৳) (Optional)</FormLabel>
                         <FormControl>
                             <Input type="number" placeholder="e.g., 80" {...field} />
                         </FormControl>
@@ -194,7 +213,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 name="imageUrl"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Image URL (Optional)</FormLabel>
                     <FormControl>
                         <Input placeholder="https://example.com/image.png" {...field} />
                     </FormControl>
@@ -216,7 +235,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                                {APPS.map(app => (
+                                {apps.map(app => (
                                     <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
                                 ))}
                             </SelectContent>
