@@ -23,7 +23,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import type { SupportTicket } from '@/lib/types';
 import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -54,18 +53,52 @@ export default function HelpCenterModal({ isOpen, onOpenChange }: HelpCenterModa
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-    // Simulate API call to save to 'support_tickets' in Firestore
-    console.log('Submitting support ticket:', values as SupportTicket);
-
-    await new Promise(resolve => setTimeout(resolve, 1000));
     
-    setIsSubmitting(false);
-    toast({
-      title: 'Ticket Submitted',
-      description: 'Our team will get back to you shortly.',
-    });
-    form.reset();
-    onOpenChange(false);
+    const formData = new FormData();
+    formData.append("access_key", process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "");
+    formData.append("name", values.name);
+    formData.append("email", values.email);
+    formData.append("message", values.message);
+    if(values.walletId) {
+      formData.append("walletId", values.walletId);
+    }
+    formData.append("subject", "New Support Ticket from MMS Studio");
+    formData.append("from_name", "MMS Studio Contact Form");
+
+
+    try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            toast({
+                title: 'Ticket Submitted',
+                description: 'Our team will get back to you shortly.',
+            });
+            form.reset();
+            onOpenChange(false);
+        } else {
+            console.error("Error submitting form:", data);
+            toast({
+                variant: 'destructive',
+                title: 'Submission Failed',
+                description: data.message || 'An unexpected error occurred.',
+            });
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Submission Failed',
+            description: 'An unexpected error occurred.',
+        });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   return (
