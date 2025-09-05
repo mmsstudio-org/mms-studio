@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
 import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
 
 type ProductCardProps = {
   product: Product;
@@ -31,7 +32,12 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-accent neon-glow h-full">
-      <div className="relative w-full aspect-video bg-muted flex items-center justify-center">
+      <div
+        className={cn(
+          'relative w-full aspect-video flex items-center justify-center',
+          !product.imageUrl && 'bg-gradient-to-br from-primary/10 via-background to-accent/10'
+        )}
+      >
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -41,10 +47,10 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
             className="object-cover"
             data-ai-hint={dataAiHint}
           />
+        ) : product.type === 'subscription' ? (
+          <Package className="h-24 w-24 text-foreground/50" />
         ) : (
-            product.type === 'subscription' 
-                ? <Package className="h-24 w-24 text-muted-foreground" />
-                : <CircleDollarSign className="h-24 w-24 text-muted-foreground" />
+          <CircleDollarSign className="h-24 w-24 text-foreground/50" />
         )}
       </div>
       <CardHeader>
