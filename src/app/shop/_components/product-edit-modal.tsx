@@ -39,12 +39,12 @@ const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   description: z.string().optional(),
   regularPrice: z.coerce.number().positive(),
-  discountedPrice: z.coerce.number().optional().or(z.literal('')),
+  discountedPrice: z.coerce.number().positive().optional().or(z.literal('')),
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   appId: z.string().min(1, { message: 'Please select an application.' }),
   type: z.enum(['subscription', 'coins']),
-  coinAmount: z.coerce.number().optional().or(z.literal('')),
-  subscriptionDays: z.coerce.number().optional().or(z.literal('')),
+  coinAmount: z.coerce.number().positive().optional().or(z.literal('')),
+  subscriptionDays: z.coerce.number().positive().optional().or(z.literal('')),
 }).refine(data => {
     if (data.type === 'coins') {
         return !!data.coinAmount && Number(data.coinAmount) > 0;

@@ -69,8 +69,8 @@ export default function CategoriesPage() {
     if(!window.confirm('Are you sure you want to delete this category and all its products? This cannot be undone.')) return;
 
     try {
-        // In a real production app, you'd want a backend function to delete sub-collections.
-        // For now, we just delete the app document. Products will be orphaned but won't show up.
+        // NOTE: This will orphan products in Firestore, but they won't be accessible in the UI.
+        // A production app should use a Cloud Function to handle cascading deletes.
         await deleteApp(appId);
         toast({ title: 'Category Deleted' });
         fetchAllData();
