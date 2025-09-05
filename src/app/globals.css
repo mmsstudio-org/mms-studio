@@ -108,8 +108,7 @@
 }
 
 .neon-text {
-  color: white;
-  text-shadow: 0 0 10px rgba(35, 11, 77, 0.8);
+  text-shadow: 0 0 2px rgba(35, 11, 77, 0.8);
 }
 
 .glass-card {

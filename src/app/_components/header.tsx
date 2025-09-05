@@ -36,7 +36,7 @@ export default function Header() {
                 alt="MMS Studio logo"
                 width={32}
                 height={32}
-                className="rounded"
+                className="rounded bg-black"
               />
               <span className="font-bold text-glow font-['Orbitron']">MMS Studio</span>
             </Link>

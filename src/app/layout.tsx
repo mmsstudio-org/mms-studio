@@ -12,7 +12,6 @@ import { getSiteInfo } from "@/lib/firestore-service";
 const defaultSiteInfo = {
   title: "MMS Studio - Digital Assets",
   description: "Your gateway to the future of digital assets.",
-
 };
 
 export default function RootLayout({
@@ -37,10 +36,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        {/* <title>{defaultSiteInfo.title}</title> */}
-        <title>MMS Studio - Official Website</title>
+        <title>{defaultSiteInfo.title}</title>
+        {/* <title>MMS Studio - Official Website</title> */}
         <meta name="description" content={defaultSiteInfo.description} />
-         <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"

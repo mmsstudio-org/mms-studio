@@ -3,10 +3,10 @@ import Link from "next/link";
 import { useState } from "react";
 import { Github, Home, Instagram, HelpCircle } from "lucide-react";
 import HelpCenterModal from "./help-center-modal";
+import Image from "next/image";
 
 export default function Footer() {
   const [isHelpOpen, setHelpOpen] = useState(false);
-
   const footerLinks = [
     { href: "/", icon: Home, label: "Home", target: 0 },
     {
@@ -15,17 +15,34 @@ export default function Footer() {
       label: "Instagram",
       target: 1,
     },
-    { href: "https://github.com/sabbirmms", icon: Github, label: "GitHub", target: 1 },
+    {
+      href: "https://github.com/sabbirmms",
+      icon: Github,
+      label: "GitHub",
+      target: 1,
+    },
     // { href: "https://sabbirmms.github.io", label: "Admin", target: 1 },
   ];
-
 
   return (
     <>
       <footer className="py-12 px-6 border-t border-border/40">
         <div className="container mx-auto">
           <div className="flex flex-wrap justify-between items-center mb-8">
-            <div className="text-2xl font-['Orbitron'] font-bold neon-text mb-4 md:mb-0">MMS Studio</div>
+            {/* theme === "dark" ? */}
+            <div
+              className={`text-2xl font-['Orbitron'] font-bold 
+                 mb-4 md:mb-0 flex items-center gap-2 mr-6 `}
+            >
+              <Image
+                src="/favicon.png"
+                alt="MMS Studio logo"
+                width={32}
+                height={32}
+                className="rounded bg-black"
+              />
+              MMS Studio
+            </div>
             <div className="flex flex-wrap gap-6">
               {footerLinks.map((link) => (
                 <Link
@@ -44,11 +61,14 @@ export default function Footer() {
               >
                 <HelpCircle className="h-5 w-5" />
                 <span className="sr-only">How to Pay</span>
-              </button>             {/* <a href="#" className="hover:text-purple-300 transition-colors">Privacy Policy</a> */}
+              </button>{" "}
+              {/* <a href="#" className="hover:text-purple-300 transition-colors">Privacy Policy</a> */}
             </div>
           </div>
           <div className="text-center text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} MMS Studio. All Rights Reserved.</p>
+            <p>
+              &copy; {new Date().getFullYear()} MMS Studio. All Rights Reserved.
+            </p>
           </div>
         </div>
       </footer>
