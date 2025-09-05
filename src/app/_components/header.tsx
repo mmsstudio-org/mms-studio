@@ -5,12 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, HelpCircle, Moon, Sun } from 'lucide-react';
 import { Logo } from './icons';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import HelpCenterModal from './help-center-modal';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { useTheme } from '@/hooks/use-theme';
+import { useTheme } from 'next-themes';
 
 
 export default function Header() {
@@ -27,7 +27,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-futuristic-gradient">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-sm">
         <div className="container flex h-14 items-center">
           <div className="mr-4 flex items-center">
             <Link href="/" className="flex items-center gap-2 mr-6">
@@ -51,7 +51,8 @@ export default function Header() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-              {theme === 'dark' ? <Sun className="h-5 w-5 text-glow text-accent" /> : <Moon className="h-5 w-5 text-glow text-accent" />}
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-glow text-accent" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-glow text-accent" />
               <span className="sr-only">Toggle Theme</span>
             </Button>
             <Button variant="ghost" size="icon" onClick={() => setHelpOpen(true)}>
