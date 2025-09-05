@@ -30,7 +30,7 @@ import { addApp, updateApp } from '@/lib/firestore-service';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
+  description: z.string().optional(),
   icon: z.union([z.string().url(), z.string().length(0), z.string().refine(s => !s.startsWith('http'))]).optional(),
 });
 
@@ -58,6 +58,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
     if (app) {
       form.reset({
         ...app,
+        description: app.description || '',
         icon: app.icon || '',
       });
     } else {
@@ -74,6 +75,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
     
     const appData = {
         ...values,
+        description: values.description || undefined,
         icon: values.icon || undefined,
     }
 
@@ -125,7 +127,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
                         <Textarea placeholder="Describe the category..." {...field} />
                     </FormControl>

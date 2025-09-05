@@ -5,7 +5,7 @@ export interface Product {
   appId: string;
   type: 'subscription' | 'coins';
   name: string;
-  description: string;
+  description?: string;
   regularPrice: number;
   discountedPrice?: number;
   imageUrl?: string;
@@ -16,7 +16,7 @@ export interface Product {
 export interface AppDetail {
   id: string; // Firestore document ID
   name: string;
-  description: string;
+  description?: string;
   icon?: string; // URL to an icon or a lucide-icon name
 }
 

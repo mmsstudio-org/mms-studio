@@ -37,7 +37,7 @@ import {
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters.' }),
+  description: z.string().optional(),
   regularPrice: z.coerce.number().positive(),
   discountedPrice: z.coerce.number().optional().or(z.literal('')),
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
@@ -108,6 +108,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
     if (product) {
       form.reset({
         ...product,
+        description: product.description || '',
         discountedPrice: product.discountedPrice || '',
         imageUrl: product.imageUrl || '',
         coinAmount: product.coinAmount || '',
@@ -133,6 +134,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
     
     const productData = {
         ...values,
+        description: values.description || undefined,
         discountedPrice: values.discountedPrice ? Number(values.discountedPrice) : undefined,
         imageUrl: values.imageUrl || undefined,
         coinAmount: values.coinAmount ? Number(values.coinAmount) : undefined,
@@ -203,7 +205,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 name="description"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Description (Optional)</FormLabel>
                     <FormControl>
                         <Textarea placeholder="Describe the product..." {...field} />
                     </FormControl>
