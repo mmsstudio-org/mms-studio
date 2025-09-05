@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc } from 'firebase/firestore';
 import type { Product, AppDetail, Feature, SiteInfo, Purchase } from './types';
 
 // Collections
@@ -63,7 +63,7 @@ export async function deleteApp(appId: string): Promise<void> {
 
 // Feature Functions
 export async function getFeatures(): Promise<Feature[]> {
-    const querySnapshot = await getDocs(featuresCollection);
+    const querySnapshot = await getDocs(query(featuresCollection, orderBy('title')));
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Feature));
 }
 
@@ -91,7 +91,7 @@ export async function getSiteInfo(): Promise<SiteInfo> {
 
 export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     const docRef = doc(siteInfoCollection, 'info');
-    await updateDoc(docRef, siteInfo);
+    await setDoc(docRef, siteInfo, { merge: true });
 }
 
 // Purchase Functions

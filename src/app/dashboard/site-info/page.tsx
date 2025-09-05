@@ -1,10 +1,10 @@
 'use client';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useForm } from 'react-hook-form';
+import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -30,13 +30,19 @@ const featureSchema = z.object({
   description: z.string().min(10, 'Description is required.'),
 });
 
+const formSchema = z.object({
+  features: z.array(featureSchema),
+});
+
+
 export default function SiteInfoPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const [features, setFeatures] = useState<Feature[]>([]);
+  
   const [loadingData, setLoadingData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFeatureSubmitting, setIsFeatureSubmitting] = useState<string | null>(null);
 
   const siteInfoForm = useForm<z.infer<typeof siteInfoSchema>>({
     resolver: zodResolver(siteInfoSchema),
@@ -48,19 +54,24 @@ export default function SiteInfoPage() {
     },
   });
 
-  const featuresForm = useForm({
-    resolver: zodResolver(z.object({ features: z.array(featureSchema) })),
+  const featuresForm = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       features: [],
     },
   });
 
+  const { fields, append, remove, update } = useFieldArray({
+    control: featuresForm.control,
+    name: 'features',
+    keyName: 'formId',
+  });
+  
   const fetchAllData = useCallback(async () => {
     setLoadingData(true);
-    const [siteInfo, features] = await Promise.all([getSiteInfo(), getFeatures()]);
+    const [siteInfo, featuresData] = await Promise.all([getSiteInfo(), getFeatures()]);
     siteInfoForm.reset(siteInfo);
-    featuresForm.reset({ features });
-    setFeatures(features);
+    featuresForm.reset({ features: featuresData });
     setLoadingData(false);
   }, [siteInfoForm, featuresForm]);
 
@@ -87,39 +98,40 @@ export default function SiteInfoPage() {
   };
 
   const handleFeatureSave = async (featureData: Feature, index: number) => {
-    setIsSubmitting(true);
+    setIsFeatureSubmitting(featureData.id || `new-${index}`);
     try {
       if (featureData.id) {
         await updateFeature(featureData.id, featureData);
+        toast({ title: 'Success', description: `Feature "${featureData.title}" updated.` });
       } else {
-        await addFeature(featureData);
+        const newId = await addFeature(featureData);
+        update(index, { ...featureData, id: newId });
+        toast({ title: 'Success', description: `Feature "${featureData.title}" added.` });
       }
-      toast({ title: 'Success', description: `Feature "${featureData.title}" saved.` });
-      fetchAllData(); // Refresh all data
     } catch (error) {
       console.error(error);
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to save feature.' });
     } finally {
-      setIsSubmitting(false);
+      setIsFeatureSubmitting(null);
     }
   }
 
-  const handleFeatureDelete = async (featureId: string) => {
-    setIsSubmitting(true);
+  const handleFeatureDelete = async (featureId: string, index: number) => {
+    setIsFeatureSubmitting(featureId);
     try {
         await deleteFeature(featureId);
+        remove(index);
         toast({ title: 'Success', description: 'Feature deleted.'});
-        fetchAllData();
     } catch (error) {
         console.error(error);
         toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete feature.' });
     } finally {
-        setIsSubmitting(false);
+        setIsFeatureSubmitting(null);
     }
   }
   
   const addNewFeature = () => {
-    setFeatures([...features, { id: '', icon: 'Zap', title: '', description: '' }]);
+    append({ id: '', icon: 'Zap', title: '', description: '' });
   }
 
   if (authLoading || loadingData) {
@@ -218,9 +230,12 @@ export default function SiteInfoPage() {
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-               {features.map((feature, index) => (
-                 <Form {...featuresForm} key={feature.id || index}>
+               <Form {...featuresForm}>
+                {fields.map((field, index) => {
+                  const featureSubmitting = isFeatureSubmitting === (field.id || `new-${index}`);
+                  return (
                     <form 
+                        key={field.formId}
                         onSubmit={featuresForm.handleSubmit(() => handleFeatureSave(featuresForm.getValues().features[index], index))} 
                         className="p-4 border rounded-lg space-y-4 relative"
                     >
@@ -264,19 +279,19 @@ export default function SiteInfoPage() {
                             )}
                         />
                          <div className="flex gap-2">
-                             <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                             <Button type="submit" disabled={featureSubmitting}>
+                                {featureSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 Save Feature
                             </Button>
-                            {feature.id && (
-                                <Button type="button" variant="destructive" onClick={() => handleFeatureDelete(feature.id!)} disabled={isSubmitting}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                            {field.id && (
+                                <Button type="button" variant="destructive" onClick={() => handleFeatureDelete(field.id!, index)} disabled={featureSubmitting}>
+                                    {featureSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                                 </Button>
                             )}
                         </div>
                     </form>
-                 </Form>
-               ))}
+                 )})}
+               </Form>
             </CardContent>
         </Card>
       </div>
