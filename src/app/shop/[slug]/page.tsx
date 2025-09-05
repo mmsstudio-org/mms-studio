@@ -2,9 +2,10 @@
 import { APPS } from '@/lib/store';
 import { notFound, useParams } from 'next/navigation';
 import ProductList from '../_components/product-list';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import type { Product } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getProductsForApp } from '@/lib/firestore-service';
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -13,25 +14,23 @@ export default function ShopSlugPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    const appProducts = await getProductsForApp(slug);
+    setProducts(appProducts);
+    setLoading(false);
+  }, [slug]);
+
+
   useEffect(() => {
     const foundApp = APPS.find((app) => app.id === slug);
     if (foundApp) {
       setApp(foundApp);
-      // In a real app, you'd fetch products from Firestore here
-      // For now, we filter the mock data
-      const fetchProducts = async () => {
-        setLoading(true);
-        // const appProducts = await getProductsForApp(slug); // Firestore call
-        const { PRODUCTS } = await import('@/lib/store');
-        const appProducts = PRODUCTS.filter(p => p.appId === slug);
-        setProducts(appProducts);
-        setLoading(false);
-      }
       fetchProducts();
     } else {
       notFound();
     }
-  }, [slug]);
+  }, [slug, fetchProducts]);
 
   if (!app) {
     return null; // Or a loading state
@@ -62,14 +61,14 @@ export default function ShopSlugPage() {
           {subscriptions.length > 0 && (
             <section>
               <h2 className="text-3xl font-bold mb-6">Subscriptions</h2>
-              <ProductList products={subscriptions} />
+              <ProductList products={subscriptions} onProductUpdate={fetchProducts} />
             </section>
           )}
 
           {coins.length > 0 && (
             <section>
               <h2 className="text-3xl font-bold mb-6">Coins</h2>
-              <ProductList products={coins} />
+              <ProductList products={coins} onProductUpdate={fetchProducts}/>
             </section>
           )}
 

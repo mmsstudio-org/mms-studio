@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
@@ -19,7 +19,7 @@ const formSchema = z.object({
 });
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -29,18 +29,24 @@ export default function LoginPage() {
     defaultValues: { email: '', password: '' },
   });
 
+  useEffect(() => {
+    if (user) {
+      router.push('/dashboard');
+    }
+  }, [user, router]);
+
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoading(true);
-    // In a real app, you'd authenticate against Firebase Auth
-    // This is a mock implementation
-    if (values.password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD) {
-      login(values.email);
+    try {
+      await login(values.email, values.password);
       toast({ title: 'Login Successful', description: 'Redirecting to dashboard...' });
       router.push('/dashboard');
-    } else {
-      toast({ variant: 'destructive', title: 'Login Failed', description: 'Invalid credentials.' });
+    } catch (error) {
+       toast({ variant: 'destructive', title: 'Login Failed', description: 'Invalid credentials.' });
+    } finally {
+        setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

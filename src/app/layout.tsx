@@ -8,8 +8,8 @@ import { AuthProvider } from '@/hooks/use-auth';
 import { ThemeProvider } from '@/hooks/use-theme';
 
 export const metadata: Metadata = {
-  title: 'MMS Studio Landing',
-  description: 'Your Gateway to the Future of Digital Assets',
+  title: 'MMS Studio - Digital Assets',
+  description: 'Your gateway to the future of digital assets. Explore our services and tools designed for the next generation of the web.',
 };
 
 export default function RootLayout({

@@ -1,7 +1,7 @@
 import { LucideIcon } from "lucide-react";
 
 export interface Product {
-  id: string;
+  id?: string; // Optional for new products
   appId: 'bcs' | 'bnc' | 'api';
   type: 'subscription' | 'coins';
   name: string;
