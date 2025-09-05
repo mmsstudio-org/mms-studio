@@ -186,7 +186,7 @@ export default function Home() {
             size="lg"
             className="px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all"
           >
-            <Link href="https://github.com/sabbirmms" target="_blank">
+            <Link href="https://sabbirmms.github.io" target="_blank">
               🔗 Visit Portfolio
             </Link>
           </Button>
