@@ -125,6 +125,7 @@ export default function SiteInfoPage() {
   }
 
   const handleFeatureDelete = async (featureId: string, index: number) => {
+    if(!window.confirm('Are you sure you want to delete this feature?')) return;
     setIsFeatureSubmitting(featureId);
     try {
         await deleteFeature(featureId);

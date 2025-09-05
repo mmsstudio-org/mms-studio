@@ -92,7 +92,16 @@ export async function getSiteInfo(): Promise<SiteInfo> {
 
 export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     const docRef = doc(siteInfoCollection, 'info');
-    await setDoc(docRef, siteInfo, { merge: true });
+    // Ensure optional fields are handled correctly.
+    const dataToSave = {
+        ...siteInfo,
+        bkashQrCodeUrl: siteInfo.bkashQrCodeUrl || '',
+        paymentApiBaseUrl: siteInfo.paymentApiBaseUrl || '',
+        paymentApiKey: siteInfo.paymentApiKey || '',
+        couponApiBaseUrl: siteInfo.couponApiBaseUrl || '',
+        couponApiKey: siteInfo.couponApiKey || '',
+    };
+    await setDoc(docRef, dataToSave, { merge: true });
 }
 
 // Purchase Functions
