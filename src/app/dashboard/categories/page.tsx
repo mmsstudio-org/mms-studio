@@ -24,6 +24,8 @@ export default function CategoriesPage() {
   const [isProductModalOpen, setProductModalOpen] = useState(false);
   const [selectedApp, setSelectedApp] = useState<AppDetail | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [appForNewProduct, setAppForNewProduct] = useState<AppDetail | null>(null);
+
 
   const fetchAllData = useCallback(async () => {
     setLoadingData(true);
@@ -74,11 +76,13 @@ export default function CategoriesPage() {
 
   const handleEditProduct = (product: Product) => {
     setSelectedProduct(product);
+    setAppForNewProduct(null);
     setProductModalOpen(true);
   };
 
-  const handleAddNewProduct = () => {
+  const handleAddNewProduct = (app: AppDetail) => {
     setSelectedProduct(null);
+    setAppForNewProduct(app);
     setProductModalOpen(true);
   };
 
@@ -127,7 +131,7 @@ export default function CategoriesPage() {
                 <CardContent>
                    <div className="flex justify-between items-center mb-4">
                         <h3 className="font-semibold">Products for {app.name}</h3>
-                        <Button variant="secondary" size="sm" onClick={handleAddNewProduct}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
+                        <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
                    </div>
                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {(products[app.id] || []).map(product => (
@@ -159,6 +163,7 @@ export default function CategoriesPage() {
         isOpen={isProductModalOpen}
         onOpenChange={setProductModalOpen}
         product={selectedProduct}
+        appForNewProduct={appForNewProduct}
         onProductUpdate={() => {
             setProductModalOpen(false);
             fetchAllData();

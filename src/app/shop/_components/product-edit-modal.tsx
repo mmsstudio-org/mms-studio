@@ -43,6 +43,24 @@ const formSchema = z.object({
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   appId: z.string().min(1, { message: 'Please select an application.' }),
   type: z.enum(['subscription', 'coins']),
+  coinAmount: z.coerce.number().optional().or(z.literal('')),
+  subscriptionDays: z.coerce.number().optional().or(z.literal('')),
+}).refine(data => {
+    if (data.type === 'coins') {
+        return !!data.coinAmount && data.coinAmount > 0;
+    }
+    return true;
+}, {
+    message: 'Coin amount is required for coin products.',
+    path: ['coinAmount'],
+}).refine(data => {
+    if (data.type === 'subscription') {
+        return !!data.subscriptionDays && data.subscriptionDays > 0;
+    }
+    return true;
+}, {
+    message: 'Subscription days are required for subscription products.',
+    path: ['subscriptionDays'],
 });
 
 type ProductEditModalProps = {
@@ -50,9 +68,10 @@ type ProductEditModalProps = {
   onOpenChange: (isOpen: boolean) => void;
   product: Product | null;
   onProductUpdate: () => void;
+  appForNewProduct?: AppDetail | null;
 };
 
-export default function ProductEditModal({ isOpen, onOpenChange, product, onProductUpdate }: ProductEditModalProps) {
+export default function ProductEditModal({ isOpen, onOpenChange, product, onProductUpdate, appForNewProduct }: ProductEditModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,8 +82,10 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         const fetchedApps = await getApps();
         setApps(fetchedApps);
     }
-    fetchApps();
-  }, []);
+    if (isOpen) {
+      fetchApps();
+    }
+  }, [isOpen]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -76,8 +97,12 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         imageUrl: '',
         appId: '',
         type: 'subscription',
+        coinAmount: '',
+        subscriptionDays: '',
     },
   });
+  
+  const productType = form.watch('type');
 
   useEffect(() => {
     if (product) {
@@ -85,6 +110,8 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         ...product,
         discountedPrice: product.discountedPrice || '',
         imageUrl: product.imageUrl || '',
+        coinAmount: product.coinAmount || '',
+        subscriptionDays: product.subscriptionDays || '',
       });
     } else {
         form.reset({
@@ -93,19 +120,23 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
             regularPrice: 0,
             discountedPrice: '',
             imageUrl: '',
-            appId: '',
+            appId: appForNewProduct?.id || '',
             type: 'subscription',
+            coinAmount: '',
+            subscriptionDays: '',
         });
     }
-  }, [product, form]);
+  }, [product, appForNewProduct, form, isOpen]); // Rerun on isOpen to reset form for 'Add New'
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    const productData: Omit<Product, 'id'> & { id?: string } = {
+    const productData = {
         ...values,
         discountedPrice: values.discountedPrice ? Number(values.discountedPrice) : undefined,
         imageUrl: values.imageUrl || undefined,
+        coinAmount: values.coinAmount ? Number(values.coinAmount) : undefined,
+        subscriptionDays: values.subscriptionDays ? Number(values.subscriptionDays) : undefined,
     }
 
     try {
@@ -228,7 +259,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Application</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
                             <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select an app" />
@@ -266,6 +297,37 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                     )}
                 />
             </div>
+             {productType === 'subscription' && (
+                <FormField
+                    control={form.control}
+                    name="subscriptionDays"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Subscription Duration (Days)</FormLabel>
+                        <FormControl>
+                           <Input type="number" placeholder="e.g., 30" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
+
+            {productType === 'coins' && (
+                <FormField
+                    control={form.control}
+                    name="coinAmount"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Coin Amount</FormLabel>
+                        <FormControl>
+                            <Input type="number" placeholder="e.g., 1000" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
             <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
               {product && (
                 <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting} className="w-full sm:w-auto">

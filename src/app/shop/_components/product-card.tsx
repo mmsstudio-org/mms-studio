@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { ShoppingCart, Pencil, Package, CircleDollarSign } from 'lucide-react';
+import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 
 type ProductCardProps = {
@@ -11,13 +11,22 @@ type ProductCardProps = {
   onEditClick: () => void;
 };
 
+function formatSubscriptionDuration(days?: number) {
+    if (!days) return null;
+    if (days >= 365) {
+        const years = Math.floor(days / 365);
+        return `per ${years > 1 ? `${years} years` : 'year'}`;
+    }
+    if (days >= 30) {
+        const months = Math.floor(days / 30);
+        return `per ${months > 1 ? `${months} months` : 'month'}`;
+    }
+    return `for ${days} days`;
+}
+
 export default function ProductCard({ product, onPurchaseClick, onEditClick }: ProductCardProps) {
   const { user } = useAuth();
   
-  const placeholderImage = product.type === 'subscription' 
-    ? "https://placehold.co/600x400/7c3aed/ffffff?text=Subscription" 
-    : "https://placehold.co/600x400/f59e0b/ffffff?text=Coins";
-
   const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
 
   return (
@@ -53,8 +62,16 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
                 <span className="text-3xl font-bold">৳{product.regularPrice}</span>
             )}
         </div>
-        {product.type === 'subscription' && (
-            <p className="text-sm text-muted-foreground mt-1">per month</p>
+        {product.type === 'subscription' && product.subscriptionDays && (
+            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                {formatSubscriptionDuration(product.subscriptionDays)}
+            </p>
+        )}
+        {product.type === 'coins' && product.coinAmount && (
+            <p className="text-sm font-bold text-amber-500 mt-1">
+                {product.coinAmount.toLocaleString()} Coins
+            </p>
         )}
       </CardContent>
       <CardFooter className="mt-auto">

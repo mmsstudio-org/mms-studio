@@ -2,13 +2,15 @@ import { LucideIcon } from "lucide-react";
 
 export interface Product {
   id?: string; // Optional for new products
-  appId: string; // Now a generic string
+  appId: string;
   type: 'subscription' | 'coins';
   name: string;
   description: string;
   regularPrice: number;
   discountedPrice?: number;
-  imageUrl?: string; // Image is now optional
+  imageUrl?: string;
+  coinAmount?: number;
+  subscriptionDays?: number;
 }
 
 export interface AppDetail {
