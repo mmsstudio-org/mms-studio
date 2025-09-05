@@ -1,186 +1,115 @@
-'use client';
+"use client";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import * as LucideIcons from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getFeatures, getSiteInfo } from "@/lib/firestore-service";
+import type { Feature, SiteInfo } from "@/lib/types";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { generateMarketingPage } from '@/ai/flows/generate-marketing-page';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2, Wand2 } from 'lucide-react';
-
-const formSchema = z.object({
-  appName: z.string().min(3, 'App name must be at least 3 characters.'),
-  appDescription: z.string().min(20, 'Description must be at least 20 characters.'),
-  targetAudience: z.string().min(10, 'Target audience must be at least 10 characters.'),
-  heroImage: z.any().refine((file) => file?.length == 1, 'Hero image is required.'),
-});
-
-type GenerateMarketingPageOutput = {
-  marketingPageContent: string;
-  suggestedLayout: string;
+const Icon = ({ name, className }: { name: string; className: string }) => {
+  const LucideIcon = (LucideIcons as any)[name];
+  if (!LucideIcon) {
+    return <LucideIcons.HelpCircle className={className} />;
+  }
+  return <LucideIcon className={className} />;
 };
 
-export default function AiPageGenerator() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<GenerateMarketingPageOutput | null>(null);
-  const { toast } = useToast();
+export default function Home() {
+  const [features, setFeatures] = useState<Feature[]>([]);
+  const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      appName: '',
-      appDescription: '',
-      targetAudience: '',
-    },
-  });
-
-  const fileRef = form.register('heroImage');
-
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    setIsLoading(true);
-    setResult(null);
-
-    try {
-      const file = values.heroImage[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-
-      reader.onload = async () => {
-        const base64Image = reader.result as string;
-        const response = await generateMarketingPage({
-          ...values,
-          heroImage: base64Image,
-          exampleLayouts: ['Minimalist', 'Corporate', 'Playful', 'Futuristic'],
-        });
-        setResult(response);
-        toast({
-          title: 'Page Generated Successfully!',
-          description: `AI suggests the "${response.suggestedLayout}" layout.`,
-        });
-      };
-
-      reader.onerror = (error) => {
-        console.error('Error reading file:', error);
-        toast({
-          variant: 'destructive',
-          title: 'Error Reading File',
-          description: 'Could not process the uploaded image.',
-        });
-      };
-    } catch (error) {
-      console.error('Error generating page:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Generation Failed',
-        description: 'An unexpected error occurred.',
-      });
-    } finally {
-      setIsLoading(false);
+  useEffect(() => {
+    async function fetchData() {
+      const [fetchedFeatures, fetchedSiteInfo] = await Promise.all([
+        getFeatures(),
+        getSiteInfo(),
+      ]);
+      setFeatures(fetchedFeatures);
+      setSiteInfo(fetchedSiteInfo);
+      setLoading(false);
     }
-  };
+    fetchData();
+  }, []);
 
   return (
-    <section className="py-20">
-      <Card className="bg-card/50 backdrop-blur-sm border-border/50">
-        <CardHeader>
-          <CardTitle className="text-3xl font-bold flex items-center gap-2">
-            <Wand2 className="h-8 w-8 text-primary" />
-            AI Marketing Page Generator
-          </CardTitle>
-          <CardDescription>
-            Describe your app and upload a hero image to generate a custom marketing page instantly.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                  control={form.control}
-                  name="appName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>App Name</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., QuantumLeap" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="targetAudience"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Target Audience</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g., Tech enthusiasts and developers" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <FormField
-                control={form.control}
-                name="appDescription"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>App Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Describe your app's features and benefits..." rows={5} {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="heroImage"
-                render={() => (
-                  <FormItem>
-                    <FormLabel>Hero Image</FormLabel>
-                    <FormControl>
-                      <Input type="file" accept="image/*" {...fileRef} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} size="lg">
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Generate Page
+    <div className="container mx-auto px-4 py-8 md:py-16">
+      <section className="text-center py-20">
+        {loading ? (
+          <>
+            <Skeleton className="h-20 w-3/4 mx-auto" />
+            <Skeleton className="h-8 w-1/2 mx-auto mt-4" />
+            <Skeleton className="h-12 w-48 mx-auto mt-8" />
+          </>
+        ) : (
+          <>
+            <h1 className="text-5xl md:text-7xl font-['Orbitron'] font-black mb-6 animate-float"
+              dangerouslySetInnerHTML={{
+                __html:
+                  siteInfo?.webName ||
+                  'MMS Studio',
+              }}
+            />
+
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
+              {siteInfo?.webDescription ||
+                "Your Gateway to the Future of Digital Assets. Explore our services and tools designed for the next generation of the web."}
+            </p>
+            <div className="flex justify-center gap-4">
+              <Button
+                asChild
+                size="lg"
+                className="neon-glow bg-primary hover:bg-primary/90"
+              >
+                <Link href="/shop">Explore The Shop</Link>
               </Button>
-            </form>
-          </Form>
-
-          {isLoading && (
-            <div className="mt-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
-              <p className="mt-2 text-muted-foreground">AI is crafting your page...</p>
             </div>
-          )}
+          </>
+        )}
+      </section>
 
-          {result && (
-            <div className="mt-12">
-              <h3 className="text-2xl font-bold mb-4">Generated Page Preview</h3>
-              <p className="mb-4 text-muted-foreground">
-                Suggested Layout: <span className="font-semibold text-accent">{result.suggestedLayout}</span>
-              </p>
-              <div
-                className="prose prose-invert max-w-none p-6 border rounded-lg bg-background"
-                dangerouslySetInnerHTML={{ __html: result.marketingPageContent }}
-              />
-            </div>
+      <section className="py-20">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {loading ? (
+            <>
+              <Skeleton className="h-56 w-full" />
+              <Skeleton className="h-56 w-full" />
+              <Skeleton className="h-56 w-full" />
+            </>
+          ) : (
+            features.map((feature) => (
+              <Card
+                key={feature.id}
+                className="bg-card/50 backdrop-blur-sm border-border/50 text-center"
+              >
+                <CardHeader className="items-center">
+                  <Icon name={feature.icon} className="h-10 w-10 text-accent" />
+                  <CardTitle className="mt-4 text-2xl font-bold">
+                    {feature.title}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
+
+      <section id="admin" className="py-20 px-6">
+        <div className="container mx-auto text-center">
+            <h2 className="text-4xl font-['Orbitron'] font-bold mb-8 neon-text">Developer & Admin Access</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Visit our developer portfolio to learn more about our projects and services.
+            </p>
+            <Button asChild size="lg" className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all">
+                <Link href="/portfolio">🔗 Go to Portfolio</Link>
+            </Button>
+        </div>
     </section>
+    </div>
   );
 }

@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
-import AiPageGenerator from "./_components/ai-page-generator";
 import { useEffect, useState } from "react";
 import { getFeatures, getSiteInfo } from "@/lib/firestore-service";
 import type { Feature, SiteInfo } from "@/lib/types";
@@ -100,7 +99,17 @@ export default function Home() {
         </div>
       </section>
 
-      <AiPageGenerator />
+      <section id="admin" className="py-20 px-6">
+        <div className="container mx-auto text-center">
+            <h2 className="text-4xl font-['Orbitron'] font-bold mb-8 neon-text">Developer & Admin Access</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Visit our developer portfolio to learn more about our projects and services.
+            </p>
+            <Button asChild size="lg" className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all">
+                <Link href="/portfolio">🔗 Go to Portfolio</Link>
+            </Button>
+        </div>
+    </section>
     </div>
   );
 }
