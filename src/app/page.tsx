@@ -19,14 +19,14 @@ const Icon = ({ name, className }: { name: string; className: string }) => {
 
 const services = [
     {
-        icon: Smartphone,
-        title: "Android App Development",
-        description: "Custom native Android applications built for performance and user engagement."
-    },
-    {
         icon: Globe,
         title: "Web Development",
         description: "Modern, responsive websites and complex web applications tailored to your needs."
+    },
+    {
+        icon: Smartphone,
+        title: "Android App Development",
+        description: "Custom native Android applications built for performance and user engagement."
     },
     {
         icon: Code,
@@ -34,9 +34,9 @@ const services = [
         description: "Robust and secure APIs to power your mobile and web applications."
     },
     {
-        icon: ShieldCheck,
-        title: "Security",
-        description: "Implementing top-tier security measures to protect your digital assets."
+        icon: Database,
+        title: "Database Design",
+        description: "Efficient and scalable database architecture for optimal performance."
     },
     {
         icon: Cloud,
@@ -44,9 +44,9 @@ const services = [
         description: "Scalable and reliable cloud infrastructure setup and management."
     },
     {
-        icon: Database,
-        title: "Database Design",
-        description: "Efficient and scalable database architecture for optimal performance."
+        icon: ShieldCheck,
+        title: "Security",
+        description: "Implementing top-tier security measures to protect your digital assets."
     },
     {
         icon: Bot,
@@ -112,6 +112,11 @@ export default function Home() {
       <section className="py-20">
         <div className="text-center mb-12">
             <h2 className="text-4xl font-['Orbitron'] font-bold neon-text">Why Choose Us?</h2>
+            <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
+                We deliver cutting-edge solutions with a focus on quality, security, and performance. 
+                Our team is dedicated to bringing your vision to life with the latest technologies. 
+                <a href="https://sabbirmms.github.io" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline font-semibold"> See more</a> of our work.
+            </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {loading ? (
