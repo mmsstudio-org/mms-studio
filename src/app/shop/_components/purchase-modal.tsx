@@ -26,6 +26,7 @@ import type { Product } from '@/lib/types';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { HowToPayContent } from './how-to-pay';
+import { addPurchase } from '@/lib/firestore-service';
 
 const formSchema = z.object({
   bkashTxnId: z.string().min(5, { message: 'Transaction ID must be at least 5 characters.' }),
@@ -50,23 +51,27 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!product) return;
     setIsSubmitting(true);
-    // Simulate writing 'pending' purchase to Firestore
-    console.log('Creating purchase record:', {
-      productId: product?.id,
-      bkashTxnId: values.bkashTxnId,
-      status: 'pending',
-    });
-
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    setIsSubmitting(false);
-    toast({
-      title: 'Purchase Submitted',
-      description: 'Your purchase is pending verification. You will receive a coupon code upon approval.',
-    });
-    form.reset();
-    onOpenChange(false);
+    try {
+      await addPurchase({ bkashTxnId: values.bkashTxnId, product });
+      toast({
+        title: 'Purchase Submitted',
+        description: 'Your purchase is pending verification. You will receive a coupon code upon approval.',
+      });
+      form.reset();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error submitting purchase', error);
+       toast({
+        variant: 'destructive',
+        title: 'Submission Failed',
+        description: 'An unexpected error occurred.',
+      });
+    } finally {
+        setIsSubmitting(false);
+    }
   }
 
   if (!product) return null;

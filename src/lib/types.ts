@@ -15,16 +15,17 @@ export interface AppDetail {
   id: string; // Firestore document ID
   name: string;
   description: string;
-  icon?: string; // URL to an icon
+  icon?: string; // URL to an icon or a lucide-icon name
 }
 
 export interface Purchase {
-  id: string;
-  product: Product;
+  id?: string;
+  productId: string;
+  productName: string;
+  productPrice: number;
   bkashTxnId: string;
   status: 'pending' | 'approved' | 'rejected';
-  couponCode?: string;
-  purchaseDate: string;
+  purchaseDate: any; // Firestore Timestamp
 }
 
 export interface SupportTicket {
