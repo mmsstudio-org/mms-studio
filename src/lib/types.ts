@@ -1,0 +1,32 @@
+export interface Product {
+  id: string;
+  appId: 'bcs' | 'bnc' | 'api';
+  type: 'subscription' | 'coins';
+  name: string;
+  description: string;
+  regularPrice: number;
+  discountedPrice?: number;
+  imageUrl: string;
+}
+
+export interface AppDetail {
+  id: 'bcs' | 'bnc' | 'api';
+  name: string;
+  description: string;
+}
+
+export interface Purchase {
+  id: string;
+  product: Product;
+  bkashTxnId: string;
+  status: 'pending' | 'approved' | 'rejected';
+  couponCode?: string;
+  purchaseDate: string;
+}
+
+export interface SupportTicket {
+    name: string;
+    email: string;
+    message: string;
+    walletId?: string;
+}
