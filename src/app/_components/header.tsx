@@ -38,7 +38,7 @@ export default function Header() {
                 height={32}
                 className="rounded"
               />
-              <span className="font-bold text-glow">MMS Studio</span>
+              <span className="font-bold text-glow font-['Orbitron']">MMS Studio</span>
             </Link>
 
             {/* Desktop nav */}

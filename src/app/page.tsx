@@ -61,8 +61,8 @@ export default function Home() {
               <Button
                 asChild
                 size="lg"
-                className="neon-glow bg-primary hover:bg-primary/90"
-              >
+                className="px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all"
+                >
                 <Link href="/shop">Explore The Shop</Link>
               </Button>
             </div>
@@ -101,15 +101,24 @@ export default function Home() {
 
       <section id="admin" className="py-20 px-6">
         <div className="container mx-auto text-center">
-            <h2 className="text-4xl font-['Orbitron'] font-bold mb-8 neon-text">Developer & Admin Access</h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-                Visit our developer portfolio to learn more about our projects and services.
-            </p>
-            <Button asChild size="lg" className="bg-gradient-to-r from-orange-500 to-red-500 px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all">
-                <Link href="/portfolio">🔗 Go to Portfolio</Link>
-            </Button>
+          <h2 className="text-4xl font-['Orbitron'] font-bold mb-8 neon-text">
+            Our Projects & Portfolio
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+            Explore our developer portfolio to discover our innovative projects, apps, and digital solutions.
+          </p>
+          <Button
+            asChild
+            size="lg"
+            className="px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all"
+          >
+            <Link href="https://github.com/sabbirmms" target="_blank">
+              🔗 Visit Portfolio
+            </Link>
+          </Button>
         </div>
-    </section>
+      </section>
+
     </div>
   );
 }

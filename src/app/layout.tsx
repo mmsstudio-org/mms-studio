@@ -37,7 +37,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>{defaultSiteInfo.title}</title>
+        {/* <title>{defaultSiteInfo.title}</title> */}
+        <title>MMS Studio - Official Website</title>
         <meta name="description" content={defaultSiteInfo.description} />
          <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
