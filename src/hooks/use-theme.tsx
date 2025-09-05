@@ -9,11 +9,10 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   return <NextThemesProvider {...props}>{children}</NextThemesProvider>
 }
 
-import { useContext } from "react";
-import { ThemeContext } from "next-themes";
+import { useTheme as useNextTheme } from "next-themes";
 
 export const useTheme = () => {
-    const context = useContext(ThemeContext);
+    const context = useNextTheme();
     if (context === undefined) {
         throw new Error("useTheme must be used within a ThemeProvider");
     }
