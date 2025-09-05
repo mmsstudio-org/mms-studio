@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { APPS } from '@/lib/store';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowRight } from 'lucide-react';
-import Image from 'next/image';
+import { HowToPaySection } from './_components/how-to-pay';
 
 export default function ShopPage() {
   return (
@@ -13,7 +13,7 @@ export default function ShopPage() {
           Select an app to browse subscriptions, coin packs, and more.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
         {APPS.map((app) => (
           <Link href={`/shop/${app.id}`} key={app.id}>
             <Card className="group overflow-hidden transition-all duration-300 hover:border-accent neon-glow">
@@ -30,6 +30,8 @@ export default function ShopPage() {
           </Link>
         ))}
       </div>
+
+      <HowToPaySection />
     </div>
   );
 }

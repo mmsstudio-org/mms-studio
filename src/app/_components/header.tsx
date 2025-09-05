@@ -5,19 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu, HelpCircle } from 'lucide-react';
 import { Logo } from './icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import HelpCenterModal from './help-center-modal';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
+
 
 export default function Header() {
   const [isHelpOpen, setHelpOpen] = useState(false);
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const navLinks = [
     { href: '/shop', label: 'Shop' },
-    { href: '/admin', label: 'Admin' },
+    ...(user ? [{ href: '/dashboard', label: 'Dashboard' }] : []),
   ];
 
   return (

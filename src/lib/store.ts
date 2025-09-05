@@ -1,5 +1,8 @@
 import type { AppDetail, Product } from './types';
 
+// This file will be deprecated in favor of Firestore.
+// For now, it provides mock data for UI development.
+
 export const APPS: AppDetail[] = [
   {
     id: 'bcs',
@@ -19,6 +22,7 @@ export const APPS: AppDetail[] = [
 ];
 
 export const PRODUCTS: Product[] = [
+  // BCS Products
   {
     id: 'bcs_sub_monthly',
     appId: 'bcs',
@@ -47,6 +51,16 @@ export const PRODUCTS: Product[] = [
     regularPrice: 150,
     imageUrl: 'https://picsum.photos/600/400',
   },
+  // BNC Products
+  {
+    id: 'bnc_sub_basic',
+    appId: 'bnc',
+    type: 'subscription',
+    name: 'BNC Basic Plan',
+    description: 'Access core features with our monthly basic plan.',
+    regularPrice: 300,
+    imageUrl: 'https://picsum.photos/600/400',
+  },
   {
     id: 'bnc_coins_500',
     appId: 'bnc',
@@ -66,10 +80,11 @@ export const PRODUCTS: Product[] = [
     regularPrice: 900,
     imageUrl: 'https://picsum.photos/600/400',
   },
+  // API Products
   {
     id: 'api_tier_1',
     appId: 'api',
-    type: 'coins',
+    type: 'coins', // API credits are treated as 'coins'
     name: 'API Tier 1 - 10k Credits',
     description: '10,000 API credits for small projects and hobbyists.',
     regularPrice: 2500,
@@ -86,3 +101,8 @@ export const PRODUCTS: Product[] = [
     imageUrl: 'https://picsum.photos/600/400',
   },
 ];
+
+export const CONFIG = {
+  bkash_qr_code_url: 'https://picsum.photos/200/200',
+  bkash_number: '01782860266',
+}
