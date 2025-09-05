@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { getFeatures, getSiteInfo } from "@/lib/firestore-service";
 import type { Feature, SiteInfo } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Smartphone, Globe, Code, ShieldCheck, Cloud, Database, Bot } from 'lucide-react';
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
   const LucideIcon = (LucideIcons as any)[name];
@@ -15,6 +16,44 @@ const Icon = ({ name, className }: { name: string; className: string }) => {
   }
   return <LucideIcon className={className} />;
 };
+
+const services = [
+    {
+        icon: Smartphone,
+        title: "Android App Development",
+        description: "Custom native Android applications built for performance and user engagement."
+    },
+    {
+        icon: Globe,
+        title: "Web Development",
+        description: "Modern, responsive websites and complex web applications tailored to your needs."
+    },
+    {
+        icon: Code,
+        title: "API Development",
+        description: "Robust and secure APIs to power your mobile and web applications."
+    },
+    {
+        icon: ShieldCheck,
+        title: "Security",
+        description: "Implementing top-tier security measures to protect your digital assets."
+    },
+    {
+        icon: Cloud,
+        title: "Cloud Setup",
+        description: "Scalable and reliable cloud infrastructure setup and management."
+    },
+    {
+        icon: Database,
+        title: "Database Design",
+        description: "Efficient and scalable database architecture for optimal performance."
+    },
+    {
+        icon: Bot,
+        title: "Robotics",
+        description: "Innovative robotics solutions and automation for various industries."
+    }
+];
 
 export default function Home() {
   const [features, setFeatures] = useState<Feature[]>([]);
@@ -71,6 +110,9 @@ export default function Home() {
       </section>
 
       <section className="py-20">
+        <div className="text-center mb-12">
+            <h2 className="text-4xl font-['Orbitron'] font-bold neon-text">Why Choose Us?</h2>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {loading ? (
             <>
@@ -98,6 +140,33 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      <section className="py-20">
+        <div className="text-center mb-12">
+            <h2 className="text-4xl font-['Orbitron'] font-bold neon-text">Our Services</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
+            <Card
+              key={index}
+              className="bg-card/50 backdrop-blur-sm border-border/50 text-center flex flex-col"
+            >
+              <CardHeader className="items-center">
+                <div className="p-4 bg-primary/10 rounded-full">
+                    <service.icon className="h-10 w-10 text-accent" />
+                </div>
+                <CardTitle className="mt-4 text-2xl font-bold">
+                  {service.title}
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow">
+                <p className="text-muted-foreground">{service.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
 
       <section id="admin" className="py-20 px-6">
         <div className="container mx-auto text-center">
