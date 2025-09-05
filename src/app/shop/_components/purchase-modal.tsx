@@ -75,8 +75,8 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
     const productPrice = product.discountedPrice ?? product.regularPrice;
 
     try {
-      // 1. Verify Transaction
-      const verifyUrl = `${siteInfo.paymentApiBaseUrl}/api/payment/${txnId}?apiKey=${siteInfo.paymentApiKey}`;
+      // 1. Verify Transaction via proxy
+      const verifyUrl = `/api/verify-payment/${txnId}?apiKey=${encodeURIComponent(siteInfo.paymentApiKey)}&baseUrl=${encodeURIComponent(siteInfo.paymentApiBaseUrl)}`;
       const verifyRes = await fetch(verifyUrl);
       const verifyData = await verifyRes.json();
 
@@ -93,7 +93,7 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
         throw new Error(`The paid amount (৳${transactionAmount}) is less than the product price (৳${productPrice}).`);
       }
       
-      // 3. Create Coupon
+      // 3. Create Coupon via proxy
       const validityDate = new Date();
       validityDate.setDate(validityDate.getDate() + (product.subscriptionDays || 30));
       
@@ -106,7 +106,7 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
         note: `Purchased: ${product.name}`,
       };
 
-      const couponUrl = `${siteInfo.couponApiBaseUrl}/api/bsc?apiKey=${siteInfo.couponApiKey}`;
+      const couponUrl = `/api/coupon?apiKey=${encodeURIComponent(siteInfo.couponApiKey)}&baseUrl=${encodeURIComponent(siteInfo.couponApiBaseUrl)}`;
       const couponRes = await fetch(couponUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -118,8 +118,8 @@ export default function PurchaseModal({ isOpen, onOpenChange, product }: Purchas
         throw new Error(couponData.message || 'Failed to create coupon.');
       }
 
-      // 4. Mark as Redeemed
-      const redeemUrl = `${siteInfo.paymentApiBaseUrl}/api/payment/${txnId}?apiKey=${siteInfo.paymentApiKey}`;
+      // 4. Mark as Redeemed via proxy
+      const redeemUrl = `/api/verify-payment/${txnId}?apiKey=${encodeURIComponent(siteInfo.paymentApiKey)}&baseUrl=${encodeURIComponent(siteInfo.paymentApiBaseUrl)}`;
       await fetch(redeemUrl, { method: 'PUT' });
 
       // 5. Success
