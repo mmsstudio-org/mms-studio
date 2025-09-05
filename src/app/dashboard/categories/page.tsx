@@ -29,17 +29,22 @@ export default function CategoriesPage() {
 
   const fetchAllData = useCallback(async () => {
     setLoadingData(true);
-    const fetchedApps = await getApps();
-    setApps(fetchedApps);
-    const productsPromises = fetchedApps.map(app => getProductsForApp(app.id));
-    const productsResults = await Promise.all(productsPromises);
-    const productsMap = fetchedApps.reduce((acc, app, index) => {
-        acc[app.id] = productsResults[index];
-        return acc;
-    }, {} as { [key: string]: Product[] });
-    setProducts(productsMap);
-    setLoadingData(false);
-  }, []);
+    try {
+        const fetchedApps = await getApps();
+        setApps(fetchedApps);
+        const productsPromises = fetchedApps.map(app => getProductsForApp(app.id));
+        const productsResults = await Promise.all(productsPromises);
+        const productsMap = fetchedApps.reduce((acc, app, index) => {
+            acc[app.id] = productsResults[index];
+            return acc;
+        }, {} as { [key: string]: Product[] });
+        setProducts(productsMap);
+    } catch(e) {
+        toast({ variant: 'destructive', title: 'Error fetching data.' });
+    } finally {
+        setLoadingData(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -64,7 +69,7 @@ export default function CategoriesPage() {
     if(!window.confirm('Are you sure you want to delete this category and all its products? This cannot be undone.')) return;
 
     try {
-        // Note: In a real production app, you'd want a backend function to delete sub-collections.
+        // In a real production app, you'd want a backend function to delete sub-collections.
         // For now, we just delete the app document. Products will be orphaned but won't show up.
         await deleteApp(appId);
         toast({ title: 'Category Deleted' });
@@ -111,7 +116,7 @@ export default function CategoriesPage() {
       </div>
       
       <div className="space-y-10">
-        {apps.length === 0 && (
+        {apps.length === 0 && !loadingData && (
             <p className="text-center text-muted-foreground py-10">No app categories found. Add one to get started.</p>
         )}
         {apps.map(app => (
@@ -143,7 +148,7 @@ export default function CategoriesPage() {
                             <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
                         </Card>
                     ))}
-                    {products[app.id]?.length === 0 && <p className="text-sm text-muted-foreground">No products yet.</p>}
+                    {(products[app.id] || []).length === 0 && <p className="text-sm text-muted-foreground">No products yet.</p>}
                    </div>
                 </CardContent>
             </Card>

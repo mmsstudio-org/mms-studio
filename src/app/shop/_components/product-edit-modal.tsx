@@ -47,7 +47,7 @@ const formSchema = z.object({
   subscriptionDays: z.coerce.number().optional().or(z.literal('')),
 }).refine(data => {
     if (data.type === 'coins') {
-        return !!data.coinAmount && data.coinAmount > 0;
+        return !!data.coinAmount && Number(data.coinAmount) > 0;
     }
     return true;
 }, {
@@ -55,7 +55,7 @@ const formSchema = z.object({
     path: ['coinAmount'],
 }).refine(data => {
     if (data.type === 'subscription') {
-        return !!data.subscriptionDays && data.subscriptionDays > 0;
+        return !!data.subscriptionDays && Number(data.subscriptionDays) > 0;
     }
     return true;
 }, {
@@ -161,6 +161,8 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
 
   async function handleDelete() {
     if (!product || !product.id) return;
+    if (!window.confirm(`Are you sure you want to delete the product "${product.name}"? This cannot be undone.`)) return;
+
     setIsDeleting(true);
     try {
         await deleteProduct(product.id);
