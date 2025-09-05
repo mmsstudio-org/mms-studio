@@ -107,7 +107,7 @@ export default function DashboardPage() {
           <Card>
             <CardHeader>
               <CardTitle>View Purchases</CardTitle>
-            </Header>
+            </CardHeader>
             <CardContent>
               <CardDescription>See pending and approved purchases. (Coming soon)</CardDescription>
             </CardContent>
