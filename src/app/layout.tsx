@@ -15,19 +15,42 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const [siteInfo, setSiteInfo] = useState({ title: 'MMS Studio - Digital Assets', description: 'Your gateway to the future of digital assets.' });
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     getSiteInfo().then(info => {
       if(info.webName && info.webDescription) {
         setSiteInfo({ title: info.webName, description: info.webDescription });
-        document.title = info.webName;
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) {
-            metaDesc.setAttribute('content', info.webDescription);
-        }
       }
     });
+    setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (isMounted) {
+      document.title = siteInfo.title;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) {
+          metaDesc.setAttribute('content', siteInfo.description);
+      }
+    }
+  }, [siteInfo, isMounted]);
+
+  if (!isMounted) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <head>
+          <title>MMS Studio - Digital Assets</title>
+          <meta name="description" content="Your gateway to the future of digital assets." />
+        </head>
+        <body className={cn(
+          'min-h-screen font-body antialiased futuristic-bg',
+          'flex flex-col'
+        )}>
+        </body>
+      </html>
+    );
+  }
 
   return (
     <html lang="en" suppressHydrationWarning>
