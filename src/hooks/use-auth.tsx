@@ -17,9 +17,11 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
+    setIsClient(true);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -36,6 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const value = { user, login, logout, loading };
+  
+  if (!isClient) {
+    return null;
+  }
 
   return <AuthContext.Provider value={value}>{!loading ? children : null}</AuthContext.Provider>;
 }
