@@ -67,7 +67,7 @@ export const HowToPayContent = ({
   return (
     <>
       <div
-        className="space-y-4 max-h-[80vh] overflow-auto "
+        className="space-y-4 max-h-[80vh] overflow-auto py-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div className="p-4 border rounded-lg">
