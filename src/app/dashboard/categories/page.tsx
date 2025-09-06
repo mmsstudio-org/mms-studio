@@ -12,6 +12,18 @@ import { Loader2, PlusCircle, Trash2, Pencil } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
+import Image from 'next/image';
+import * as LucideIcons from 'lucide-react';
+
+const Icon = ({ name, className }: { name: string; className: string }) => {
+  const LucideIcon = (LucideIcons as any)[name];
+  if (!LucideIcon) {
+    // Return a default icon or null if the name is not a valid Lucide icon
+    return null;
+  }
+  return <LucideIcon className={className} />;
+};
+
 
 export default function CategoriesPage() {
   const { user, loading: authLoading } = useAuth();
@@ -122,11 +134,22 @@ export default function CategoriesPage() {
         {apps.map(app => (
             <Card key={app.id}>
                 <CardHeader>
-                   <div className="flex justify-between items-center">
-                     <div>
-                        <CardTitle>{app.name}</CardTitle>
-                        <CardDescription>{app.description}</CardDescription>
-                     </div>
+                   <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                        {app.icon && app.icon.startsWith('http') ? (
+                            <Image src={app.icon} alt={app.name} width={40} height={40} className="rounded-md" />
+                        ) : app.icon ? (
+                            <Icon name={app.icon} className="h-10 w-10 text-accent" />
+                        ) : (
+                            <div className="h-10 w-10 bg-muted rounded-md flex items-center justify-center text-accent font-bold text-lg">
+                                {app.name.charAt(0)}
+                            </div>
+                        )}
+                        <div>
+                            <CardTitle>{app.name}</CardTitle>
+                            <CardDescription>{app.description}</CardDescription>
+                        </div>
+                    </div>
                      <div className="flex gap-2">
                         <Button variant="outline" size="sm" onClick={() => handleEditApp(app)}><Pencil className="mr-2 h-4 w-4"/>Edit Category</Button>
                         <Button variant="destructive" size="sm" onClick={() => handleDeleteApp(app.id)}><Trash2 className="mr-2 h-4 w-4"/>Delete Category</Button>
