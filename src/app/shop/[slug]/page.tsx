@@ -1,10 +1,12 @@
 'use client';
 import { notFound, useParams } from 'next/navigation';
 import ProductList from '../_components/product-list';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { Product, AppDetail } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getProductsForApp, getApp } from '@/lib/firestore-service';
+import { Button } from '@/components/ui/button';
+import { ArrowUpNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -12,6 +14,8 @@ export default function ShopSlugPage() {
   const [app, setApp] = useState<AppDetail | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subscriptionSort, setSubscriptionSort] = useState<'asc' | 'desc'>('asc');
+  const [coinSort, setCoinSort] = useState<'asc' | 'desc'>('asc');
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -31,6 +35,29 @@ export default function ShopSlugPage() {
     fetchProducts();
   }, [slug, fetchProducts]);
 
+  const sortProducts = useCallback((products: Product[], order: 'asc' | 'desc'): Product[] => {
+    return [...products].sort((a, b) => {
+        const priceA = a.discountedPrice || a.regularPrice;
+        const priceB = b.discountedPrice || b.regularPrice;
+        if (order === 'asc') {
+            return priceA - priceB;
+        } else {
+            return priceB - priceA;
+        }
+    });
+  }, []);
+  
+  const subscriptions = useMemo(() => {
+    const subs = products.filter(p => p.type === 'subscription');
+    return sortProducts(subs, subscriptionSort);
+  }, [products, subscriptionSort, sortProducts]);
+
+  const coins = useMemo(() => {
+    const coinsList = products.filter(p => p.type === 'coins');
+    return sortProducts(coinsList, coinSort);
+  }, [products, coinSort, sortProducts]);
+
+
   if (loading || !app) {
      return (
         <div className="container mx-auto py-10">
@@ -47,9 +74,6 @@ export default function ShopSlugPage() {
      )
   }
   
-  const subscriptions = products.filter(p => p.type === 'subscription');
-  const coins = products.filter(p => p.type === 'coins');
-
   return (
     <div className="container mx-auto py-10">
       <div className="text-center mb-12">
@@ -64,14 +88,26 @@ export default function ShopSlugPage() {
         <div className="space-y-16">
           {subscriptions.length > 0 && (
             <section>
-              <h2 className="text-3xl font-bold mb-6">Subscriptions</h2>
+              <div className="flex justify-between items-center mb-6">
+                 <h2 className="text-3xl font-bold">Subscriptions</h2>
+                 <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')}>
+                    Sort by price
+                    {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-5 w-5" /> : <ArrowDownWideNarrow className="ml-2 h-5 w-5" />}
+                 </Button>
+              </div>
               <ProductList products={subscriptions} onProductUpdate={fetchProducts} />
             </section>
           )}
 
           {coins.length > 0 && (
             <section>
-              <h2 className="text-3xl font-bold mb-6">Coins</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-3xl font-bold">Coins</h2>
+                    <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')}>
+                        Sort by price
+                        {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-5 w-5" /> : <ArrowDownWideNarrow className="ml-2 h-5 w-5" />}
+                    </Button>
+              </div>
               <ProductList products={coins} onProductUpdate={fetchProducts}/>
             </section>
           )}
