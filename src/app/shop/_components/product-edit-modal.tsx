@@ -61,6 +61,14 @@ const formSchema = z.object({
 }, {
     message: 'Subscription days are required for subscription products.',
     path: ['subscriptionDays'],
+}).refine(data => {
+    if (data.discountedPrice && data.regularPrice) {
+        return Number(data.discountedPrice) <= Number(data.regularPrice);
+    }
+    return true;
+}, {
+    message: 'Discounted price cannot be greater than regular price.',
+    path: ['discountedPrice'],
 });
 
 type ProductEditModalProps = {
