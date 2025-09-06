@@ -67,7 +67,7 @@ export const HowToPayContent = ({
   return (
     <>
       <div
-        className="space-y-4 max-h-[80vh] overflow-auto py-4"
+        className="space-y-4 max-h-[80vh] overflow-auto p-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div className="p-4 border rounded-lg">
@@ -80,7 +80,7 @@ export const HowToPayContent = ({
               <Copy className="h-5 w-5" />
             </Button>
           </div>
-          {productPrice && (
+          {productPrice && productPrice > 0 && (
             <p className="text-sm text-muted-foreground mt-1">
               Amount to send:{" "}
               <span className="font-bold text-foreground">৳{productPrice}</span>
@@ -164,7 +164,7 @@ export function HowToPaySection() {
       <div className="max-w-4xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-8">How to Pay</h2>
         <div className="p-6 border rounded-lg bg-card/50">
-          <HowToPayContent />
+          <HowToPayContent productPrice={0} />
         </div>
       </div>
     </section>

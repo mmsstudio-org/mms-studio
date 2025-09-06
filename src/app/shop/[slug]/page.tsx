@@ -88,11 +88,11 @@ export default function ShopSlugPage() {
         <div className="space-y-16">
           {subscriptions.length > 0 && (
             <section>
-              <div className="flex justify-between items-center mb-6">
-                 <h2 className="text-3xl font-bold">Subscriptions</h2>
-                 <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')}>
+              <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                 <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
+                 <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
                     Sort by price
-                    {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-5 w-5" /> : <ArrowDownWideNarrow className="ml-2 h-5 w-5" />}
+                    {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                  </Button>
               </div>
               <ProductList products={subscriptions} onProductUpdate={fetchProducts} />
@@ -101,11 +101,11 @@ export default function ShopSlugPage() {
 
           {coins.length > 0 && (
             <section>
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold">Coins</h2>
-                    <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')}>
+                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                    <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
+                    <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
                         Sort by price
-                        {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-5 w-5" /> : <ArrowDownWideNarrow className="ml-2 h-5 w-5" />}
+                        {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                     </Button>
               </div>
               <ProductList products={coins} onProductUpdate={fetchProducts}/>
