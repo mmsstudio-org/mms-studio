@@ -206,7 +206,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto pr-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
              <FormField
                 control={form.control}
                 name="name"

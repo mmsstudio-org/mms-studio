@@ -2,23 +2,23 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
 import Image from 'next/image';
 import * as LucideIcons from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
   const LucideIcon = (LucideIcons as any)[name];
   if (!LucideIcon) {
-    // Return a default icon or null if the name is not a valid Lucide icon
     return null;
   }
   return <LucideIcon className={className} />;
@@ -37,7 +37,7 @@ export default function CategoriesPage() {
   const [selectedApp, setSelectedApp] = useState<AppDetail | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [appForNewProduct, setAppForNewProduct] = useState<AppDetail | null>(null);
-
+  const [sortOrders, setSortOrders] = useState<{ [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc' } }>({});
 
   const fetchAllData = useCallback(async () => {
     setLoadingData(true);
@@ -51,12 +51,52 @@ export default function CategoriesPage() {
             return acc;
         }, {} as { [key: string]: Product[] });
         setProducts(productsMap);
+
+        const initialSortOrders = fetchedApps.reduce((acc, app) => {
+            acc[app.id] = { subscriptions: 'asc', coins: 'asc' };
+            return acc;
+        }, {} as { [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc' } });
+        setSortOrders(initialSortOrders);
+
     } catch(e) {
         toast({ variant: 'destructive', title: 'Error fetching data.' });
     } finally {
         setLoadingData(false);
     }
   }, [toast]);
+
+  const handleSortToggle = (appId: string, type: 'subscriptions' | 'coins') => {
+    setSortOrders(prev => ({
+        ...prev,
+        [appId]: {
+            ...prev[appId],
+            [type]: prev[appId][type] === 'asc' ? 'desc' : 'asc',
+        },
+    }));
+  };
+
+  const sortProducts = useCallback((products: Product[], order: 'asc' | 'desc'): Product[] => {
+    return [...products].sort((a, b) => {
+        const priceA = a.discountedPrice || a.regularPrice;
+        const priceB = b.discountedPrice || b.regularPrice;
+        if (order === 'asc') {
+            return priceA - priceB;
+        } else {
+            return priceB - a.regularPrice;
+        }
+    });
+  }, []);
+
+  const getSortedProducts = useCallback((appId: string) => {
+    const appProducts = products[appId] || [];
+    const appSortOrders = sortOrders[appId] || { subscriptions: 'asc', coins: 'asc' };
+    
+    const subscriptions = sortProducts(appProducts.filter(p => p.type === 'subscription'), appSortOrders.subscriptions);
+    const coins = sortProducts(appProducts.filter(p => p.type === 'coins'), appSortOrders.coins);
+    
+    return { subscriptions, coins };
+  }, [products, sortOrders, sortProducts]);
+
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -81,8 +121,6 @@ export default function CategoriesPage() {
     if(!window.confirm('Are you sure you want to delete this category and all its products? This cannot be undone.')) return;
 
     try {
-        // NOTE: This will orphan products in Firestore, but they won't be accessible in the UI.
-        // A production app should use a Cloud Function to handle cascading deletes.
         await deleteApp(appId);
         toast({ title: 'Category Deleted' });
         fetchAllData();
@@ -131,7 +169,10 @@ export default function CategoriesPage() {
         {apps.length === 0 && !loadingData && (
             <p className="text-center text-muted-foreground py-10">No app categories found. Add one to get started.</p>
         )}
-        {apps.map(app => (
+        {apps.map(app => {
+            const { subscriptions, coins } = getSortedProducts(app.id);
+            const appSorts = sortOrders[app.id] || { subscriptions: 'asc', coins: 'asc' };
+            return (
             <Card key={app.id}>
                 <CardHeader>
                    <div className="flex justify-between items-start">
@@ -161,21 +202,59 @@ export default function CategoriesPage() {
                         <h3 className="font-semibold">Products for {app.name}</h3>
                         <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
                    </div>
-                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {(products[app.id] || []).map(product => (
-                        <Card key={product.id} className="p-4 flex flex-col justify-between">
-                            <div>
-                                <p className="font-bold">{product.name}</p>
-                                <p className="text-sm text-muted-foreground">৳{product.regularPrice}</p>
-                            </div>
-                            <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
-                        </Card>
-                    ))}
-                    {(products[app.id] || []).length === 0 && <p className="text-sm text-muted-foreground">No products yet.</p>}
-                   </div>
+                   
+                   {subscriptions.length > 0 && (
+                     <div className="mb-6">
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-medium text-muted-foreground">Subscriptions</h4>
+                            <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'subscriptions')}>
+                                Sort by price
+                                {appSorts.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {subscriptions.map(product => (
+                                <Card key={product.id} className="p-4 flex flex-col justify-between">
+                                    <div>
+                                        <p className="font-bold">{product.name}</p>
+                                        <p className="text-sm text-muted-foreground">৳{product.regularPrice}</p>
+                                        <Badge variant="outline" className="mt-2 capitalize">{product.type}</Badge>
+                                    </div>
+                                    <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
+                                </Card>
+                            ))}
+                        </div>
+                     </div>
+                   )}
+
+                   {coins.length > 0 && (
+                     <div>
+                        <div className="flex justify-between items-center mb-2">
+                            <h4 className="font-medium text-muted-foreground">Coins</h4>
+                             <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'coins')}>
+                                Sort by price
+                                {appSorts.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                            </Button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {coins.map(product => (
+                                <Card key={product.id} className="p-4 flex flex-col justify-between">
+                                     <div>
+                                        <p className="font-bold">{product.name}</p>
+                                        <p className="text-sm text-muted-foreground">৳{product.regularPrice}</p>
+                                        <Badge variant="outline" className="mt-2 capitalize">{product.type}</Badge>
+                                    </div>
+                                    <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
+                                </Card>
+                            ))}
+                        </div>
+                     </div>
+                   )}
+                   
+                    {(products[app.id] || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No products yet for this category.</p>}
                 </CardContent>
             </Card>
-        ))}
+        )})}
       </div>
 
       <AppEditModal 
