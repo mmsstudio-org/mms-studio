@@ -161,7 +161,7 @@ export const HowToPayContent = ({
 export function HowToPaySection() {
   return (
     <section id="how-to-pay" className="py-20">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto p-4">
         <h2 className="text-3xl font-bold text-center mb-8">How to Pay</h2>
         <div className="p-6 border rounded-lg bg-card/50">
           <HowToPayContent productPrice={0} />

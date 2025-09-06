@@ -86,7 +86,10 @@ export default function PurchaseModal({
     }
     setIsSubmitting(true);
     const txnId = values.bkashTxnId.toUpperCase();
-    const productPrice = product.discountedPrice ?? product.regularPrice;
+    const productPrice =
+      product.discountedPrice && product.discountedPrice > 0
+        ? product.discountedPrice
+        : product.regularPrice;
 
     try {
       // 1. Verify Transaction via proxy
@@ -172,7 +175,10 @@ export default function PurchaseModal({
 
   if (!product) return null;
 
-  const price = product.discountedPrice ?? product.regularPrice;
+  const price =
+    product.discountedPrice && product.discountedPrice > 0
+      ? product.discountedPrice
+      : product.regularPrice;
 
   return (
     <Dialog
