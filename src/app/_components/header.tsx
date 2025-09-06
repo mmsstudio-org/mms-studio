@@ -68,14 +68,14 @@ export default function Header() {
               size="icon"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
-              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-glow text-accent" />
-              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-glow text-accent" />
+              <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 text-glow" />
+              <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100 text-glow" />
               <span className="sr-only">Toggle Theme</span>
             </Button>
 
             {/* Help center */}
             <Button variant="ghost" size="icon" onClick={() => setHelpOpen(true)}>
-              <HelpCircle className="h-5 w-5 text-glow text-accent" />
+              <HelpCircle className="h-5 w-5 text-glow" />
               <span className="sr-only">Help Center</span>
             </Button>
 
