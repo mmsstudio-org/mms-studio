@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
 import Image from 'next/image';
 import * as LucideIcons from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
   const LucideIcon = (LucideIcons as any)[name];
@@ -82,7 +83,7 @@ export default function CategoriesPage() {
         if (order === 'asc') {
             return priceA - priceB;
         } else {
-            return priceB - a.regularPrice;
+            return priceB - priceA;
         }
     });
   }, []);
@@ -155,6 +156,37 @@ export default function CategoriesPage() {
     );
   }
 
+  const renderProductCard = (product: Product) => (
+    <Card key={product.id} className="flex flex-col">
+        <div className="relative w-full aspect-video flex items-center justify-center bg-muted/20">
+            {product.imageUrl ? (
+                <Image src={product.imageUrl} alt={product.name} layout="fill" className="object-cover" />
+            ) : product.type === 'subscription' ? (
+                <Package className="h-12 w-12 text-muted-foreground" />
+            ) : (
+                <CircleDollarSign className="h-12 w-12 text-muted-foreground" />
+            )}
+        </div>
+        <div className="p-4 flex-grow flex flex-col">
+            <h5 className="font-bold truncate">{product.name}</h5>
+            {product.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>}
+            <div className="mt-2 text-sm flex items-baseline gap-2">
+                {product.discountedPrice ? (
+                    <>
+                        <span className="font-bold text-accent">৳{product.discountedPrice}</span>
+                        <span className="text-muted-foreground line-through">৳{product.regularPrice}</span>
+                    </>
+                ) : (
+                    <span className="font-bold">৳{product.regularPrice}</span>
+                )}
+            </div>
+        </div>
+        <CardContent className="mt-auto p-4 pt-0">
+            <Button className="w-full" size="sm" variant="outline" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
+        </CardContent>
+    </Card>
+  );
+
   return (
     <div className="container py-10">
       <div className="flex justify-between items-center mb-8">
@@ -213,16 +245,7 @@ export default function CategoriesPage() {
                             </Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {subscriptions.map(product => (
-                                <Card key={product.id} className="p-4 flex flex-col justify-between">
-                                    <div>
-                                        <p className="font-bold">{product.name}</p>
-                                        <p className="text-sm text-muted-foreground">৳{product.regularPrice}</p>
-                                        <Badge variant="outline" className="mt-2 capitalize">{product.type}</Badge>
-                                    </div>
-                                    <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
-                                </Card>
-                            ))}
+                            {subscriptions.map(renderProductCard)}
                         </div>
                      </div>
                    )}
@@ -237,16 +260,7 @@ export default function CategoriesPage() {
                             </Button>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {coins.map(product => (
-                                <Card key={product.id} className="p-4 flex flex-col justify-between">
-                                     <div>
-                                        <p className="font-bold">{product.name}</p>
-                                        <p className="text-sm text-muted-foreground">৳{product.regularPrice}</p>
-                                        <Badge variant="outline" className="mt-2 capitalize">{product.type}</Badge>
-                                    </div>
-                                    <Button className="w-full mt-4" size="sm" variant="ghost" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
-                                </Card>
-                            ))}
+                            {coins.map(renderProductCard)}
                         </div>
                      </div>
                    )}
