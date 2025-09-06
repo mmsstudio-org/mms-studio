@@ -8,11 +8,14 @@ import type { AppDetail } from '@/lib/types';
 import { getApps } from '@/lib/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import Image from 'next/image';
+import * as LucideIcons from 'lucide-react';
 
-const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  Smartphone,
-  MessageSquare,
-  Code,
+const Icon = ({ name, className }: { name: string; className: string }) => {
+  const LucideIcon = (LucideIcons as any)[name];
+  if (!LucideIcon) {
+    return null;
+  }
+  return <LucideIcon className={className} />;
 };
 
 
@@ -46,17 +49,16 @@ export default function ShopPage() {
           </>
         ) : (
           apps.map((app) => {
-            const IconComponent = app.icon && iconMap[app.icon] ? iconMap[app.icon] : null;
             return (
               <Link href={`/shop/${app.id}`} key={app.id}>
-                <Card className="group overflow-hidden transition-all duration-300 hover:border-accent neon-glow">
+                <Card className="group overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
                         {app.icon && app.icon.startsWith('http') ? (
                           <Image src={app.icon} alt={app.name} width={32} height={32} className="rounded-md" />
-                        ) : IconComponent ? (
-                          <IconComponent className="h-8 w-8 text-accent" />
+                        ) : app.icon ? (
+                          <Icon name={app.icon} className="h-8 w-8 text-accent" />
                         ) : (
                           <div className="h-8 w-8 bg-muted rounded-md flex items-center justify-center text-accent font-bold">
                             {app.name.charAt(0)}

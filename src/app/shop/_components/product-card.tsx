@@ -31,7 +31,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
   const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
 
   return (
-    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-accent neon-glow h-full">
+    <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1 h-full">
       <div
         className={cn(
           'relative w-full aspect-video flex items-center justify-center',

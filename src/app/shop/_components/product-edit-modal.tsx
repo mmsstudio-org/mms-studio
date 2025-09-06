@@ -34,6 +34,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import Image from 'next/image';
+import * as LucideIcons from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
@@ -78,6 +80,14 @@ type ProductEditModalProps = {
   onProductUpdate: () => void;
   appForNewProduct?: AppDetail | null;
 };
+
+const Icon = ({ name, className }: { name: string; className: string }) => {
+    const LucideIcon = (LucideIcons as any)[name];
+    if (!LucideIcon) {
+      return null;
+    }
+    return <LucideIcon className={className} />;
+  };
 
 export default function ProductEditModal({ isOpen, onOpenChange, product, onProductUpdate, appForNewProduct }: ProductEditModalProps) {
   const { toast } = useToast();
@@ -274,12 +284,25 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                          <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
                             <FormControl>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Select an app" />
+                                     <SelectValue placeholder="Select an app" />
                                 </SelectTrigger>
                             </FormControl>
                             <SelectContent>
                                 {apps.map(app => (
-                                    <SelectItem key={app.id} value={app.id}>{app.name}</SelectItem>
+                                    <SelectItem key={app.id} value={app.id}>
+                                        <div className="flex items-center gap-2">
+                                            {app.icon && app.icon.startsWith('http') ? (
+                                                <Image src={app.icon} alt={app.name} width={20} height={20} className="rounded-md" />
+                                            ) : app.icon ? (
+                                                <Icon name={app.icon} className="h-5 w-5" />
+                                            ) : (
+                                                <div className="h-5 w-5 bg-muted rounded-md flex items-center justify-center text-xs">
+                                                  {app.name.charAt(0)}
+                                                </div>
+                                            )}
+                                            {app.name}
+                                        </div>
+                                    </SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
