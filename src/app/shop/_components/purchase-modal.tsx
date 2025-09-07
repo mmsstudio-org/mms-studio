@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -131,6 +132,8 @@ export default function PurchaseModal({
         show_ads: product.type !== "subscription",
         note: `Purchased: ${product.name} - ${product.description || ''}`,
       };
+      
+      console.log("Creating coupon with body:", couponBody);
 
       const couponUrl = `/api/coupon?apiKey=${encodeURIComponent(
         siteInfo.couponApiKey
@@ -143,7 +146,8 @@ export default function PurchaseModal({
 
       const couponData = await couponRes.json();
       if (!couponData.success) {
-        throw new Error(couponData.message || "Failed to create coupon.");
+        console.error("Coupon creation failed:", couponData);
+        throw new Error(couponData.message || "Failed to create coupon: Missing required fields.");
       }
 
       // 4. Mark as Redeemed via proxy
