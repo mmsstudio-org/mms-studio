@@ -81,7 +81,7 @@ export default function PurchaseModal({
         title: "Configuration Error",
         description:
           "The site is not configured for automated payments. Please contact support.",
-        duration: 30000,
+        duration: 5000,
       });
       return;
     }
@@ -157,7 +157,7 @@ export default function PurchaseModal({
       toast({
         title: "Verification Successful!",
         description: `Your transaction has been successfully verified. Use your transaction ID (“${txnId}”) as your coupon code to redeem your purchase.`,
-        duration: 30000,
+        duration: 15000,
       });
 
       form.reset();
@@ -167,7 +167,7 @@ export default function PurchaseModal({
         variant: "destructive",
         title: "Verification Failed",
         description: error.message || "An unexpected error occurred.",
-        duration: 30000,
+        duration: 5000,
       });
     } finally {
       setIsSubmitting(false);
