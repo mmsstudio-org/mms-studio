@@ -127,13 +127,11 @@ export default function PurchaseModal({
       const couponBody = {
         code: txnId,
         validity: validityDate.toISOString(),
-        coin_amount: product.type === "subscription" ? 0 : (product.coinAmount || 0),
+        coin_amount: product.type === "subscription" ? 1 : (product.coinAmount || 1),
         type: "single",
-        show_ads: product.type !== "subscription",
+        show_ad: product.type !== "subscription",
         note: `Purchased: ${product.name} - ${product.description || ''}`,
       };
-      
-      console.log("Creating coupon with body:", couponBody);
 
       const couponUrl = `/api/coupon?apiKey=${encodeURIComponent(
         siteInfo.couponApiKey
@@ -146,7 +144,6 @@ export default function PurchaseModal({
 
       const couponData = await couponRes.json();
       if (!couponData.success) {
-        console.error("Coupon creation failed:", couponData);
         throw new Error(couponData.message || "Failed to create coupon: Missing required fields.");
       }
 
