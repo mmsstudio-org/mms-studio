@@ -15,11 +15,14 @@ import { getSiteInfo } from "@/lib/firestore-service";
 import type { SiteInfo } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import HelpCenterModal from "@/app/_components/help-center-modal";
+import { cn } from "@/lib/utils";
 
 export const HowToPayContent = ({
   productPrice,
+  isScrollable = true,
 }: {
   productPrice?: number;
+  isScrollable?: boolean;
 }) => {
   const { toast } = useToast();
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
@@ -67,7 +70,10 @@ export const HowToPayContent = ({
   return (
     <>
       <div
-        className="space-y-4 max-h-[80vh] overflow-auto p-1"
+        className={cn(
+            "space-y-4 p-1",
+            isScrollable && "max-h-[80vh] overflow-auto"
+        )}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div className="p-4 border rounded-lg">
@@ -164,7 +170,7 @@ export function HowToPaySection() {
       <div className="max-w-4xl mx-auto p-4">
         <h2 className="text-3xl font-bold text-center mb-8">How to Pay</h2>
         <div className="p-6 border rounded-lg bg-card/50">
-          <HowToPayContent productPrice={0} />
+          <HowToPayContent productPrice={0} isScrollable={false} />
         </div>
       </div>
     </section>
