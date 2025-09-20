@@ -1,4 +1,4 @@
-# MMS Studio - Digital Asset E-Commerce Platform
+# [MMS Studio](https://mmsstudio.vercel.app) - Digital Asset E-Commerce Platform
 
 MMS Studio is a modern, full-stack e-commerce application designed for selling digital products, such as software subscriptions and in-app currencies. It features a complete administrative dashboard for managing products and sales, and a seamless, automated payment verification system for customers.
 
@@ -40,7 +40,7 @@ Follow these instructions to get a local copy of the project up and running for 
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-repo/mms-studio.git
+    git clone https://github.com/mmsstudio-org/mms-studio.git
     cd mms-studio
     ```
 
