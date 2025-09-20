@@ -40,7 +40,7 @@ export default function ShopPage() {
           Select an app to browse subscriptions, coin packs, and more.
         </p>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 items-stretch">
         {loading ? (
           <>
             <Skeleton className="h-[120px] w-full" />
@@ -50,9 +50,9 @@ export default function ShopPage() {
         ) : (
           apps.map((app) => {
             return (
-              <Link href={`/shop/${app.id}`} key={app.id}>
-                <Card className="group overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
-                  <CardHeader>
+              <Link href={`/shop/${app.id}`} key={app.id} className="flex">
+                <Card className="group flex flex-col w-full overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
+                  <CardHeader className="flex-grow">
                     <div className="flex justify-between items-start">
                       <div className="flex items-center gap-4">
                         {app.icon && app.icon.startsWith('http') ? (

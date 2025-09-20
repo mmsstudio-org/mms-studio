@@ -87,14 +87,49 @@ export default function ShopSlugPage() {
         </p>
       </div>
 
+      
+      <div className="space-y-16">
+        {subscriptions.length > 0 && (
+          <section>
+            <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
+                <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
+                  Sort by price
+                  {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                </Button>
+            </div>
+            <ProductList products={subscriptions} onProductUpdate={fetchProducts} app={app} />
+          </section>
+        )}
+
+        {coins.length > 0 && (
+          <section>
+              <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                  <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
+                  <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
+                      Sort by price
+                      {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                  </Button>
+            </div>
+            <ProductList products={coins} onProductUpdate={fetchProducts} app={app} />
+          </section>
+        )}
+
+        {products.length === 0 && !loading && (
+          <div className="text-center py-20 border-2 border-dashed rounded-lg">
+              <p className="text-muted-foreground">No products available for this app yet.</p>
+          </div>
+        )}
+      </div>
+
       {app.youtubeVideoId && (
-        <section className="mb-16">
+        <section className="mt-16">
           <Card className="overflow-hidden">
             <CardHeader>
               <CardTitle className="text-2xl md:text-3xl">Payment Tutorial</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="aspect-video">
+              <div className="aspect-video max-w-4xl mx-auto">
                 <iframe
                   className="w-full h-full rounded-lg"
                   src={`https://www.youtube.com/embed/${app.youtubeVideoId}`}
@@ -108,40 +143,6 @@ export default function ShopSlugPage() {
           </Card>
         </section>
       )}
-      
-        <div className="space-y-16">
-          {subscriptions.length > 0 && (
-            <section>
-              <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                 <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
-                 <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
-                    Sort by price
-                    {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                 </Button>
-              </div>
-              <ProductList products={subscriptions} onProductUpdate={fetchProducts} app={app} />
-            </section>
-          )}
-
-          {coins.length > 0 && (
-            <section>
-                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                    <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
-                    <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
-                        Sort by price
-                        {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                    </Button>
-              </div>
-              <ProductList products={coins} onProductUpdate={fetchProducts} app={app} />
-            </section>
-          )}
-
-          {products.length === 0 && !loading && (
-            <div className="text-center py-20 border-2 border-dashed rounded-lg">
-                <p className="text-muted-foreground">No products available for this app yet.</p>
-            </div>
-          )}
-        </div>
     </div>
   );
 }
