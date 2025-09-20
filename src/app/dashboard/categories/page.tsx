@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useAuth } from '@/hooks/use-auth';
@@ -8,13 +9,14 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
 import Image from 'next/image';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
@@ -158,7 +160,7 @@ export default function CategoriesPage() {
 
   const renderProductCard = (product: Product) => (
     <Card key={product.id} className="flex flex-col">
-        <div className="relative w-full aspect-video flex items-center justify-center bg-muted/20">
+        <div className="relative w-full aspect-video flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
             {product.imageUrl ? (
                 <Image src={product.imageUrl} alt={product.name} layout="fill" className="object-cover" />
             ) : product.type === 'subscription' ? (
@@ -171,7 +173,7 @@ export default function CategoriesPage() {
             <h5 className="font-bold truncate">{product.name}</h5>
             {product.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>}
             <div className="mt-2 text-sm flex items-baseline gap-2">
-                {product.discountedPrice ? (
+                {product.discountedPrice && product.discountedPrice > 0 ? (
                     <>
                         <span className="font-bold text-accent">৳{product.discountedPrice}</span>
                         <span className="text-muted-foreground line-through">৳{product.regularPrice}</span>
@@ -230,42 +232,52 @@ export default function CategoriesPage() {
                    </div>
                 </CardHeader>
                 <CardContent>
-                   <div className="flex justify-between items-center mb-4">
-                        <h3 className="font-semibold">Products for {app.name}</h3>
-                        <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
-                   </div>
-                   
-                   {subscriptions.length > 0 && (
-                     <div className="mb-6">
-                        <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-medium text-muted-foreground">Subscriptions</h4>
-                            <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'subscriptions')}>
-                                Sort by price
-                                {appSorts.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
-                            </Button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {subscriptions.map(renderProductCard)}
-                        </div>
-                     </div>
-                   )}
+                    <Collapsible>
+                        <CollapsibleTrigger asChild>
+                           <Button variant="outline" className="w-full group">
+                                View Products ({ (products[app.id] || []).length })
+                                <ChevronsUpDown className="h-4 w-4 ml-2 group-data-[state=open]:rotate-180 transition-transform" />
+                           </Button>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent className="mt-4 pt-4 border-t">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-semibold">Products for {app.name}</h3>
+                                <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
+                            </div>
+                            
+                            {subscriptions.length > 0 && (
+                                <div className="mb-6">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-medium text-muted-foreground">Subscriptions</h4>
+                                        <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'subscriptions')}>
+                                            Sort by price
+                                            {appSorts.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {subscriptions.map(renderProductCard)}
+                                    </div>
+                                </div>
+                            )}
 
-                   {coins.length > 0 && (
-                     <div>
-                        <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-medium text-muted-foreground">Coins</h4>
-                             <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'coins')}>
-                                Sort by price
-                                {appSorts.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
-                            </Button>
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            {coins.map(renderProductCard)}
-                        </div>
-                     </div>
-                   )}
-                   
-                    {(products[app.id] || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No products yet for this category.</p>}
+                            {coins.length > 0 && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-medium text-muted-foreground">Coins</h4>
+                                        <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'coins')}>
+                                            Sort by price
+                                            {appSorts.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {coins.map(renderProductCard)}
+                                    </div>
+                                </div>
+                            )}
+                            
+                            {(products[app.id] || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">No products yet for this category.</p>}
+                        </CollapsibleContent>
+                    </Collapsible>
                 </CardContent>
             </Card>
         )})}
