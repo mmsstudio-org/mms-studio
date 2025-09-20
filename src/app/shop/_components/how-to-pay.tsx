@@ -1,3 +1,4 @@
+
 "use client";
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -20,9 +21,11 @@ import { cn } from "@/lib/utils";
 export const HowToPayContent = ({
   productPrice,
   isScrollable = true,
+  youtubeVideoId,
 }: {
   productPrice?: number;
   isScrollable?: boolean;
+  youtubeVideoId?: string;
 }) => {
   const { toast } = useToast();
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
@@ -71,7 +74,7 @@ export const HowToPayContent = ({
     <>
       <div
         className={cn(
-          "space-y-4 p-1",
+          "space-y-4 p-1 pt-4",
           isScrollable && "max-h-[80vh] overflow-auto"
         )}
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -112,6 +115,26 @@ export const HowToPayContent = ({
               </p>
             </div>
           </>
+        )}
+        
+        {youtubeVideoId && (
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Payment Tutorial Video</AccordionTrigger>
+                <AccordionContent>
+                  <div className="aspect-video">
+                    <iframe
+                      className="w-full h-full rounded-lg"
+                      src={`https://www.youtube.com/embed/${youtubeVideoId}`}
+                      title="YouTube video player"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
         )}
 
         <Accordion type="single" collapsible className="w-full">

@@ -1,3 +1,4 @@
+
 import { LucideIcon } from "lucide-react";
 
 export interface Product {
@@ -18,6 +19,7 @@ export interface AppDetail {
   name: string;
   description?: string;
   icon?: string; // URL to an icon or a lucide-icon name
+  youtubeVideoId?: string; // YouTube video ID
 }
 
 export interface Purchase {

@@ -1,7 +1,8 @@
+
 'use client';
 
 import { useState } from 'react';
-import type { Product } from '@/lib/types';
+import type { Product, AppDetail } from '@/lib/types';
 import ProductCard from './product-card';
 import PurchaseModal from './purchase-modal';
 import { useAuth } from '@/hooks/use-auth';
@@ -11,9 +12,10 @@ import ProductEditModal from './product-edit-modal';
 type ProductListProps = {
   products: Product[];
   onProductUpdate: () => void;
+  app: AppDetail;
 };
 
-export default function ProductList({ products, onProductUpdate }: ProductListProps) {
+export default function ProductList({ products, onProductUpdate, app }: ProductListProps) {
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
   const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -45,6 +47,7 @@ export default function ProductList({ products, onProductUpdate }: ProductListPr
         isOpen={isPurchaseModalOpen}
         onOpenChange={setPurchaseModalOpen}
         product={selectedProduct}
+        app={app}
       />
        {user && (
         <ProductEditModal

@@ -1,3 +1,4 @@
+
 'use client';
 import { notFound, useParams } from 'next/navigation';
 import ProductList from '../_components/product-list';
@@ -7,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getProductsForApp, getApp } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
 import { ArrowUpNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -42,7 +44,7 @@ export default function ShopSlugPage() {
         if (order === 'asc') {
             return priceA - priceB;
         } else {
-            return priceB - priceA;
+            return priceB - a.regularPrice;
         }
     });
   }, []);
@@ -77,13 +79,35 @@ export default function ShopSlugPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold tracking-tight">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
           {app.name} Store
         </h1>
         <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
           {app.description}
         </p>
       </div>
+
+      {app.youtubeVideoId && (
+        <section className="mb-16">
+          <Card className="overflow-hidden">
+            <CardHeader>
+              <CardTitle className="text-2xl md:text-3xl">Payment Tutorial</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="aspect-video">
+                <iframe
+                  className="w-full h-full rounded-lg"
+                  src={`https://www.youtube.com/embed/${app.youtubeVideoId}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                ></iframe>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
       
         <div className="space-y-16">
           {subscriptions.length > 0 && (
@@ -95,7 +119,7 @@ export default function ShopSlugPage() {
                     {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                  </Button>
               </div>
-              <ProductList products={subscriptions} onProductUpdate={fetchProducts} />
+              <ProductList products={subscriptions} onProductUpdate={fetchProducts} app={app} />
             </section>
           )}
 
@@ -108,7 +132,7 @@ export default function ShopSlugPage() {
                         {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                     </Button>
               </div>
-              <ProductList products={coins} onProductUpdate={fetchProducts}/>
+              <ProductList products={coins} onProductUpdate={fetchProducts} app={app} />
             </section>
           )}
 

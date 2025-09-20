@@ -23,7 +23,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import type { Product, SiteInfo } from "@/lib/types";
+import type { Product, SiteInfo, AppDetail } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { HowToPayContent } from "./how-to-pay";
@@ -39,12 +39,14 @@ type PurchaseModalProps = {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
   product: Product | null;
+  app: AppDetail | null;
 };
 
 export default function PurchaseModal({
   isOpen,
   onOpenChange,
   product,
+  app,
 }: PurchaseModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -127,11 +129,13 @@ export default function PurchaseModal({
       const couponBody = {
         code: txnId,
         validity: validityDate.toISOString(),
-        coin_amount: product.type === "subscription" ? 1 : (product.coinAmount || 1),
+        coin_amount: product.type === "subscription" ? 0 : (product.coinAmount || 1),
         type: "single",
         show_ad: product.type !== "subscription",
         note: `Purchased: ${product.name} - ${product.description || ''}`,
       };
+      
+      console.log('Coupon Body:', couponBody);
 
       const couponUrl = `/api/coupon?apiKey=${encodeURIComponent(
         siteInfo.couponApiKey
@@ -144,6 +148,7 @@ export default function PurchaseModal({
 
       const couponData = await couponRes.json();
       if (!couponData.success) {
+        console.error('Coupon Creation Error:', couponData);
         throw new Error(couponData.message || "Failed to create coupon: Missing required fields.");
       }
 
@@ -208,7 +213,7 @@ export default function PurchaseModal({
 
         {showHowToPay ? (
           <div>
-            <HowToPayContent productPrice={price} />
+            <HowToPayContent productPrice={price} youtubeVideoId={app?.youtubeVideoId}/>
             <Button
               variant="outline"
               className="w-full mt-4"

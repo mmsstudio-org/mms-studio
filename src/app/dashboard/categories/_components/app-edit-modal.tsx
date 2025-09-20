@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -28,10 +29,24 @@ import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { addApp, updateApp } from '@/lib/firestore-service';
 
+// YouTube regex to get video ID from URL
+const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+
+// Validator for YouTube URL or a raw video ID
+const youtubeIdOrUrlSchema = z.string().optional().refine(val => {
+    if (!val) return true; // Allow empty string
+    if (youtubeRegex.test(val)) return true; // Allow full URL
+    if (val.length === 11 && /^[a-zA-Z0-9_-]+$/.test(val)) return true; // Allow raw ID
+    return false;
+}, {
+    message: "Please enter a valid YouTube video URL or Video ID."
+});
+
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   description: z.string().optional(),
   icon: z.union([z.string().url(), z.string().length(0), z.string().refine(s => !s.startsWith('http'))]).optional(),
+  youtubeVideoUrl: youtubeIdOrUrlSchema,
 });
 
 type AppEditModalProps = {
@@ -51,6 +66,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
         name: '',
         description: '',
         icon: '',
+        youtubeVideoUrl: '',
     },
   });
 
@@ -60,23 +76,41 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
         ...app,
         description: app.description || '',
         icon: app.icon || '',
+        youtubeVideoUrl: app.youtubeVideoId || '',
       });
     } else {
         form.reset({
             name: '',
             description: '',
             icon: '',
+            youtubeVideoUrl: '',
         });
     }
   }, [app, form]);
 
+  function getYouTubeVideoId(urlOrId: string): string {
+    if (!urlOrId) return "";
+    const match = urlOrId.match(youtubeRegex);
+    if (match && match[1]) {
+      return match[1];
+    }
+    // If no match from URL, assume it's a raw ID if it fits the criteria
+    if (urlOrId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(urlOrId)) {
+        return urlOrId;
+    }
+    return "";
+  }
+  
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
+    const videoId = getYouTubeVideoId(values.youtubeVideoUrl || "");
+    
     const appData = {
-        ...values,
+        name: values.name,
         description: values.description || "",
         icon: values.icon || "",
+        youtubeVideoId: videoId,
     }
 
     try {
@@ -108,7 +142,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
              <FormField
                 control={form.control}
                 name="name"
@@ -143,6 +177,19 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
                     <FormLabel>Icon (Lucide name or URL)</FormLabel>
                     <FormControl>
                         <Input placeholder="e.g., Smartphone or https://example.com/icon.png" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+             <FormField
+                control={form.control}
+                name="youtubeVideoUrl"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Tutorial Video (YouTube URL or ID)</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., https://www.youtube.com/watch?v=..." {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
