@@ -129,7 +129,7 @@ export default function PurchaseModal({
       const couponBody = {
         code: txnId,
         validity: validityDate.toISOString(),
-        coin_amount: product.type === "subscription" ? 0 : (product.coinAmount || 1),
+        coin_amount: product.type === "subscription" ? 1 : (product.coinAmount || 1),
         type: "single",
         show_ad: product.type !== "subscription",
         note: `Purchased: ${product.name} - ${product.description || ''}`,
