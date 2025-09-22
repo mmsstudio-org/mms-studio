@@ -145,7 +145,8 @@ export default function CouponsPage() {
 
   const getBadgeVariant = (status: 'Active' | 'Expired' | 'Limit Reached' | 'Redeemed'): 'default' | 'secondary' | 'destructive' => {
     if (status === 'Expired' || status === 'Limit Reached' || status === 'Redeemed') return 'destructive';
-    return 'secondary';
+    if (status === 'Active') return 'secondary';
+    return 'default';
   };
 
   const getStatusText = (coupon: Coupon): 'Active' | 'Expired' | 'Limit Reached' | 'Redeemed' => {
@@ -160,6 +161,9 @@ export default function CouponsPage() {
     const lowercasedQuery = searchQuery.toLowerCase();
     if (!lowercasedQuery) return coupons;
 
+    if (lowercasedQuery === 'active') {
+        return coupons.filter(c => getStatusText(c) === 'Active');
+    }
     if (lowercasedQuery === 'expired') {
       return coupons.filter(c => getStatusText(c) === 'Expired');
     }
@@ -263,7 +267,7 @@ export default function CouponsPage() {
           <h1 className="text-4xl font-bold">Manage Coupons</h1>
           <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Tip: Search "expired", "redeemed", or "limit reached" to filter coupons.
+            Tip: Search "active", "expired", "redeemed", or "limit reached" to filter coupons.
           </p>
         </div>
 
@@ -460,6 +464,5 @@ export default function CouponsPage() {
     </>
   );
 }
-
 
     
