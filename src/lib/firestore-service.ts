@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit } from 'firebase/firestore';
 import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon } from './types';
 
 // Collections
@@ -110,6 +110,22 @@ export async function getPurchases(): Promise<Purchase[]> {
     const q = query(purchasesCollection, orderBy('received_time', 'desc'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Purchase));
+}
+
+export async function getPurchaseByTxnId(txnId: string): Promise<Purchase | null> {
+    const q = query(purchasesCollection, where('txn_id', '==', txnId), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (querySnapshot.empty) {
+        // Fallback to check if the doc ID is the txnId
+        const docRef = doc(db, 'payment_sms', txnId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Purchase;
+        }
+        return null;
+    }
+    const doc = querySnapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as Purchase;
 }
 
 export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeemed: boolean): Promise<void> {

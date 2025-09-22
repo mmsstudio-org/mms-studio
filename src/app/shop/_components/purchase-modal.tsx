@@ -27,7 +27,7 @@ import type { Product, SiteInfo, AppDetail } from "@/lib/types";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { HowToPayContent } from "./how-to-pay";
-import { getSiteInfo } from "@/lib/firestore-service";
+import { getSiteInfo, getPurchaseByTxnId, getCoupon, addCoupon, updatePurchaseRedeemedStatus } from "@/lib/firestore-service";
 
 const formSchema = z.object({
   bkashTxnId: z
@@ -71,21 +71,9 @@ export default function PurchaseModal({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (
-      !product ||
-      !siteInfo?.paymentApiBaseUrl ||
-      !siteInfo?.paymentApiKey ||
-      !siteInfo?.couponApiBaseUrl ||
-      !siteInfo?.couponApiKey
-    ) {
-      toast({
-        variant: "destructive",
-        title: "Configuration Error",
-        description:
-          "The site is not configured for automated payments. Please contact support.",
-        duration: 5000,
-      });
-      return;
+    if (!product) {
+        toast({ variant: 'destructive', title: 'Product Error', description: 'No product selected for purchase.' });
+        return;
     }
     setIsSubmitting(true);
     const txnId = values.bkashTxnId.toUpperCase();
@@ -95,70 +83,58 @@ export default function PurchaseModal({
         : product.regularPrice;
 
     try {
-      // 1. Verify Transaction via proxy
-      const verifyUrl = `/api/verify-payment/${txnId}?apiKey=${encodeURIComponent(
-        siteInfo.paymentApiKey
-      )}&baseUrl=${encodeURIComponent(siteInfo.paymentApiBaseUrl)}`;
-      const verifyRes = await fetch(verifyUrl);
-      const verifyData = await verifyRes.json();
-
-      if (verifyData.error || !verifyData.id) {
+      // 1. Find the purchase record in Firestore
+      const purchaseRecord = await getPurchaseByTxnId(txnId);
+      if (!purchaseRecord) {
         throw new Error("Invalid Transaction ID.");
       }
-
-      if (verifyData.is_redeemed) {
+      
+      // 2. Check if already redeemed
+      if (purchaseRecord.is_redeemed) {
         throw new Error(
-          `This transaction ID is already used. If you’ve redeemed this purchase before, your coupon code is “${txnId}”.`
+          `This transaction ID has already been used. Your coupon code is "${txnId}".`
         );
       }
-
-      // 2. Match Amount
-      const transactionAmount = Number(verifyData.amount);
+      
+      // 3. Match Amount
+      const transactionAmount = Number(purchaseRecord.amount);
       if (transactionAmount < productPrice) {
         throw new Error(
           `The paid amount (৳${transactionAmount}) is less than the product price (৳${productPrice}).`
         );
       }
 
-      // 3. Create Coupon via proxy
+      // 4. Check if a coupon with this code already exists
+      const existingCoupon = await getCoupon(txnId);
+      if(existingCoupon) {
+        // This case should be rare if is_redeemed flag is working correctly, but it's a good safeguard.
+        throw new Error(`This transaction ID has already been used to generate a coupon. Your coupon code is "${txnId}".`);
+      }
+
+      // 5. Create Coupon
       const validityDate = new Date();
       validityDate.setDate(
         validityDate.getDate() + (product.subscriptionDays || 30)
       );
 
-      const couponBody = {
+      const newCoupon = {
         code: txnId,
-        validity: validityDate.toISOString(),
-        coin_amount: product.type === "subscription" ? 1 : (product.coinAmount || 1),
-        type: "single",
-        show_ad: product.type !== "subscription",
+        validity: validityDate.getTime(),
+        coins: product.type === "subscription" ? 1 : (product.coinAmount || 1),
+        type: 'single' as const,
+        show_ads: product.type !== "subscription",
         note: `Purchased: ${product.name} - ${product.description || ''}`,
+        created: Date.now(),
+        redeem_count: 0,
+        redeem_limit: 1,
       };
       
-      console.log('Coupon Body:', couponBody);
+      await addCoupon(newCoupon);
 
-      const couponUrl = `/api/coupon?apiKey=${encodeURIComponent(
-        siteInfo.couponApiKey
-      )}&baseUrl=${encodeURIComponent(siteInfo.couponApiBaseUrl)}`;
-      const couponRes = await fetch(couponUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(couponBody),
-      });
+      // 6. Mark as Redeemed
+      await updatePurchaseRedeemedStatus(purchaseRecord.id, true);
 
-      const couponData = await couponRes.json();
-      if (!couponData.success) {
-        console.error('Coupon Creation Error:', couponData);
-        throw new Error(couponData.message || "Failed to create coupon: Missing required fields.");
-      }
-
-      // 4. Mark as Redeemed via proxy
-      const redeemUrl = `/api/verify-payment/${txnId}?apiKey=${encodeURIComponent(
-        siteInfo.paymentApiKey
-      )}&baseUrl=${encodeURIComponent(siteInfo.paymentApiBaseUrl)}`;
-      await fetch(redeemUrl, { method: "PUT" });
-
-      // 5. Success
+      // 7. Success
       toast({
         title: "Verification Successful!",
         description: `Your transaction has been successfully verified. Use your transaction ID (“${txnId}”) as your coupon code to redeem your purchase.`,
@@ -172,7 +148,7 @@ export default function PurchaseModal({
         variant: "destructive",
         title: "Verification Failed",
         description: error.message || "An unexpected error occurred.",
-        duration: 5000,
+        duration: 8000,
       });
     } finally {
       setIsSubmitting(false);
@@ -240,7 +216,7 @@ export default function PurchaseModal({
                     <FormItem>
                       <FormLabel>bKash Transaction ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 9A4B7C2D1E" {...field} />
+                        <Input placeholder="e.g., 9A4B7C2D1E" {...field} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
