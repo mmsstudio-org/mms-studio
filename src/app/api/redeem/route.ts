@@ -48,7 +48,12 @@ export async function GET(request: NextRequest) {
     await updateCoupon(coupon.id, {redeem_count: newRedeemCount});
 
     const validityDate = new Date(coupon.validity);
-    const validityISOString = validityDate.toISOString().slice(0, 19);
+    
+    // Adjust for BDT (UTC+6)
+    const bdtOffset = 6 * 60 * 60 * 1000; // 6 hours in milliseconds
+    const bdtDate = new Date(validityDate.getTime() + bdtOffset);
+    
+    const validityISOString = bdtDate.toISOString().slice(0, 19);
 
 
     return NextResponse.json({
