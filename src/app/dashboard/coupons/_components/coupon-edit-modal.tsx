@@ -290,9 +290,9 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                        <FormLabel>Disable Ads</FormLabel>
+                        <FormLabel>Show Ads</FormLabel>
                         <FormDescription>
-                           If enabled, ads will not be shown to the user.
+                           If enabled, ads will be shown to the user.
                         </FormDescription>
                     </div>
                     <FormControl>

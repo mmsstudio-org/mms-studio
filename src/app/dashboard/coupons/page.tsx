@@ -230,7 +230,7 @@ export default function CouponsPage() {
                 <p><strong>Coins:</strong> {coupon.coins}</p>
                 <p><strong>Type:</strong> <span className="capitalize">{coupon.type}</span></p>
                 <p><strong>Usage:</strong> {coupon.type === 'certain amount' && coupon.redeem_limit !== null ? `${coupon.redeem_count} / ${coupon.redeem_limit}` : coupon.redeem_count}</p>
-                <p><strong>Disable Ads:</strong> {coupon.show_ads ? 'Yes' : 'No'}</p>
+                <p><strong>Show Ads:</strong> {coupon.show_ads ? 'Yes' : 'No'}</p>
                 <p><strong>Created:</strong> {format(new Date(coupon.created), 'Pp')}</p>
                 <p><strong>Validity:</strong> {format(new Date(coupon.validity), 'Pp')}</p>
                 {coupon.note && (
@@ -260,40 +260,41 @@ export default function CouponsPage() {
                 <h1 className="text-4xl font-bold">Manage Coupons</h1>
                 <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
             </div>
-            {!isBatchDeleteMode && <Button onClick={handleAddNew}><PlusCircle className="mr-2 h-4 w-4"/> Create Coupon</Button>}
+            <div className="flex items-center gap-2">
+              {!isBatchDeleteMode ? (
+                <Button onClick={handleAddNew}><PlusCircle className="mr-2 h-4 w-4"/> Create Coupon</Button>
+              ) : (
+                <Button variant="secondary" onClick={() => {
+                  setBatchDeleteMode(false);
+                  setSelectedIds(new Set());
+                }}>
+                  <ShieldX className="mr-2 h-4 w-4" /> Cancel
+                </Button>
+              )}
+              {!isBatchDeleteMode ? (
+                  <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
+                  </Button>
+              ) : (
+                  <Button variant="destructive" onClick={() => setFinalDeleteConfirmOpen(true)} disabled={selectedIds.size === 0}>
+                  <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
+                  </Button>
+              )}
+          </div>
         </div>
         <p className="text-sm text-muted-foreground mb-8">
             Tip: Search "expired" or "limit reached" to filter coupons.
         </p>
 
-        <div className="flex items-center gap-4 mb-4">
-            <div className="relative flex-grow">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    type="search"
-                    placeholder="Search by coupon code..."
-                    className="w-full rounded-lg bg-background pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
-            </div>
-            {!isBatchDeleteMode ? (
-                <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
-                </Button>
-                ) : (
-                <>
-                    <Button variant="destructive" onClick={() => setFinalDeleteConfirmOpen(true)} disabled={selectedIds.size === 0}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
-                    </Button>
-                    <Button variant="secondary" onClick={() => {
-                    setBatchDeleteMode(false);
-                    setSelectedIds(new Set());
-                    }}>
-                    <ShieldX className="mr-2 h-4 w-4" /> Cancel
-                    </Button>
-                </>
-            )}
+        <div className="relative flex-grow mb-4">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+                type="search"
+                placeholder="Search by coupon code..."
+                className="w-full rounded-lg bg-background pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+            />
         </div>
 
         {/* Desktop Table */}
@@ -315,7 +316,7 @@ export default function CouponsPage() {
                         <TableHead>Type</TableHead>
                         <TableHead>Coins</TableHead>
                         <TableHead>Usage</TableHead>
-                        <TableHead>Disable Ads</TableHead>
+                        <TableHead>Show Ads</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Validity</TableHead>
                         <TableHead>Note</TableHead>
@@ -445,4 +446,3 @@ export default function CouponsPage() {
     </>
   );
 }
-
