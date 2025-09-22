@@ -29,7 +29,7 @@ import { Loader2 } from 'lucide-react';
 import { addFeature, updateFeature } from '@/lib/firestore-service';
 
 const formSchema = z.object({
-  icon: z.string().min(1, 'Icon name is required.'),
+  icon: z.string().optional(),
   title: z.string().min(3, 'Title is required.'),
   description: z.string().min(10, 'Description is required.'),
 });
@@ -75,15 +75,19 @@ export default function FeatureEditModal({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
+    const featureData = {
+        ...values,
+        icon: values.icon || 'Zap', // Use a default if empty
+    }
     try {
       if (feature && feature.id) {
-        await updateFeature(feature.id, values);
+        await updateFeature(feature.id, featureData);
         toast({
           title: 'Success',
           description: `Feature "${values.title}" updated.`,
         });
       } else {
-        await addFeature(values);
+        await addFeature(featureData);
         toast({
           title: 'Success',
           description: `Feature "${values.title}" added.`,
@@ -124,9 +128,9 @@ export default function FeatureEditModal({
               name="icon"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Icon Name (from Lucide React)</FormLabel>
+                  <FormLabel>Icon (Lucide name or URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Zap" {...field} />
+                    <Input placeholder="e.g., Zap or https://example.com/icon.png" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

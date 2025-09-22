@@ -16,6 +16,7 @@ import {
   Database,
   Bot,
 } from "lucide-react";
+import Image from "next/image";
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
   const LucideIcon = (LucideIcons as any)[name];
@@ -158,7 +159,13 @@ export default function Home() {
                 className="bg-card/50 backdrop-blur-sm border-border/50 text-center"
               >
                 <CardHeader className="items-center">
-                  <Icon name={feature.icon} className="h-10 w-10 text-accent" />
+                  {feature.icon && feature.icon.startsWith('http') ? (
+                      <div className="h-12 w-12 bg-muted rounded-lg flex items-center justify-center">
+                        <Image src={feature.icon} alt={feature.title} width={32} height={32} className="object-contain" />
+                      </div>
+                    ) : (
+                      <Icon name={feature.icon} className="h-10 w-10 text-accent" />
+                  )}
                   <CardTitle className="mt-4 text-2xl font-bold">
                     {feature.title}
                   </CardTitle>

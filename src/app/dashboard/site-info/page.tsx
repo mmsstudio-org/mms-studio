@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import FeatureEditModal from './_components/feature-edit-modal';
 import { ConfirmationDialog } from '../purchases/_components/confirmation-dialog';
 import * as LucideIcons from 'lucide-react';
+import Image from 'next/image';
 
 const siteInfoSchema = z.object({
   webName: z.string().min(3, 'Website name must be at least 3 characters.'),
@@ -216,7 +217,7 @@ export default function SiteInfoPage() {
                   <div className="flex justify-between items-center">
                       <div>
                           <CardTitle>Homepage Features</CardTitle>
-                          <CardDescription className="mt-1">Manage the features displayed on your homepage.</CardDescription>
+                          <CardDescription className="mt-2">Manage the features displayed on your homepage.</CardDescription>
                       </div>
                       <Button onClick={handleAddNewFeature}><PlusCircle className="mr-2 h-4 w-4" /> Add Feature</Button>
                   </div>
@@ -228,7 +229,13 @@ export default function SiteInfoPage() {
                   features.map((feature) => (
                     <Card key={feature.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4">
                       <div className="flex items-center gap-4 mb-4 sm:mb-0">
-                          <Icon name={feature.icon} className="h-8 w-8 text-accent shrink-0" />
+                          {feature.icon && feature.icon.startsWith('http') ? (
+                            <div className="h-10 w-10 bg-muted rounded-lg flex items-center justify-center shrink-0">
+                              <Image src={feature.icon} alt={feature.title} width={24} height={24} className="object-contain" />
+                            </div>
+                          ) : (
+                            <Icon name={feature.icon} className="h-8 w-8 text-accent shrink-0" />
+                          )}
                           <div className="flex-grow">
                               <h4 className="font-bold">{feature.title}</h4>
                               <p className="text-sm text-muted-foreground">{feature.description}</p>
