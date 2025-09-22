@@ -155,3 +155,31 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+
+.animated-gradient-border {
+  @apply relative z-10 inline-flex items-center justify-center px-8 py-4 rounded-full text-lg font-semibold
+         bg-background text-foreground
+         transition-all duration-300;
+}
+
+.animated-gradient-border::before {
+  content: "";
+  @apply absolute -inset-0.5 z-[-1] rounded-full;
+  background: conic-gradient(from 180deg at 50% 50%, hsl(var(--primary)) 0%, hsl(var(--accent)) 50%, hsl(var(--primary)) 100%);
+  animation: rotate-gradient 4s linear infinite;
+  transition: opacity 0.3s;
+}
+
+.animated-gradient-border:hover::before {
+  animation-duration: 2s;
+}
+
+@keyframes rotate-gradient {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

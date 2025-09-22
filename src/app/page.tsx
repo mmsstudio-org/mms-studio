@@ -15,6 +15,8 @@ import {
   Cloud,
   Database,
   Bot,
+  ShoppingBag,
+  Briefcase,
 } from "lucide-react";
 import Image from "next/image";
 
@@ -112,12 +114,15 @@ export default function Home() {
                 "Your Gateway to the Future of Digital Assets. Explore our services and tools designed for the next generation of the web."}
             </p>
             <div className="flex justify-center gap-4">
-              <Button
+               <Button
                 asChild
                 size="lg"
-                className="px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all"
+                className="animated-gradient-border"
               >
-                <Link href="/shop">Explore The Shop</Link>
+                <Link href="/shop">
+                  <ShoppingBag className="mr-2 h-5 w-5" />
+                  Explore The Shop
+                </Link>
               </Button>
             </div>
           </>
@@ -216,13 +221,14 @@ export default function Home() {
             Explore our developer portfolio to discover our innovative projects,
             apps, and digital solutions.
           </p>
-          <Button
+           <Button
             asChild
             size="lg"
-            className="px-8 py-4 rounded-full text-lg font-semibold hover-glow transition-all"
+            className="animated-gradient-border"
           >
             <Link href="https://sabbirmms.github.io" target="_blank">
-              🔗 Visit Portfolio
+              <Briefcase className="mr-2 h-5 w-5" />
+              Visit Portfolio
             </Link>
           </Button>
         </div>
