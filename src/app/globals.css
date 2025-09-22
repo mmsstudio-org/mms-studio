@@ -157,14 +157,30 @@
 }
 
 
-.glowing-btn {
-  @apply relative inline-flex items-center justify-center px-8 py-4 rounded-full text-lg font-semibold
-         bg-primary text-primary-foreground
-         transition-all duration-300;
-  box-shadow: 0 0 5px hsl(var(--primary) / 0.6), 0 0 10px hsl(var(--primary) / 0.4);
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
 }
 
-.glowing-btn:hover {
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.8), 0 0 20px hsl(var(--primary) / 0.6);
-  transform: translateY(-2px);
+@keyframes futuristic-glow-spin {
+  to {
+    --angle: 360deg;
+  }
+}
+
+.futuristic-glowing-button-container {
+  @apply relative rounded-full p-px;
+  background: conic-gradient(from var(--angle), hsl(var(--primary) / 0.8), hsl(var(--accent) / 0.8) 50%, hsl(var(--primary) / 0.8));
+  animation: futuristic-glow-spin 4s linear infinite;
+  box-shadow: 0 0 10px hsl(var(--primary) / 0.5), 0 0 15px hsl(var(--accent) / 0.4);
+  transition: all 0.3s ease;
+}
+
+.futuristic-glowing-button-container:hover {
+  box-shadow: 0 0 15px hsl(var(--primary) / 0.7), 0 0 25px hsl(var(--accent) / 0.6);
+}
+
+.futuristic-glowing-button {
+  @apply relative inline-flex w-full items-center justify-center rounded-full bg-background px-8 py-4 text-lg font-semibold text-foreground transition-colors hover:bg-background/80;
 }

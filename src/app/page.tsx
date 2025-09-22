@@ -114,16 +114,12 @@ export default function Home() {
                 "Your Gateway to the Future of Digital Assets. Explore our services and tools designed for the next generation of the web."}
             </p>
             <div className="flex justify-center gap-4">
-               <Button
-                asChild
-                size="lg"
-                className="glowing-btn"
-              >
-                <Link href="/shop">
-                  <ShoppingBag className="mr-2 h-5 w-5" />
-                  Explore The Shop
-                </Link>
-              </Button>
+              <div className="futuristic-glowing-button-container">
+                 <Link href="/shop" className="futuristic-glowing-button">
+                    <ShoppingBag className="mr-2 h-5 w-5" />
+                    Explore The Shop
+                  </Link>
+              </div>
             </div>
           </>
         )}
@@ -221,16 +217,12 @@ export default function Home() {
             Explore our developer portfolio to discover our innovative projects,
             apps, and digital solutions.
           </p>
-           <Button
-            asChild
-            size="lg"
-            className="glowing-btn"
-          >
-            <Link href="https://sabbirmms.github.io" target="_blank">
-              <Briefcase className="mr-2 h-5 w-5" />
-              Visit Portfolio
+          <div className="futuristic-glowing-button-container">
+            <Link href="https://sabbirmms.github.io" target="_blank" className="futuristic-glowing-button">
+                <Briefcase className="mr-2 h-5 w-5" />
+                Visit Portfolio
             </Link>
-          </Button>
+          </div>
         </div>
       </section>
     </div>
