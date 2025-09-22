@@ -1,5 +1,5 @@
 import { db } from './firebase';
-import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch } from 'firebase/firestore';
 import type { Product, AppDetail, Feature, SiteInfo, Purchase } from './types';
 
 // Collections
@@ -119,4 +119,13 @@ export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeem
 export async function deletePurchase(purchaseId: string): Promise<void> {
     const purchaseRef = doc(db, 'payment_sms', purchaseId);
     await deleteDoc(purchaseRef);
+}
+
+export async function deletePurchasesBatch(purchaseIds: string[]): Promise<void> {
+    const batch = writeBatch(db);
+    purchaseIds.forEach(id => {
+        const purchaseRef = doc(db, 'payment_sms', id);
+        batch.delete(purchaseRef);
+    });
+    await batch.commit();
 }

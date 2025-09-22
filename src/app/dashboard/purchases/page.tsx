@@ -17,11 +17,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { Purchase } from '@/lib/types';
-import { getPurchases, updatePurchaseRedeemedStatus, deletePurchase } from '@/lib/firestore-service';
+import { getPurchases, updatePurchaseRedeemedStatus, deletePurchase, deletePurchasesBatch } from '@/lib/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { MoreHorizontal, Search, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Search, Trash2, ShieldX, Loader2 } from 'lucide-react';
 import { ConfirmationDialog } from './_components/confirmation-dialog';
+import { Checkbox } from '@/components/ui/checkbox';
 
 function formatDelay(sentTime: number, receivedTime: number): string {
     const delaySeconds = Math.round((receivedTime - sentTime) / 1000);
@@ -51,6 +52,14 @@ export default function PurchasesPage() {
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
   const [isStatusConfirmOpen, setStatusConfirmOpen] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  
+  // Batch delete states
+  const [isBatchDeleteMode, setBatchDeleteMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isEnableBatchConfirmOpen, setEnableBatchConfirmOpen] = useState(false);
+  const [isFinalDeleteConfirmOpen, setFinalDeleteConfirmOpen] = useState(false);
+  const [isDeletingBatch, setIsDeletingBatch] = useState(false);
+
 
   const fetchPurchases = useCallback(async () => {
     setLoadingData(true);
@@ -98,6 +107,41 @@ export default function PurchasesPage() {
     setSelectedPurchase(null);
   }
 
+  const handleBatchDelete = async () => {
+    setIsDeletingBatch(true);
+    try {
+      await deletePurchasesBatch(Array.from(selectedIds));
+      toast({ title: 'Success', description: `${selectedIds.size} purchases deleted.` });
+      fetchPurchases();
+      setSelectedIds(new Set());
+      setBatchDeleteMode(false);
+    } catch(error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete purchases.' });
+    } finally {
+      setIsDeletingBatch(false);
+    }
+  }
+
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if(checked) {
+        setSelectedIds(new Set(filteredPurchases.map(p => p.id)));
+    } else {
+        setSelectedIds(new Set());
+    }
+  }
+
+  const handleRowSelect = (id: string, isSelected: boolean) => {
+    setSelectedIds(prev => {
+        const newSet = new Set(prev);
+        if(isSelected) {
+            newSet.add(id);
+        } else {
+            newSet.delete(id);
+        }
+        return newSet;
+    })
+  }
+
   const getBadgeVariant = (is_redeemed: boolean) => {
     return is_redeemed ? 'default' : 'secondary';
   };
@@ -110,6 +154,16 @@ export default function PurchasesPage() {
       );
   }, [purchases, searchQuery]);
 
+  const summaryStats = useMemo(() => {
+    return purchases.reduce((acc, p) => {
+      acc.totalTransactions++;
+      acc.totalAmount += p.amount;
+      if (p.is_redeemed) {
+        acc.redeemedAmount += p.amount;
+      }
+      return acc;
+    }, { totalTransactions: 0, totalAmount: 0, redeemedAmount: 0 });
+  }, [purchases]);
 
   if (authLoading || loadingData) {
     return (
@@ -144,7 +198,7 @@ export default function PurchasesPage() {
   const renderActionsDropdown = (purchase: Purchase) => (
     <DropdownMenu>
         <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0" disabled={isBatchDeleteMode}>
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
             </Button>
@@ -173,7 +227,35 @@ export default function PurchasesPage() {
       <h1 className="text-4xl font-bold">Manage Purchases</h1>
       <p className="text-muted-foreground mb-8">View and manage all user purchase submissions.</p>
 
-        <div className="relative mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{summaryStats.totalTransactions}</div>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Amount</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">৳{summaryStats.totalAmount.toFixed(2)}</div>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Redeemed Amount</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">৳{summaryStats.redeemedAmount.toFixed(2)}</div>
+              </CardContent>
+          </Card>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-4 mb-4">
+        <div className="relative flex-grow sm:flex-grow-0">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
                 type="search"
@@ -183,12 +265,39 @@ export default function PurchasesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
             />
         </div>
+        {!isBatchDeleteMode ? (
+          <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
+            <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
+          </Button>
+        ) : (
+          <>
+            <Button variant="destructive" onClick={() => setFinalDeleteConfirmOpen(true)} disabled={selectedIds.size === 0}>
+              <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
+            </Button>
+            <Button variant="secondary" onClick={() => {
+              setBatchDeleteMode(false);
+              setSelectedIds(new Set());
+            }}>
+              <ShieldX className="mr-2 h-4 w-4" /> Cancel
+            </Button>
+          </>
+        )}
+      </div>
 
       {/* Desktop Table View */}
       <Card className="hidden md:block">
         <Table>
             <TableHeader>
                 <TableRow>
+                    {isBatchDeleteMode && (
+                        <TableHead className="w-[50px]">
+                            <Checkbox 
+                                onCheckedChange={handleSelectAll}
+                                checked={selectedIds.size > 0 && selectedIds.size === filteredPurchases.length}
+                                aria-label="Select all"
+                            />
+                        </TableHead>
+                    )}
                     <TableHead>Received Time</TableHead>
                     <TableHead>Sent Time</TableHead>
                     <TableHead>Delay</TableHead>
@@ -202,7 +311,16 @@ export default function PurchasesPage() {
             </TableHeader>
             <TableBody>
                 {filteredPurchases.map(purchase => (
-                    <TableRow key={purchase.id}>
+                    <TableRow key={purchase.id} data-state={selectedIds.has(purchase.id) && "selected"}>
+                        {isBatchDeleteMode && (
+                           <TableCell>
+                             <Checkbox 
+                                checked={selectedIds.has(purchase.id)}
+                                onCheckedChange={(checked) => handleRowSelect(purchase.id, !!checked)}
+                                aria-label={`Select purchase ${purchase.txn_id}`}
+                             />
+                           </TableCell>
+                        )}
                         <TableCell>{purchase.received_time ? format(new Date(purchase.received_time), 'PPp') : 'N/A'}</TableCell>
                         <TableCell>{purchase.sent_time ? format(new Date(purchase.sent_time), 'PPp') : 'N/A'}</TableCell>
                         <TableCell>{formatDelay(purchase.sent_time, purchase.received_time)}</TableCell>
@@ -220,7 +338,7 @@ export default function PurchasesPage() {
                 ))}
                 {filteredPurchases.length === 0 && (
                     <TableRow>
-                        <TableCell colSpan={9} className="text-center h-24">No purchases found.</TableCell>
+                        <TableCell colSpan={isBatchDeleteMode ? 10 : 9} className="text-center h-24">No purchases found.</TableCell>
                     </TableRow>
                 )}
             </TableBody>
@@ -230,10 +348,19 @@ export default function PurchasesPage() {
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {filteredPurchases.map(purchase => (
-            <Card key={purchase.id}>
+            <Card key={purchase.id} className={selectedIds.has(purchase.id) ? "border-primary" : ""}>
                 <CardHeader>
                     <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg">৳{purchase.amount}</CardTitle>
+                        <div className="flex items-center gap-4">
+                           {isBatchDeleteMode && (
+                            <Checkbox 
+                                checked={selectedIds.has(purchase.id)}
+                                onCheckedChange={(checked) => handleRowSelect(purchase.id, !!checked)}
+                                aria-label={`Select purchase ${purchase.txn_id}`}
+                             />
+                           )}
+                          <CardTitle className="text-lg">৳{purchase.amount}</CardTitle>
+                        </div>
                         {renderActionsDropdown(purchase)}
                     </div>
                     <Badge variant={getBadgeVariant(purchase.is_redeemed)} className="w-fit">{purchase.is_redeemed ? 'Redeemed' : 'Not Redeemed'}</Badge>
@@ -279,6 +406,27 @@ export default function PurchasesPage() {
         </>
       }
       confirmText="Delete"
+    />
+     <ConfirmationDialog
+        isOpen={isEnableBatchConfirmOpen}
+        onOpenChange={setEnableBatchConfirmOpen}
+        onConfirm={() => setBatchDeleteMode(true)}
+        title="Enable Batch Delete Mode?"
+        description={<p>You are about to enter batch delete mode. Checkboxes will appear next to each item, allowing you to select multiple purchases for deletion.</p>}
+        confirmText="Enable"
+    />
+    <ConfirmationDialog
+        isOpen={isFinalDeleteConfirmOpen}
+        onOpenChange={setFinalDeleteConfirmOpen}
+        onConfirm={handleBatchDelete}
+        title={`Delete ${selectedIds.size} Purchases?`}
+        description={
+          <>
+            <p>You are about to permanently delete <span className="font-bold">{selectedIds.size}</span> purchase records. This action cannot be undone.</p>
+            {isDeletingBatch && <Loader2 className="mx-auto mt-4 h-6 w-6 animate-spin" />}
+          </>
+        }
+        confirmText="Delete Permanently"
     />
     </>
   );
