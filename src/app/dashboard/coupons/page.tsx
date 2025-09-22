@@ -255,7 +255,7 @@ export default function CouponsPage() {
   return (
     <>
     <div className="container py-10">
-        <div className="flex justify-between items-center mb-1">
+        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-1">
             <div>
                 <h1 className="text-4xl font-bold">Manage Coupons</h1>
                 <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
@@ -458,4 +458,5 @@ export default function CouponsPage() {
   );
 }
 
+    
     
