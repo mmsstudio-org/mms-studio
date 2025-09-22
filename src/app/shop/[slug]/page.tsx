@@ -18,24 +18,29 @@ export default function ShopSlugPage() {
   const [loading, setLoading] = useState(true);
   const [subscriptionSort, setSubscriptionSort] = useState<'asc' | 'desc'>('asc');
   const [coinSort, setCoinSort] = useState<'asc' | 'desc'>('asc');
+  const [appFound, setAppFound] = useState<boolean | null>(null);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     const appDetails = await getApp(slug);
     if (appDetails) {
       setApp(appDetails);
       const appProducts = await getProductsForApp(slug);
       setProducts(appProducts);
+      setAppFound(true);
     } else {
-      notFound();
+      setAppFound(false);
     }
     setLoading(false);
   }, [slug]);
 
-
   useEffect(() => {
-    fetchProducts();
-  }, [slug, fetchProducts]);
+    fetchData();
+  }, [slug, fetchData]);
+  
+  if (appFound === false) {
+    notFound();
+  }
 
   const sortProducts = useCallback((products: Product[], order: 'asc' | 'desc'): Product[] => {
     return [...products].sort((a, b) => {
@@ -98,7 +103,7 @@ export default function ShopSlugPage() {
                   {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                 </Button>
             </div>
-            <ProductList products={subscriptions} onProductUpdate={fetchProducts} app={app} />
+            <ProductList products={subscriptions} onProductUpdate={fetchData} app={app} />
           </section>
         )}
 
@@ -111,7 +116,7 @@ export default function ShopSlugPage() {
                       {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                   </Button>
             </div>
-            <ProductList products={coins} onProductUpdate={fetchProducts} app={app} />
+            <ProductList products={coins} onProductUpdate={fetchData} app={app} />
           </section>
         )}
 
