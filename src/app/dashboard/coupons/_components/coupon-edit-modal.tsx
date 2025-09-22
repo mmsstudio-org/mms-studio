@@ -58,6 +58,14 @@ const formSchema = z.object({
 }, {
     message: 'Redeem limit is required for "certain amount" type.',
     path: ['redeem_limit'],
+}).refine(data => {
+    if(data.type === 'multiple') {
+        return data.redeem_limit === '' || !data.redeem_limit;
+    }
+    return true;
+}, {
+    message: 'Redeem limit should not be set for "multiple" type.',
+    path: ['redeem_limit'],
 });
 
 type CouponEditModalProps = {
@@ -71,6 +79,7 @@ type CouponEditModalProps = {
 export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, onCouponUpdate }: CouponEditModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -94,17 +103,20 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
         const defaultValidity = new Date();
         defaultValidity.setDate(defaultValidity.getDate() + 30);
         
+        let initialDate;
         if (coupon) {
+          initialDate = new Date(coupon.validity);
           form.reset({
             code: mode === 'clone' ? '' : coupon.code,
             coins: coupon.coins,
-            validity: new Date(coupon.validity),
+            validity: initialDate,
             type: coupon.type,
             redeem_limit: coupon.redeem_limit || '',
             show_ads: coupon.show_ads,
             note: coupon.note || '',
           });
         } else {
+            initialDate = defaultValidity;
             form.reset({
                 code: '',
                 coins: 0,
@@ -115,6 +127,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 note: '',
             });
         }
+        setCalendarMonth(initialDate);
     }
   }, [coupon, mode, form, isOpen]);
 
@@ -124,7 +137,6 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
     try {
         console.log("Submitting values:", values);
 
-        // Check for existing coupon on add/clone
         if (mode === 'add' || mode === 'clone') {
             const existingCoupon = await getCoupon(values.code);
             if (existingCoupon) {
@@ -234,7 +246,8 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            month={field.value}
+                            month={calendarMonth}
+                            onMonthChange={setCalendarMonth}
                         />
                         </PopoverContent>
                     </Popover>
@@ -318,7 +331,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 )}
             />
             
-            <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+            <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-end sm:items-center gap-2">
               <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-first sm:order-last">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Coupon
@@ -330,7 +343,3 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
     </Dialog>
   );
 }
-
-    
-
-    
