@@ -74,7 +74,7 @@ export async function addFeature(feature: Omit<Feature, 'id'>): Promise<string> 
     return docRef.id;
 }
 
-export async function updateFeature(featureId: string, feature: Partial<Feature>): Promise<void> {
+export async function updateFeature(featureId: string, feature: Partial<Omit<Feature, 'id'>>): Promise<void> {
     const featureRef = doc(db, 'web-features', featureId);
     await updateDoc(featureRef, feature);
 }

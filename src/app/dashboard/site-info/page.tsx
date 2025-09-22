@@ -113,7 +113,7 @@ export default function SiteInfoPage() {
   };
 
   const confirmDeleteFeature = async () => {
-    if (!featureToDelete) return;
+    if (!featureToDelete || !featureToDelete.id) return;
     try {
       await deleteFeature(featureToDelete.id);
       toast({ title: 'Success', description: 'Feature deleted successfully.' });
@@ -216,7 +216,7 @@ export default function SiteInfoPage() {
                   <div className="flex justify-between items-center">
                       <div>
                           <CardTitle>Homepage Features</CardTitle>
-                          <CardDescription>Manage the features displayed on your homepage.</CardDescription>
+                          <CardDescription className="mt-1">Manage the features displayed on your homepage.</CardDescription>
                       </div>
                       <Button onClick={handleAddNewFeature}><PlusCircle className="mr-2 h-4 w-4" /> Add Feature</Button>
                   </div>
