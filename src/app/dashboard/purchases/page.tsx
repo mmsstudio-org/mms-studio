@@ -147,11 +147,20 @@ export default function PurchasesPage() {
   };
   
   const filteredPurchases = useMemo(() => {
-      if (!searchQuery) return purchases;
-      return purchases.filter(p => 
-        p.txn_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.sender && p.sender.toLowerCase().includes(searchQuery.toLowerCase()))
-      );
+    const lowercasedQuery = searchQuery.toLowerCase();
+    if (!lowercasedQuery) return purchases;
+
+    if (lowercasedQuery === 'redeemed' || lowercasedQuery === 'true') {
+      return purchases.filter(p => p.is_redeemed);
+    }
+    if (lowercasedQuery === 'not redeemed' || lowercasedQuery === 'false') {
+      return purchases.filter(p => !p.is_redeemed);
+    }
+
+    return purchases.filter(p => 
+      p.txn_id.toLowerCase().includes(lowercasedQuery) ||
+      (p.sender && p.sender.toLowerCase().includes(lowercasedQuery))
+    );
   }, [purchases, searchQuery]);
 
   const summaryStats = useMemo(() => {
@@ -226,7 +235,10 @@ export default function PurchasesPage() {
     <>
     <div className="container py-10">
       <h1 className="text-4xl font-bold">Manage Purchases</h1>
-      <p className="text-muted-foreground mb-8">View and manage all user purchase submissions.</p>
+      <p className="text-muted-foreground mb-1">View and manage all user purchase submissions.</p>
+      <p className="text-muted-foreground text-sm mb-8">
+        Tip: Search for "redeemed", "true", "not redeemed", or "false" to filter by status.
+      </p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
