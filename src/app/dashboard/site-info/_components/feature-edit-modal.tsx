@@ -60,21 +60,23 @@ export default function FeatureEditModal({
   });
 
   useEffect(() => {
-    if (feature) {
-      form.reset(feature);
-    } else {
-      form.reset({
-        icon: 'Zap',
-        title: '',
-        description: '',
-      });
+    if (isOpen) {
+      if (feature) {
+        form.reset(feature);
+      } else {
+        form.reset({
+          icon: 'Zap',
+          title: '',
+          description: '',
+        });
+      }
     }
   }, [feature, form, isOpen]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      if (feature) {
+      if (feature && feature.id) {
         await updateFeature(feature.id, values);
         toast({
           title: 'Success',
