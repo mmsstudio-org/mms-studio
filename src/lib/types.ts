@@ -44,7 +44,7 @@ export interface SupportTicket {
 }
 
 export interface Feature {
-  id?: string;
+  id: string;
   icon: string; // Lucide icon name as string
   title: string;
   description: string;
@@ -55,10 +55,6 @@ export interface SiteInfo {
   webDescription?: string;
   bkashNumber?: string;
   bkashQrCodeUrl?: string;
-  paymentApiBaseUrl?: string;
-  paymentApiKey?: string;
-  couponApiBaseUrl?: string;
-  couponApiKey?: string;
 }
 
 export interface Coupon {

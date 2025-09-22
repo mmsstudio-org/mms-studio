@@ -74,7 +74,7 @@ export async function addFeature(feature: Omit<Feature, 'id'>): Promise<string> 
     return docRef.id;
 }
 
-export async function updateFeature(featureId: string, feature: Partial<Feature>): Promise<void> {
+export async function updateFeature(featureId: string, feature: Partial<Omit<Feature, 'id'>>): Promise<void> {
     const featureRef = doc(db, 'web-features', featureId);
     await updateDoc(featureRef, feature);
 }
@@ -98,10 +98,6 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     const dataToSave = {
         ...siteInfo,
         bkashQrCodeUrl: siteInfo.bkashQrCodeUrl || '',
-        paymentApiBaseUrl: siteInfo.paymentApiBaseUrl || '',
-        paymentApiKey: siteInfo.paymentApiKey || '',
-        couponApiBaseUrl: siteInfo.couponApiBaseUrl || '',
-        couponApiKey: siteInfo.couponApiKey || '',
     };
     await setDoc(docRef, dataToSave, { merge: true });
 }

@@ -101,13 +101,8 @@ export default function Home() {
           <>
             <h1
               className="text-5xl md:text-7xl font-['Orbitron'] font-black mb-6 animate-float"
-              // dangerouslySetInnerHTML={{
-              //   __html:
-              //     siteInfo?.webName ||
-              //     'MMS Studio',
-              // }}
             >
-              <span className="gradient-text">Building the Future</span>
+              <span className="gradient-text">{siteInfo?.webName || "MMS Studio"}</span>
               <br /> <span className="neon-text">of Apps & Services</span>
             </h1>
 
