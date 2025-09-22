@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
     await updateCoupon(coupon.id, {redeem_count: newRedeemCount});
 
     const validityDate = new Date(coupon.validity);
-    const validityISOString = validityDate.toISOString().replace('.000Z', '');
+    const validityISOString = validityDate.toISOString().slice(0, 19);
 
 
     return NextResponse.json({
