@@ -7,7 +7,7 @@ const productsCollection = collection(db, 'web-products');
 const appsCollection = collection(db, 'web-apps');
 const siteInfoCollection = collection(db, 'web-site-info');
 const featuresCollection = collection(db, 'web-features');
-const purchasesCollection = collection(db, 'web-purchases');
+const purchasesCollection = collection(db, 'payment_sms');
 
 
 // Product Functions
@@ -104,27 +104,14 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     await setDoc(docRef, dataToSave, { merge: true });
 }
 
-// Purchase Functions
-export async function addPurchase(purchaseData: Omit<Purchase, 'id' | 'purchaseDate' | 'status'> & {product: Product}): Promise<void> {
-    const price = purchaseData.product.discountedPrice ?? purchaseData.product.regularPrice;
-    const newPurchase: Omit<Purchase, 'id'> = {
-        productId: purchaseData.product.id!,
-        productName: purchaseData.product.name,
-        productPrice: price,
-        bkashTxnId: purchaseData.bkashTxnId,
-        status: 'pending',
-        purchaseDate: serverTimestamp()
-    };
-    await addDoc(purchasesCollection, newPurchase);
-}
-
+// Purchase Functions (from payment_sms collection)
 export async function getPurchases(): Promise<Purchase[]> {
-    const q = query(purchasesCollection, orderBy('purchaseDate', 'desc'));
+    const q = query(purchasesCollection, orderBy('received_time', 'desc'));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Purchase));
 }
 
-export async function updatePurchaseStatus(purchaseId: string, status: 'pending' | 'approved' | 'rejected'): Promise<void> {
-    const purchaseRef = doc(db, 'web-purchases', purchaseId);
-    await updateDoc(purchaseRef, { status });
+export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeemed: boolean): Promise<void> {
+    const purchaseRef = doc(db, 'payment_sms', purchaseId);
+    await updateDoc(purchaseRef, { is_redeemed });
 }

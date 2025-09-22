@@ -23,13 +23,17 @@ export interface AppDetail {
 }
 
 export interface Purchase {
-  id?: string;
-  productId: string;
-  productName: string;
-  productPrice: number;
-  bkashTxnId: string;
-  status: 'pending' | 'approved' | 'rejected';
-  purchaseDate: any; // Firestore Timestamp
+  id: string;
+  amount: number;
+  is_redeemed: boolean;
+  message_source: string;
+  original_sms: string;
+  received_time: number;
+  receiver_device: string;
+  receiver_email: string;
+  sender: string | null;
+  sent_time: number;
+  txn_id: string;
 }
 
 export interface SupportTicket {
