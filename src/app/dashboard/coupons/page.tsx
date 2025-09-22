@@ -143,14 +143,15 @@ export default function CouponsPage() {
     })
   }
 
-  const getBadgeVariant = (status: 'Active' | 'Expired' | 'Limit Reached'): 'default' | 'secondary' | 'destructive' => {
-    if (status === 'Expired' || status === 'Limit Reached') return 'destructive';
+  const getBadgeVariant = (status: 'Active' | 'Expired' | 'Limit Reached' | 'Redeemed'): 'default' | 'secondary' | 'destructive' => {
+    if (status === 'Expired' || status === 'Limit Reached' || status === 'Redeemed') return 'destructive';
     return 'secondary';
   };
 
-  const getStatusText = (coupon: Coupon) => {
+  const getStatusText = (coupon: Coupon): 'Active' | 'Expired' | 'Limit Reached' | 'Redeemed' => {
     const now = Date.now();
     if (coupon.validity < now) return 'Expired';
+    if (coupon.type === 'single' && coupon.redeem_count >= 1) return 'Redeemed';
     if (coupon.type === 'certain amount' && coupon.redeem_limit !== null && coupon.redeem_count >= coupon.redeem_limit) return 'Limit Reached';
     return 'Active';
   }
@@ -161,6 +162,9 @@ export default function CouponsPage() {
 
     if (lowercasedQuery === 'expired') {
       return coupons.filter(c => getStatusText(c) === 'Expired');
+    }
+    if (lowercasedQuery === 'redeemed') {
+      return coupons.filter(c => getStatusText(c) === 'Redeemed');
     }
     if (lowercasedQuery === 'limit reached') {
       return coupons.filter(c => getStatusText(c) === 'Limit Reached');
@@ -259,7 +263,7 @@ export default function CouponsPage() {
           <h1 className="text-4xl font-bold">Manage Coupons</h1>
           <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Tip: Search "expired" or "limit reached" to filter coupons.
+            Tip: Search "expired", "redeemed", or "limit reached" to filter coupons.
           </p>
         </div>
 
@@ -458,4 +462,4 @@ export default function CouponsPage() {
 }
 
 
-
+    

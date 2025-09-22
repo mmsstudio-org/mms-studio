@@ -10,13 +10,14 @@ MMS Studio is a modern, full-stack e-commerce application designed for selling d
 - **Automated bKash Payments**: A streamlined purchase process where customers pay via bKash and use their bKash Transaction ID (TxnID) for verification.
 - **Instant Coupon Generation**: Upon successful payment verification, the system automatically generates a coupon code (using the TxnID) for the user to redeem their purchase.
 - **Responsive Design**: A fully responsive interface that works seamlessly on desktop and mobile devices.
-- **Help Center**: A built-in contact form for customer support inquiries.
+- **Help Center**: A built-in contact form for customer support inquiries, powered by Web3Forms.
 
 ### Administrative Dashboard
 - **Secure Admin Login**: An email and password-based authentication system protects the admin dashboard.
-- **Site Information Management**: Easily update the website's name, description, features, and critical API credentials from the dashboard.
-- **Category & Product Management**: Admins can create, edit, and delete application categories and the products within them (both subscriptions and coin packs).
-- **Purchase Management**: A centralized view to monitor all pending, approved, and rejected customer purchases.
+- **Site Information Management**: Easily update the website's name, description, homepage features, and bKash payment details.
+- **Category & Product Management**: Admins can create, edit, and delete application categories and the products within them (both subscriptions and coin packs). The UI is fully responsive and provides a seamless management experience on any device.
+- **Purchase Management**: A centralized view to monitor all purchase submissions from the payment system. Admins can filter, search, and manage records, including batch deletion.
+- **Coupon Management**: A comprehensive interface to create, edit, clone, and delete coupons. Supports various coupon types (single-use, multiple-use, limited quantity) and provides robust search and batch deletion capabilities.
 
 ## Tech Stack
 
@@ -25,7 +26,7 @@ MMS Studio is a modern, full-stack e-commerce application designed for selling d
 - **Styling**: Tailwind CSS with ShadCN UI components for a modern, consistent look.
 - **Backend & Database**: Firebase (Firestore) for data storage.
 - **Authentication**: Firebase Authentication for the admin dashboard.
-- **Deployment**: Configured for deployment on modern hosting platforms.
+- **Deployment**: Configured for deployment on modern hosting platforms like Firebase App Hosting or Vercel.
 
 ## Getting Started
 
@@ -52,15 +53,19 @@ Follow these instructions to get a local copy of the project up and running for 
     ```
 
 3.  **Set up Environment Variables:**
-    Create a `.env.local` file in the root of the project and add your Firebase configuration details. You can get these from your Firebase project settings.
+    Create a `.env.local` file in the root of the project and add your Firebase configuration details. You can get these from your Firebase project settings. You will also need to add an access key for the contact form.
 
     ```env
+    # Firebase Configuration
     NEXT_PUBLIC_FIREBASE_API_KEY=AIza...
     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
     NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
     NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
     NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
     NEXT_PUBLIC_FIREBASE_APP_ID=1:...:web:...
+
+    # Web3Forms Access Key for Help Center
+    NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY=your_web3forms_access_key
     ```
 
 ### Running the Development Server
@@ -74,9 +79,16 @@ Open [http://localhost:9002](http://localhost:9002) in your browser to see the a
 ## Project Structure
 
 - `src/app/`: Contains all the pages and routes for the application, following the Next.js App Router convention.
-  - `(admin)/dashboard/`: Protected routes for the admin dashboard.
-  - `(public)/`: Publicly accessible routes like the homepage, shop, etc.
-  - `api/`: API routes for server-side proxy requests.
-- `src/components/`: Shared React components, including UI elements from ShadCN.
-- `src/lib/`: Core application logic, including Firebase services (`firestore-service.ts`) and type definitions.
-- `src/hooks/`: Custom React hooks for authentication and other functionalities.
+  - `(admin)/dashboard/`: Protected routes for the admin dashboard (Site Info, Categories, Purchases, Coupons).
+  - `(public)/`: Publicly accessible routes like the homepage, shop, and login.
+  - `api/`: Server-side API routes.
+    - `redeem/route.ts`: Handles coupon redemption logic. Validates coupon code, usage limits, and expiration, then returns coupon data.
+    - `verify-payment/` & `coupon/`: Deprecated routes, no longer in use.
+- `src/components/`: Shared React components, including UI elements from ShadCN (`/ui`) and custom app components.
+- `src/lib/`: Core application logic.
+  - `firebase.ts`: Firebase SDK initialization.
+  - `firestore-service.ts`: All interactions with the Firestore database (CRUD operations for products, categories, coupons, etc.).
+  - `types.ts`: TypeScript type definitions for all major data structures.
+- `src/hooks/`: Custom React hooks for authentication (`use-auth`), theme management (`use-theme`), and toast notifications (`use-toast`).
+
+    
