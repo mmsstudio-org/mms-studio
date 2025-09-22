@@ -67,7 +67,7 @@ export default function Footer() {
           </div>
           <div className="text-center text-muted-foreground">
             <p>
-              &copy; {new Date().getFullYear()} MMS Studio. All Rights Reserved.
+              &copy; 2020-{new Date().getFullYear()} MMS Studio. All Rights Reserved.
             </p>
           </div>
         </div>
