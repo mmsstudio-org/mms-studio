@@ -240,7 +240,7 @@ export default function CategoriesPage() {
                            </Button>
                         </CollapsibleTrigger>
                         <CollapsibleContent className="mt-4 pt-4 border-t">
-                            <div className="flex justify-between items-center mb-4">
+                            <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 className="font-semibold">Products for {app.name}</h3>
                                 <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
                             </div>
