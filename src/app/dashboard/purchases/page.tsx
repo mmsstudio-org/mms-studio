@@ -159,10 +159,11 @@ export default function PurchasesPage() {
       acc.totalTransactions++;
       acc.totalAmount += p.amount;
       if (p.is_redeemed) {
+        acc.redeemedTransactions++;
         acc.redeemedAmount += p.amount;
       }
       return acc;
-    }, { totalTransactions: 0, totalAmount: 0, redeemedAmount: 0 });
+    }, { totalTransactions: 0, totalAmount: 0, redeemedTransactions: 0, redeemedAmount: 0 });
   }, [purchases]);
 
   if (authLoading || loadingData) {
@@ -227,13 +228,13 @@ export default function PurchasesPage() {
       <h1 className="text-4xl font-bold">Manage Purchases</h1>
       <p className="text-muted-foreground mb-8">View and manage all user purchase submissions.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+                  <CardTitle className="text-sm font-medium">Redeemed Amount</CardTitle>
               </CardHeader>
               <CardContent>
-                  <div className="text-2xl font-bold">{summaryStats.totalTransactions}</div>
+                  <div className="text-2xl font-bold">৳{summaryStats.redeemedAmount.toFixed(2)}</div>
               </CardContent>
           </Card>
           <Card>
@@ -244,12 +245,20 @@ export default function PurchasesPage() {
                   <div className="text-2xl font-bold">৳{summaryStats.totalAmount.toFixed(2)}</div>
               </CardContent>
           </Card>
-          <Card>
+           <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Redeemed Amount</CardTitle>
+                  <CardTitle className="text-sm font-medium">Redeemed Transactions</CardTitle>
               </CardHeader>
               <CardContent>
-                  <div className="text-2xl font-bold">৳{summaryStats.redeemedAmount.toFixed(2)}</div>
+                  <div className="text-2xl font-bold">{summaryStats.redeemedTransactions}</div>
+              </CardContent>
+          </Card>
+          <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Transactions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                  <div className="text-2xl font-bold">{summaryStats.totalTransactions}</div>
               </CardContent>
           </Card>
       </div>
