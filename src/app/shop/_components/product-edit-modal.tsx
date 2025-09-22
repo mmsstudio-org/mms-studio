@@ -361,6 +361,9 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Coin Amount</FormLabel>
+                     <FormDescription>
+                        If the app supports it, coins can be bundled with a subscription. If the type is 'coins', the user only gets coins.
+                    </FormDescription>
                     <FormControl>
                         <Input type="number" placeholder="e.g., 1000" {...field} />
                     </FormControl>
