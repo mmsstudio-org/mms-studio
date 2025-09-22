@@ -3,7 +3,7 @@
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useCallback, useMemo } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from '@/components/ui/badge';
 import {
@@ -141,6 +141,32 @@ export default function PurchasesPage() {
     )
   );
 
+  const renderActionsDropdown = (purchase: Purchase) => (
+    <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+            </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => {
+                setSelectedPurchase(purchase);
+                setStatusConfirmOpen(true);
+            }}>
+              {purchase.is_redeemed ? 'Mark as Not Redeemed' : 'Mark as Redeemed'}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem className="text-destructive" onClick={() => {
+                setSelectedPurchase(purchase);
+                setDeleteConfirmOpen(true);
+            }}>
+               <Trash2 className="mr-2 h-4 w-4"/> Delete
+            </DropdownMenuItem>
+        </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
   return (
     <>
     <div className="container py-10">
@@ -158,7 +184,8 @@ export default function PurchasesPage() {
             />
         </div>
 
-      <Card>
+      {/* Desktop Table View */}
+      <Card className="hidden md:block">
         <Table>
             <TableHeader>
                 <TableRow>
@@ -176,8 +203,8 @@ export default function PurchasesPage() {
             <TableBody>
                 {filteredPurchases.map(purchase => (
                     <TableRow key={purchase.id}>
-                        <TableCell>{purchase.received_time ? format(new Date(purchase.received_time), 'Pp') : 'N/A'}</TableCell>
-                        <TableCell>{purchase.sent_time ? format(new Date(purchase.sent_time), 'Pp') : 'N/A'}</TableCell>
+                        <TableCell>{purchase.received_time ? format(new Date(purchase.received_time), 'PPp') : 'N/A'}</TableCell>
+                        <TableCell>{purchase.sent_time ? format(new Date(purchase.sent_time), 'PPp') : 'N/A'}</TableCell>
                         <TableCell>{formatDelay(purchase.sent_time, purchase.received_time)}</TableCell>
                         <TableCell>৳{purchase.amount}</TableCell>
                         <TableCell>{purchase.sender || 'N/A'}</TableCell>
@@ -187,29 +214,7 @@ export default function PurchasesPage() {
                         </TableCell>
                         <TableCell>{purchase.message_source}</TableCell>
                          <TableCell className="text-right">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" className="h-8 w-8 p-0">
-                                        <span className="sr-only">Open menu</span>
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem onClick={() => {
-                                        setSelectedPurchase(purchase);
-                                        setStatusConfirmOpen(true);
-                                    }}>
-                                      {purchase.is_redeemed ? 'Mark as Not Redeemed' : 'Mark as Redeemed'}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-destructive" onClick={() => {
-                                        setSelectedPurchase(purchase);
-                                        setDeleteConfirmOpen(true);
-                                    }}>
-                                       <Trash2 className="mr-2 h-4 w-4"/> Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                           {renderActionsDropdown(purchase)}
                          </TableCell>
                     </TableRow>
                 ))}
@@ -221,6 +226,34 @@ export default function PurchasesPage() {
             </TableBody>
         </Table>
       </Card>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {filteredPurchases.map(purchase => (
+            <Card key={purchase.id}>
+                <CardHeader>
+                    <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">৳{purchase.amount}</CardTitle>
+                        {renderActionsDropdown(purchase)}
+                    </div>
+                    <Badge variant={getBadgeVariant(purchase.is_redeemed)} className="w-fit">{purchase.is_redeemed ? 'Redeemed' : 'Not Redeemed'}</Badge>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm">
+                    <p><span className="font-semibold">Txn ID:</span> {purchase.txn_id}</p>
+                    <p><span className="font-semibold">Sender:</span> {purchase.sender || 'N/A'}</p>
+                    <p><span className="font-semibold">Source:</span> {purchase.message_source}</p>
+                    <p><span className="font-semibold">Received:</span> {purchase.received_time ? format(new Date(purchase.received_time), 'Pp') : 'N/A'}</p>
+                    <p><span className="font-semibold">Sent:</span> {purchase.sent_time ? format(new Date(purchase.sent_time), 'Pp') : 'N/A'}</p>
+                    <p><span className="font-semibold">Delay:</span> {formatDelay(purchase.sent_time, purchase.received_time)}</p>
+                </CardContent>
+            </Card>
+        ))}
+        {filteredPurchases.length === 0 && (
+           <Card className="text-center h-24 flex items-center justify-center">
+             <p className="text-muted-foreground">No purchases found.</p>
+           </Card>
+        )}
+      </div>
     </div>
     <ConfirmationDialog
       isOpen={isStatusConfirmOpen}
