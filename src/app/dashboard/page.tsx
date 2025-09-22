@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Settings, LayoutGrid, ListOrdered } from 'lucide-react';
+import { Settings, LayoutGrid, ListOrdered, Ticket } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -72,6 +72,16 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <CardDescription>See pending and approved purchases.</CardDescription>
+              </CardContent>
+            </Card>
+           </Link>
+           <Link href="/dashboard/coupons">
+             <Card className="hover:border-primary transition-colors h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Ticket className="h-5 w-5 text-accent" /> Manage Coupons</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription>Create and manage discount and access coupons.</CardDescription>
               </CardContent>
             </Card>
            </Link>

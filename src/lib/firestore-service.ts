@@ -1,6 +1,6 @@
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch } from 'firebase/firestore';
-import type { Product, AppDetail, Feature, SiteInfo, Purchase } from './types';
+import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon } from './types';
 
 // Collections
 const productsCollection = collection(db, 'web-products');
@@ -8,6 +8,7 @@ const appsCollection = collection(db, 'web-apps');
 const siteInfoCollection = collection(db, 'web-site-info');
 const featuresCollection = collection(db, 'web-features');
 const purchasesCollection = collection(db, 'payment_sms');
+const couponsCollection = collection(db, 'web-coupons');
 
 
 // Product Functions
@@ -129,3 +130,33 @@ export async function deletePurchasesBatch(purchaseIds: string[]): Promise<void>
     });
     await batch.commit();
 }
+
+
+// Coupon Functions
+export async function getCoupons(): Promise<Coupon[]> {
+    const q = query(couponsCollection, orderBy('created', 'desc'));
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Coupon));
+}
+
+export async function getCoupon(code: string): Promise<Coupon | null> {
+    const docRef = doc(db, 'web-coupons', code);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Coupon : null;
+}
+
+export async function addCoupon(couponData: Omit<Coupon, 'id'>): Promise<void> {
+    const couponRef = doc(db, 'web-coupons', couponData.code);
+    await setDoc(couponRef, couponData);
+}
+
+export async function updateCoupon(code: string, couponData: Partial<Omit<Coupon, 'id' | 'code'>>): Promise<void> {
+    const couponRef = doc(db, 'web-coupons', code);
+    await updateDoc(couponRef, couponData);
+}
+
+export async function deleteCoupon(code: string): Promise<void> {
+    const couponRef = doc(db, 'web-coupons', code);
+    await deleteDoc(couponRef);
+}
+

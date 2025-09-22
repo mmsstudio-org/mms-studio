@@ -60,3 +60,16 @@ export interface SiteInfo {
   couponApiBaseUrl?: string;
   couponApiKey?: string;
 }
+
+export interface Coupon {
+    id: string; // The document ID (which is the coupon code)
+    created: number;
+    validity: number;
+    code: string;
+    coins: number;
+    show_ads: boolean;
+    type: 'single' | 'certain' | 'multiple';
+    redeem_limit: number | null;
+    redeem_count: number;
+    note: string | null;
+}
