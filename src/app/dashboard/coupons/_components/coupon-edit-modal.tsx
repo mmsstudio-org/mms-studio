@@ -58,14 +58,6 @@ const formSchema = z.object({
 }, {
     message: 'Redeem limit is required for "certain amount" type.',
     path: ['redeem_limit'],
-}).refine(data => {
-    if(data.type === 'multiple') {
-        return data.redeem_limit === '' || !data.redeem_limit;
-    }
-    return true;
-}, {
-    message: 'Redeem limit should not be set for "multiple" type.',
-    path: ['redeem_limit'],
 });
 
 type CouponEditModalProps = {
@@ -192,7 +184,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
              <FormField
                 control={form.control}
                 name="code"
