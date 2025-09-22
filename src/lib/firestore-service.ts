@@ -1,3 +1,4 @@
+
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit } from 'firebase/firestore';
 import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon } from './types';
@@ -109,7 +110,7 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
 export async function getPurchases(): Promise<Purchase[]> {
     const q = query(purchasesCollection, orderBy('received_time', 'desc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Purchase));
+    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Purchase));
 }
 
 export async function getPurchaseByTxnId(txnId: string): Promise<Purchase | null> {
@@ -124,8 +125,8 @@ export async function getPurchaseByTxnId(txnId: string): Promise<Purchase | null
         }
         return null;
     }
-    const doc = querySnapshot.docs[0];
-    return { id: doc.id, ...doc.data() } as Purchase;
+    const purchaseDoc = querySnapshot.docs[0];
+    return { id: purchaseDoc.id, ...purchaseDoc.data() } as Purchase;
 }
 
 export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeemed: boolean): Promise<void> {
@@ -152,7 +153,7 @@ export async function deletePurchasesBatch(purchaseIds: string[]): Promise<void>
 export async function getCoupons(): Promise<Coupon[]> {
     const q = query(couponsCollection, orderBy('created', 'desc'));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Coupon));
+    return querySnapshot.docs.map(d => ({ id: d.id, ...d.data() } as Coupon));
 }
 
 export async function getCoupon(code: string): Promise<Coupon | null> {
