@@ -188,7 +188,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                     <FormItem>
                     <FormLabel>Coupon Code</FormLabel>
                     <FormControl>
-                        <Input placeholder="e.g., SUMMER24" {...field} disabled={isCodeDisabled} onChange={e => field.onChange(e.target.value.toUpperCase())} />
+                        <Input placeholder="e.g., SUMMER24" {...field} disabled={isCodeDisabled} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>
@@ -234,8 +234,8 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
+                            month={field.value}
                             disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
-                            initialFocus
                         />
                         </PopoverContent>
                     </Popover>
