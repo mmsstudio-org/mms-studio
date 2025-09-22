@@ -115,3 +115,8 @@ export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeem
     const purchaseRef = doc(db, 'payment_sms', purchaseId);
     await updateDoc(purchaseRef, { is_redeemed });
 }
+
+export async function deletePurchase(purchaseId: string): Promise<void> {
+    const purchaseRef = doc(db, 'payment_sms', purchaseId);
+    await deleteDoc(purchaseRef);
+}
