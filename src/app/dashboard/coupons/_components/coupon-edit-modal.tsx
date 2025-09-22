@@ -117,31 +117,35 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     
-    // Check for existing coupon on add/clone
-    if (mode === 'add' || mode === 'clone') {
-        const existingCoupon = await getCoupon(values.code);
-        if (existingCoupon) {
-            toast({
-                variant: 'destructive',
-                title: 'Coupon Exists',
-                description: `A coupon with the code "${values.code}" already exists.`,
-            });
-            setIsSubmitting(false);
-            return;
-        }
-    }
-
-    const couponData = {
-        code: values.code,
-        coins: values.coins,
-        validity: values.validity.getTime(),
-        type: values.type,
-        redeem_limit: values.type === 'certain' ? Number(values.redeem_limit) : null,
-        show_ads: values.show_ads,
-        note: values.note || null,
-    };
-
     try {
+        console.log("Submitting values:", values);
+
+        // Check for existing coupon on add/clone
+        if (mode === 'add' || mode === 'clone') {
+            const existingCoupon = await getCoupon(values.code);
+            if (existingCoupon) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Coupon Exists',
+                    description: `A coupon with the code "${values.code}" already exists.`,
+                });
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+        const couponData = {
+            code: values.code,
+            coins: values.coins,
+            validity: values.validity.getTime(),
+            type: values.type,
+            redeem_limit: values.type === 'certain' ? Number(values.redeem_limit) : null,
+            show_ads: values.show_ads,
+            note: values.note || null,
+        };
+
+        console.log("Prepared coupon data:", couponData);
+
         if (mode === 'edit' && coupon) {
             await updateCoupon(coupon.id, couponData);
             toast({ title: 'Coupon Updated'});
@@ -151,6 +155,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 created: Date.now(),
                 redeem_count: 0,
             };
+            console.log("Creating new coupon with final data:", finalData);
             await addCoupon(finalData);
             toast({ title: 'Coupon Created' });
         }
@@ -158,7 +163,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
         onOpenChange(false);
     } catch (error) {
         console.error("Error saving coupon:", error);
-        toast({ variant: 'destructive', title: 'Save Failed', description: 'An unexpected error occurred.' });
+        toast({ variant: 'destructive', title: 'Save Failed', description: 'An unexpected error occurred. Check the console for details.' });
     } finally {
         setIsSubmitting(false);
     }
