@@ -1,3 +1,4 @@
+
 'use client';
 import Link from 'next/link';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,7 +54,7 @@ export default function ShopPage() {
               <Link href={`/shop/${app.id}`} key={app.id} className="flex h-full">
                 <Card className="group flex flex-col w-full overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
                   <CardHeader>
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-center">
                       <div className="flex items-center gap-4">
                         {app.icon && app.icon.startsWith('http') ? (
                           <Image src={app.icon} alt={app.name} width={32} height={32} className="rounded-md" />
