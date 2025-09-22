@@ -117,7 +117,7 @@ export default function Home() {
                <Button
                 asChild
                 size="lg"
-                className="animated-gradient-border"
+                className="glowing-btn"
               >
                 <Link href="/shop">
                   <ShoppingBag className="mr-2 h-5 w-5" />
@@ -224,7 +224,7 @@ export default function Home() {
            <Button
             asChild
             size="lg"
-            className="animated-gradient-border"
+            className="glowing-btn"
           >
             <Link href="https://sabbirmms.github.io" target="_blank">
               <Briefcase className="mr-2 h-5 w-5" />
