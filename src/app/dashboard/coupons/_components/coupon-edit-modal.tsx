@@ -318,8 +318,8 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 )}
             />
             
-            <DialogFooter className="pt-4">
-              <Button type="submit" disabled={isSubmitting} className="w-full">
+            <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+              <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-first sm:order-last">
                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Save Coupon
               </Button>
