@@ -234,7 +234,6 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            month={field.value}
                             disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))}
                         />
                         </PopoverContent>
