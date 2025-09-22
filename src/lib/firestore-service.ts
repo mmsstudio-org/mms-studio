@@ -3,11 +3,11 @@ import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, g
 import type { Product, AppDetail, Feature, SiteInfo, Purchase } from './types';
 
 // Collections
-const productsCollection = collection(db, 'products');
-const appsCollection = collection(db, 'apps');
-const siteInfoCollection = collection(db, 'site-info');
-const featuresCollection = collection(db, 'features');
-const purchasesCollection = collection(db, 'purchases');
+const productsCollection = collection(db, 'web-products');
+const appsCollection = collection(db, 'web-apps');
+const siteInfoCollection = collection(db, 'web-site-info');
+const featuresCollection = collection(db, 'web-features');
+const purchasesCollection = collection(db, 'web-purchases');
 
 
 // Product Functions
@@ -22,12 +22,12 @@ export async function addProduct(product: Omit<Product, 'id'>): Promise<void> {
 }
 
 export async function updateProduct(productId: string, product: Partial<Product>): Promise<void> {
-    const productRef = doc(db, 'products', productId);
+    const productRef = doc(db, 'web-products', productId);
     await updateDoc(productRef, product);
 }
 
 export async function deleteProduct(productId: string): Promise<void> {
-    const productRef = doc(db, 'products', productId);
+    const productRef = doc(db, 'web-products', productId);
     await deleteDoc(productRef);
 }
 
@@ -39,7 +39,7 @@ export async function getApps(): Promise<AppDetail[]> {
 }
 
 export async function getApp(appId: string): Promise<AppDetail | null> {
-    const docRef = doc(db, 'apps', appId);
+    const docRef = doc(db, 'web-apps', appId);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
         return { id: docSnap.id, ...docSnap.data() } as AppDetail;
@@ -52,12 +52,12 @@ export async function addApp(app: Omit<AppDetail, 'id'>): Promise<void> {
 }
 
 export async function updateApp(appId: string, app: Partial<AppDetail>): Promise<void> {
-    const appRef = doc(db, 'apps', appId);
+    const appRef = doc(db, 'web-apps', appId);
     await updateDoc(appRef, app);
 }
 
 export async function deleteApp(appId: string): Promise<void> {
-    const appRef = doc(db, 'apps', appId);
+    const appRef = doc(db, 'web-apps', appId);
     await deleteDoc(appRef);
 }
 
@@ -73,12 +73,12 @@ export async function addFeature(feature: Omit<Feature, 'id'>): Promise<string> 
 }
 
 export async function updateFeature(featureId: string, feature: Partial<Feature>): Promise<void> {
-    const featureRef = doc(db, 'features', featureId);
+    const featureRef = doc(db, 'web-features', featureId);
     await updateDoc(featureRef, feature);
 }
 
 export async function deleteFeature(featureId: string): Promise<void> {
-    const featureRef = doc(db, 'features', featureId);
+    const featureRef = doc(db, 'web-features', featureId);
     await deleteDoc(featureRef);
 }
 
@@ -125,6 +125,6 @@ export async function getPurchases(): Promise<Purchase[]> {
 }
 
 export async function updatePurchaseStatus(purchaseId: string, status: 'pending' | 'approved' | 'rejected'): Promise<void> {
-    const purchaseRef = doc(db, 'purchases', purchaseId);
+    const purchaseRef = doc(db, 'web-purchases', purchaseId);
     await updateDoc(purchaseRef, { status });
 }
