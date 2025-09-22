@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -274,95 +275,90 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                     </FormItem>
                 )}
             />
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="appId"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Application</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
-                            <FormControl>
-                                <SelectTrigger>
-                                     <SelectValue placeholder="Select an app" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                                {apps.map(app => (
-                                    <SelectItem key={app.id} value={app.id}>
-                                        <div className="flex items-center gap-2">
-                                            {app.icon && app.icon.startsWith('http') ? (
-                                                <Image src={app.icon} alt={app.name} width={20} height={20} className="rounded-md" />
-                                            ) : app.icon ? (
-                                                <Icon name={app.icon} className="h-5 w-5" />
-                                            ) : (
-                                                <div className="h-5 w-5 bg-muted rounded-md flex items-center justify-center text-xs">
-                                                  {app.name.charAt(0)}
-                                                </div>
-                                            )}
-                                            {app.name}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Product Type</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a type" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                               <SelectItem value="subscription">Subscription</SelectItem>
-                               <SelectItem value="coins">Coins</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-             {productType === 'subscription' && (
-                <FormField
-                    control={form.control}
-                    name="subscriptionDays"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Subscription Duration (Days)</FormLabel>
+            <FormField
+                control={form.control}
+                name="appId"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Application</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
                         <FormControl>
-                           <Input type="number" placeholder="e.g., 30" {...field} />
+                            <SelectTrigger>
+                                    <SelectValue placeholder="Select an app" />
+                            </SelectTrigger>
                         </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            )}
+                        <SelectContent>
+                            {apps.map(app => (
+                                <SelectItem key={app.id} value={app.id}>
+                                    <div className="flex items-center gap-2">
+                                        {app.icon && app.icon.startsWith('http') ? (
+                                            <Image src={app.icon} alt={app.name} width={20} height={20} className="rounded-md" />
+                                        ) : app.icon ? (
+                                            <Icon name={app.icon} className="h-5 w-5" />
+                                        ) : (
+                                            <div className="h-5 w-5 bg-muted rounded-md flex items-center justify-center text-xs">
+                                                {app.name.charAt(0)}
+                                            </div>
+                                        )}
+                                        {app.name}
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Product Type</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Select a type" />
+                            </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                            <SelectItem value="subscription">Subscription</SelectItem>
+                            <SelectItem value="coins">Coins</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            
+            <FormField
+                control={form.control}
+                name="subscriptionDays"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Subscription Duration (Days)</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="e.g., 30" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
-            {productType === 'coins' && (
-                <FormField
-                    control={form.control}
-                    name="coinAmount"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Coin Amount</FormLabel>
-                        <FormControl>
-                            <Input type="number" placeholder="e.g., 1000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            )}
+            <FormField
+                control={form.control}
+                name="coinAmount"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Coin Amount</FormLabel>
+                    <FormControl>
+                        <Input type="number" placeholder="e.g., 1000" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
             <DialogFooter className="pt-4 flex-col sm:flex-row gap-2">
               {product && (
                 <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting} className="w-full sm:w-auto">
