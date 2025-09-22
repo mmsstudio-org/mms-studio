@@ -46,33 +46,38 @@ const formSchema = z.object({
   imageUrl: z.string().url({ message: 'Please enter a valid URL.' }).optional().or(z.literal('')),
   appId: z.string().min(1, { message: 'Please select an application.' }),
   type: z.enum(['subscription', 'coins']),
-  coinAmount: z.coerce.number().positive().optional().or(z.literal('')),
+  coinAmount: z.coerce.number().min(0).optional(),
   subscriptionDays: z.coerce.number().positive().optional().or(z.literal('')),
-}).refine(data => {
+}).superRefine((data, ctx) => {
     if (data.type === 'coins') {
-        return !!data.coinAmount && Number(data.coinAmount) > 0;
+        if (!data.coinAmount || Number(data.coinAmount) <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Coin amount is required for coin products and must be positive.',
+                path: ['coinAmount'],
+            });
+        }
     }
-    return true;
-}, {
-    message: 'Coin amount is required for coin products.',
-    path: ['coinAmount'],
-}).refine(data => {
     if (data.type === 'subscription') {
-        return !!data.subscriptionDays && Number(data.subscriptionDays) > 0;
+         if (!data.subscriptionDays || Number(data.subscriptionDays) <= 0) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Validity days are required for subscription products.',
+                path: ['subscriptionDays'],
+            });
+        }
     }
-    return true;
-}, {
-    message: 'Subscription days are required for subscription products.',
-    path: ['subscriptionDays'],
-}).refine(data => {
     if (data.discountedPrice && data.regularPrice) {
-        return Number(data.discountedPrice) <= Number(data.regularPrice);
+        if (Number(data.discountedPrice) > Number(data.regularPrice)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: 'Discounted price cannot be greater than regular price.',
+                path: ['discountedPrice'],
+            });
+        }
     }
-    return true;
-}, {
-    message: 'Discounted price cannot be greater than regular price.',
-    path: ['discountedPrice'],
 });
+
 
 type ProductEditModalProps = {
   isOpen: boolean;
@@ -116,8 +121,8 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         imageUrl: '',
         appId: '',
         type: 'subscription',
-        coinAmount: '',
-        subscriptionDays: '',
+        coinAmount: 0,
+        subscriptionDays: 30,
     },
   });
   
@@ -130,8 +135,8 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
         description: product.description || '',
         discountedPrice: product.discountedPrice || '',
         imageUrl: product.imageUrl || '',
-        coinAmount: product.coinAmount || '',
-        subscriptionDays: product.subscriptionDays || '',
+        coinAmount: product.coinAmount || 0,
+        subscriptionDays: product.subscriptionDays || 30,
       });
     } else {
         form.reset({
@@ -142,8 +147,8 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
             imageUrl: '',
             appId: appForNewProduct?.id || '',
             type: 'subscription',
-            coinAmount: '',
-            subscriptionDays: '',
+            coinAmount: 0,
+            subscriptionDays: 30,
         });
     }
   }, [product, appForNewProduct, form, isOpen]); // Rerun on isOpen to reset form for 'Add New'
@@ -279,7 +284,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 control={form.control}
                 name="appId"
                 render={({ field }) => (
-                    <FormItem>
+                    <FormItem className="flex flex-col">
                     <FormLabel>Application</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
                         <FormControl>
@@ -337,7 +342,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 name="subscriptionDays"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Subscription Duration (Days)</FormLabel>
+                    <FormLabel>Validity Days</FormLabel>
                     <FormControl>
                         <Input type="number" placeholder="e.g., 30" {...field} />
                     </FormControl>
