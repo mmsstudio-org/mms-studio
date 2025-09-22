@@ -18,6 +18,7 @@ import { z } from 'zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -284,7 +285,7 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 control={form.control}
                 name="appId"
                 render={({ field }) => (
-                    <FormItem className="flex flex-col">
+                    <FormItem>
                     <FormLabel>Application</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value} disabled={!!appForNewProduct}>
                         <FormControl>
@@ -343,6 +344,9 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Validity Days</FormLabel>
+                    <FormDescription>
+                        For subscriptions, this is the usage duration. For coin products, the coupon must be redeemed within these days before it expires.
+                    </FormDescription>
                     <FormControl>
                         <Input type="number" placeholder="e.g., 30" {...field} />
                     </FormControl>
