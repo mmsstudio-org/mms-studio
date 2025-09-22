@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { Coupon } from '@/lib/types';
-import { getCoupons, deleteCoupon } from '@/lib/firestore-service';
+import { getCoupons, deleteCoupon, deleteCouponsBatch } from '@/lib/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { MoreHorizontal, Search, PlusCircle, Trash2, Copy, Pencil } from 'lucide-react';
+import { MoreHorizontal, Search, PlusCircle, Trash2, Copy, Pencil, Info, ShieldX, Loader2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +23,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ConfirmationDialog } from '../purchases/_components/confirmation-dialog';
 import CouponEditModal from './_components/coupon-edit-modal';
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Checkbox } from '@/components/ui/checkbox';
+
 
 export default function CouponsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -40,6 +43,14 @@ export default function CouponsPage() {
   // Delete confirmation
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [couponToDelete, setCouponToDelete] = useState<Coupon | null>(null);
+  
+  // Batch delete states
+  const [isBatchDeleteMode, setBatchDeleteMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [isEnableBatchConfirmOpen, setEnableBatchConfirmOpen] = useState(false);
+  const [isFinalDeleteConfirmOpen, setFinalDeleteConfirmOpen] = useState(false);
+  const [isDeletingBatch, setIsDeletingBatch] = useState(false);
+
 
   const fetchCoupons = useCallback(async () => {
     setLoadingData(true);
@@ -97,23 +108,63 @@ export default function CouponsPage() {
     setCouponToDelete(null);
   }
   
-  const getBadgeVariant = (coupon: Coupon): 'default' | 'secondary' | 'destructive' => {
-    const now = Date.now();
-    if (coupon.validity < now) return 'destructive';
-    if (coupon.type === 'certain' && coupon.redeem_limit !== null && coupon.redeem_count >= coupon.redeem_limit) return 'destructive';
+  const handleBatchDelete = async () => {
+    setIsDeletingBatch(true);
+    try {
+      await deleteCouponsBatch(Array.from(selectedIds));
+      toast({ title: 'Success', description: `${selectedIds.size} coupons deleted.` });
+      fetchCoupons();
+      setSelectedIds(new Set());
+      setBatchDeleteMode(false);
+    } catch(error) {
+      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete coupons.' });
+    } finally {
+      setIsDeletingBatch(false);
+    }
+  }
+
+  const handleSelectAll = (checked: boolean | 'indeterminate') => {
+    if(checked) {
+        setSelectedIds(new Set(filteredCoupons.map(p => p.id)));
+    } else {
+        setSelectedIds(new Set());
+    }
+  }
+
+  const handleRowSelect = (id: string, isSelected: boolean) => {
+    setSelectedIds(prev => {
+        const newSet = new Set(prev);
+        if(isSelected) {
+            newSet.add(id);
+        } else {
+            newSet.delete(id);
+        }
+        return newSet;
+    })
+  }
+  
+  const getBadgeVariant = (status: 'Active' | 'Expired' | 'Limit Reached'): 'default' | 'secondary' | 'destructive' => {
+    if (status === 'Expired' || status === 'Limit Reached') return 'destructive';
     return 'secondary';
   };
 
   const getStatusText = (coupon: Coupon) => {
     const now = Date.now();
     if (coupon.validity < now) return 'Expired';
-    if (coupon.type === 'certain' && coupon.redeem_limit !== null && coupon.redeem_count >= coupon.redeem_limit) return 'Limit Reached';
+    if (coupon.type === 'certain amount' && coupon.redeem_limit !== null && coupon.redeem_count >= coupon.redeem_limit) return 'Limit Reached';
     return 'Active';
   }
   
   const filteredCoupons = useMemo(() => {
     const lowercasedQuery = searchQuery.toLowerCase();
     if (!lowercasedQuery) return coupons;
+    
+    if (lowercasedQuery === 'expired') {
+      return coupons.filter(c => getStatusText(c) === 'Expired');
+    }
+    if (lowercasedQuery === 'limit reached') {
+        return coupons.filter(c => getStatusText(c) === 'Limit Reached');
+    }
 
     return coupons.filter(c => c.code.toLowerCase().includes(lowercasedQuery));
   }, [coupons, searchQuery]);
@@ -141,16 +192,25 @@ export default function CouponsPage() {
   const renderCouponCard = (coupon: Coupon) => {
     const status = getStatusText(coupon);
     return (
-        <Card key={coupon.id}>
+        <Card key={coupon.id} data-state={selectedIds.has(coupon.id) ? "selected" : undefined}>
             <CardHeader>
                 <div className="flex justify-between items-start">
-                    <div>
-                        <CardTitle className="font-mono text-lg">{coupon.code}</CardTitle>
-                        <Badge variant={getBadgeVariant(coupon)} className="mt-1">{status}</Badge>
+                    <div className="flex items-center gap-4">
+                         {isBatchDeleteMode && (
+                            <Checkbox 
+                                checked={selectedIds.has(coupon.id)}
+                                onCheckedChange={(checked) => handleRowSelect(coupon.id, !!checked)}
+                                aria-label={`Select coupon ${coupon.code}`}
+                             />
+                           )}
+                        <div>
+                            <CardTitle className="font-mono text-lg">{coupon.code}</CardTitle>
+                            <Badge variant={getBadgeVariant(status)} className="mt-1">{status}</Badge>
+                        </div>
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
+                            <Button variant="ghost" className="h-8 w-8 p-0" disabled={isBatchDeleteMode}>
                                 <span className="sr-only">Open menu</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
@@ -169,11 +229,24 @@ export default function CouponsPage() {
             <CardContent className="text-sm space-y-2">
                 <p><strong>Coins:</strong> {coupon.coins}</p>
                 <p><strong>Type:</strong> <span className="capitalize">{coupon.type}</span></p>
-                <p><strong>Usage:</strong> {coupon.type === 'certain' && coupon.redeem_limit !== null ? `${coupon.redeem_count} / ${coupon.redeem_limit}` : coupon.redeem_count}</p>
-                <p><strong>Show Ads:</strong> {coupon.show_ads ? 'No' : 'Yes'}</p>
+                <p><strong>Usage:</strong> {coupon.type === 'certain amount' && coupon.redeem_limit !== null ? `${coupon.redeem_count} / ${coupon.redeem_limit}` : coupon.redeem_count}</p>
+                <p><strong>Disable Ads:</strong> {coupon.show_ads ? 'Yes' : 'No'}</p>
                 <p><strong>Created:</strong> {format(new Date(coupon.created), 'Pp')}</p>
                 <p><strong>Validity:</strong> {format(new Date(coupon.validity), 'Pp')}</p>
-                {coupon.note && <p className="text-xs text-muted-foreground pt-2 border-t mt-2"><strong>Note:</strong> {coupon.note}</p>}
+                {coupon.note && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <p className="truncate text-xs text-muted-foreground pt-2 border-t mt-2">
+                                    <strong>Note:</strong> {coupon.note}
+                                </p>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p className="max-w-xs">{coupon.note}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
             </CardContent>
         </Card>
     );
@@ -182,13 +255,16 @@ export default function CouponsPage() {
   return (
     <>
     <div className="container py-10">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex justify-between items-center mb-1">
             <div>
                 <h1 className="text-4xl font-bold">Manage Coupons</h1>
                 <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
             </div>
-            <Button onClick={handleAddNew}><PlusCircle className="mr-2 h-4 w-4"/> Create Coupon</Button>
+            {!isBatchDeleteMode && <Button onClick={handleAddNew}><PlusCircle className="mr-2 h-4 w-4"/> Create Coupon</Button>}
         </div>
+        <p className="text-sm text-muted-foreground mb-8">
+            Tip: Search "expired" or "limit reached" to filter coupons.
+        </p>
 
         <div className="flex items-center gap-4 mb-4">
             <div className="relative flex-grow">
@@ -201,6 +277,23 @@ export default function CouponsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                 />
             </div>
+            {!isBatchDeleteMode ? (
+                <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
+                </Button>
+                ) : (
+                <>
+                    <Button variant="destructive" onClick={() => setFinalDeleteConfirmOpen(true)} disabled={selectedIds.size === 0}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
+                    </Button>
+                    <Button variant="secondary" onClick={() => {
+                    setBatchDeleteMode(false);
+                    setSelectedIds(new Set());
+                    }}>
+                    <ShieldX className="mr-2 h-4 w-4" /> Cancel
+                    </Button>
+                </>
+            )}
         </div>
 
         {/* Desktop Table */}
@@ -208,12 +301,21 @@ export default function CouponsPage() {
             <Table>
                 <TableHeader>
                     <TableRow>
+                        {isBatchDeleteMode && (
+                            <TableHead className="w-[50px]">
+                                <Checkbox 
+                                    onCheckedChange={handleSelectAll}
+                                    checked={selectedIds.size > 0 && selectedIds.size === filteredCoupons.length}
+                                    aria-label="Select all"
+                                />
+                            </TableHead>
+                        )}
                         <TableHead>Code</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead>Coins</TableHead>
                         <TableHead>Usage</TableHead>
-                        <TableHead>Show Ads</TableHead>
+                        <TableHead>Disable Ads</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Validity</TableHead>
                         <TableHead>Note</TableHead>
@@ -224,20 +326,42 @@ export default function CouponsPage() {
                     {filteredCoupons.map(c => {
                         const status = getStatusText(c);
                         return (
-                            <TableRow key={c.id}>
+                            <TableRow key={c.id} data-state={selectedIds.has(c.id) && "selected"}>
+                                {isBatchDeleteMode && (
+                                   <TableCell>
+                                     <Checkbox 
+                                        checked={selectedIds.has(c.id)}
+                                        onCheckedChange={(checked) => handleRowSelect(c.id, !!checked)}
+                                        aria-label={`Select coupon ${c.code}`}
+                                     />
+                                   </TableCell>
+                                )}
                                 <TableCell className="font-mono">{c.code}</TableCell>
-                                <TableCell><Badge variant={getBadgeVariant(c)}>{status}</Badge></TableCell>
+                                <TableCell><Badge variant={getBadgeVariant(status)}>{status}</Badge></TableCell>
                                 <TableCell className="capitalize">{c.type}</TableCell>
                                 <TableCell>{c.coins}</TableCell>
-                                <TableCell>{c.type === 'certain' && c.redeem_limit !== null ? `${c.redeem_count} / ${c.redeem_limit}` : c.redeem_count}</TableCell>
-                                <TableCell>{c.show_ads ? 'No' : 'Yes'}</TableCell>
+                                <TableCell>{c.type === 'certain amount' && c.redeem_limit !== null ? `${c.redeem_count} / ${c.redeem_limit}` : c.redeem_count}</TableCell>
+                                <TableCell>{c.show_ads ? 'Yes' : 'No'}</TableCell>
                                 <TableCell>{format(new Date(c.created), 'PPp')}</TableCell>
                                 <TableCell>{format(new Date(c.validity), 'PPp')}</TableCell>
-                                <TableCell className="max-w-[200px] truncate">{c.note || 'N/A'}</TableCell>
+                                <TableCell className="max-w-[150px] truncate">
+                                    {c.note ? (
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                   <span className="flex items-center gap-1">{c.note} <Info className="h-3 w-3 text-muted-foreground" /></span>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p className="max-w-xs">{c.note}</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    ) : 'N/A'}
+                                </TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                            <Button variant="ghost" className="h-8 w-8 p-0" disabled={isBatchDeleteMode}>
                                                 <span className="sr-only">Open menu</span>
                                                 <MoreHorizontal className="h-4 w-4" />
                                             </Button>
@@ -257,7 +381,7 @@ export default function CouponsPage() {
                     })}
                      {filteredCoupons.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={10} className="text-center h-24">No coupons found.</TableCell>
+                            <TableCell colSpan={11} className="text-center h-24">No coupons found.</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
@@ -296,6 +420,27 @@ export default function CouponsPage() {
         </>
       }
       confirmText="Delete"
+    />
+     <ConfirmationDialog
+        isOpen={isEnableBatchConfirmOpen}
+        onOpenChange={setEnableBatchConfirmOpen}
+        onConfirm={() => setBatchDeleteMode(true)}
+        title="Enable Batch Delete Mode?"
+        description={<p>Checkboxes will appear next to each item, allowing you to select multiple coupons for deletion.</p>}
+        confirmText="Enable"
+    />
+    <ConfirmationDialog
+        isOpen={isFinalDeleteConfirmOpen}
+        onOpenChange={setFinalDeleteConfirmOpen}
+        onConfirm={handleBatchDelete}
+        title={`Delete ${selectedIds.size} Coupons?`}
+        description={
+          <>
+            <p>You are about to permanently delete <span className="font-bold">{selectedIds.size}</span> coupons. This action cannot be undone.</p>
+            {isDeletingBatch && <Loader2 className="mx-auto mt-4 h-6 w-6 animate-spin" />}
+          </>
+        }
+        confirmText="Delete Permanently"
     />
     </>
   );

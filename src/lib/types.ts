@@ -68,7 +68,7 @@ export interface Coupon {
     code: string;
     coins: number;
     show_ads: boolean;
-    type: 'single' | 'certain' | 'multiple';
+    type: 'single' | 'certain amount' | 'multiple';
     redeem_limit: number | null;
     redeem_count: number;
     note: string | null;

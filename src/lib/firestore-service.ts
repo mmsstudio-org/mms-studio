@@ -160,3 +160,11 @@ export async function deleteCoupon(code: string): Promise<void> {
     await deleteDoc(couponRef);
 }
 
+export async function deleteCouponsBatch(couponCodes: string[]): Promise<void> {
+    const batch = writeBatch(db);
+    couponCodes.forEach(code => {
+        const couponRef = doc(db, 'web-coupons', code);
+        batch.delete(couponRef);
+    });
+    await batch.commit();
+}

@@ -46,17 +46,17 @@ const formSchema = z.object({
   code: z.string().min(3, 'Code must be at least 3 characters.').transform(val => val.toUpperCase()),
   coins: z.coerce.number().min(0),
   validity: z.date({ required_error: "A validity date is required."}),
-  type: z.enum(['single', 'certain', 'multiple']),
+  type: z.enum(['single', 'certain amount', 'multiple']),
   redeem_limit: z.coerce.number().positive().optional().or(z.literal('')),
   show_ads: z.boolean(),
   note: z.string().optional(),
 }).refine(data => {
-    if (data.type === 'certain') {
+    if (data.type === 'certain amount') {
         return !!data.redeem_limit && Number(data.redeem_limit) > 0;
     }
     return true;
 }, {
-    message: 'Redeem limit is required for "certain" type.',
+    message: 'Redeem limit is required for "certain amount" type.',
     path: ['redeem_limit'],
 });
 
@@ -91,6 +91,9 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
 
   useEffect(() => {
     if(isOpen) {
+        const defaultValidity = new Date();
+        defaultValidity.setDate(defaultValidity.getDate() + 30);
+        
         if (coupon) {
           form.reset({
             code: mode === 'clone' ? '' : coupon.code,
@@ -105,7 +108,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
             form.reset({
                 code: '',
                 coins: 0,
-                validity: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+                validity: defaultValidity,
                 type: 'single',
                 redeem_limit: '',
                 show_ads: false,
@@ -136,12 +139,9 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
         }
 
         const couponData = {
-            code: values.code,
-            coins: values.coins,
+            ...values,
             validity: values.validity.getTime(),
-            type: values.type,
-            redeem_limit: values.type === 'certain' ? Number(values.redeem_limit) : null,
-            show_ads: values.show_ads,
+            redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
             note: values.note || null,
         };
 
@@ -251,7 +251,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                     render={({ field }) => (
                         <FormItem>
                         <FormLabel>Type</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value}>
+                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
                             <FormControl>
                                 <SelectTrigger>
                                     <SelectValue placeholder="Select a type" />
@@ -259,7 +259,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                             </FormControl>
                             <SelectContent>
                                <SelectItem value="single">Single</SelectItem>
-                               <SelectItem value="certain">Certain Amount</SelectItem>
+                               <SelectItem value="certain amount">Certain Amount</SelectItem>
                                <SelectItem value="multiple">Multiple</SelectItem>
                             </SelectContent>
                         </Select>
@@ -267,7 +267,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                         </FormItem>
                     )}
                 />
-                 {couponType === 'certain' && (
+                 {couponType === 'certain amount' && (
                     <FormField
                         control={form.control}
                         name="redeem_limit"
@@ -290,9 +290,9 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
                     <div className="space-y-0.5">
-                        <FormLabel>Show Ads</FormLabel>
+                        <FormLabel>Disable Ads</FormLabel>
                         <FormDescription>
-                           If enabled, ads will not be shown to user.
+                           If enabled, ads will not be shown to the user.
                         </FormDescription>
                     </div>
                     <FormControl>
