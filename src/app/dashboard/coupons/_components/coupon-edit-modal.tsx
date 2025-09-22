@@ -43,7 +43,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  code: z.string().min(3, 'Code must be at least 3 characters.').transform(val => val.toUpperCase()),
+  code: z.string().min(3, 'Code must be at least 3 characters.').transform(val => val.toUpperCase().replace(/\s+/g, '')),
   coins: z.coerce.number().min(0),
   validity: z.date({ required_error: "A validity date is required."}),
   type: z.enum(['single', 'certain amount', 'multiple']),
@@ -331,3 +331,5 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
     </Dialog>
   );
 }
+
+    

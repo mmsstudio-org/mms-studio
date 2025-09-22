@@ -260,27 +260,37 @@ export default function CouponsPage() {
                 <h1 className="text-4xl font-bold">Manage Coupons</h1>
                 <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
             </div>
-            <div className="flex items-center gap-2">
+             <div className="flex items-center gap-2">
               {!isBatchDeleteMode ? (
-                <Button onClick={handleAddNew}><PlusCircle className="mr-2 h-4 w-4"/> Create Coupon</Button>
-              ) : (
-                <Button variant="secondary" onClick={() => {
-                  setBatchDeleteMode(false);
-                  setSelectedIds(new Set());
-                }}>
-                  <ShieldX className="mr-2 h-4 w-4" /> Cancel
-                </Button>
-              )}
-              {!isBatchDeleteMode ? (
+                <>
                   <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
-                      <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
+                    <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
                   </Button>
+                  <Button onClick={handleAddNew}>
+                    <PlusCircle className="mr-2 h-4 w-4" /> Create Coupon
+                  </Button>
+                </>
               ) : (
-                  <Button variant="destructive" onClick={() => setFinalDeleteConfirmOpen(true)} disabled={selectedIds.size === 0}>
-                  <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
+                <>
+                  <Button
+                    variant="destructive"
+                    onClick={() => setFinalDeleteConfirmOpen(true)}
+                    disabled={selectedIds.size === 0}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
                   </Button>
+                   <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setBatchDeleteMode(false);
+                      setSelectedIds(new Set());
+                    }}
+                  >
+                    <ShieldX className="mr-2 h-4 w-4" /> Cancel
+                  </Button>
+                </>
               )}
-          </div>
+            </div>
         </div>
         <p className="text-sm text-muted-foreground mb-8">
             Tip: Search "expired" or "limit reached" to filter coupons.
@@ -319,7 +329,6 @@ export default function CouponsPage() {
                         <TableHead>Show Ads</TableHead>
                         <TableHead>Created</TableHead>
                         <TableHead>Validity</TableHead>
-                        <TableHead>Note</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -337,7 +346,23 @@ export default function CouponsPage() {
                                      />
                                    </TableCell>
                                 )}
-                                <TableCell className="font-mono">{c.code}</TableCell>
+                                <TableCell className="font-mono">
+                                    <div className="flex items-center gap-2">
+                                        <span>{c.code}</span>
+                                        {c.note && (
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger>
+                                                        <Info className="h-4 w-4 text-muted-foreground cursor-pointer" />
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p className="max-w-xs">{c.note}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                        )}
+                                    </div>
+                                </TableCell>
                                 <TableCell><Badge variant={getBadgeVariant(status)}>{status}</Badge></TableCell>
                                 <TableCell className="capitalize">{c.type}</TableCell>
                                 <TableCell>{c.coins}</TableCell>
@@ -345,20 +370,6 @@ export default function CouponsPage() {
                                 <TableCell>{c.show_ads ? 'Yes' : 'No'}</TableCell>
                                 <TableCell>{format(new Date(c.created), 'PPp')}</TableCell>
                                 <TableCell>{format(new Date(c.validity), 'PPp')}</TableCell>
-                                <TableCell className="max-w-[150px] truncate">
-                                    {c.note ? (
-                                        <TooltipProvider>
-                                            <Tooltip>
-                                                <TooltipTrigger>
-                                                   <span className="flex items-center gap-1">{c.note} <Info className="h-3 w-3 text-muted-foreground" /></span>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p className="max-w-xs">{c.note}</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </TooltipProvider>
-                                    ) : 'N/A'}
-                                </TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
@@ -382,7 +393,7 @@ export default function CouponsPage() {
                     })}
                      {filteredCoupons.length === 0 && (
                         <TableRow>
-                            <TableCell colSpan={11} className="text-center h-24">No coupons found.</TableCell>
+                            <TableCell colSpan={10} className="text-center h-24">No coupons found.</TableCell>
                         </TableRow>
                     )}
                 </TableBody>
@@ -425,10 +436,10 @@ export default function CouponsPage() {
      <ConfirmationDialog
         isOpen={isEnableBatchConfirmOpen}
         onOpenChange={setEnableBatchConfirmOpen}
-        onConfirm={() => setBatchDeleteMode(true)}
         title="Enable Batch Delete Mode?"
         description={<p>Checkboxes will appear next to each item, allowing you to select multiple coupons for deletion.</p>}
         confirmText="Enable"
+        onConfirm={() => setBatchDeleteMode(true)}
     />
     <ConfirmationDialog
         isOpen={isFinalDeleteConfirmOpen}
@@ -446,3 +457,5 @@ export default function CouponsPage() {
     </>
   );
 }
+
+    
