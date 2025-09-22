@@ -191,12 +191,12 @@ export default function CategoriesPage() {
 
   return (
     <div className="container py-10">
-      <div className="flex justify-between items-center mb-8">
-        <div>
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-8">
+        <div className="text-center md:text-left">
           <h1 className="text-4xl font-bold">Manage Categories & Products</h1>
           <p className="text-muted-foreground">Add, edit, or remove app categories and their associated products.</p>
         </div>
-        <Button onClick={handleAddNewApp}><PlusCircle className="mr-2 h-4 w-4"/> Add New Category</Button>
+        <Button onClick={handleAddNewApp} className="w-full md:w-auto"><PlusCircle className="mr-2 h-4 w-4"/> Add New Category</Button>
       </div>
       
       <div className="space-y-10">
@@ -209,7 +209,7 @@ export default function CategoriesPage() {
             return (
             <Card key={app.id}>
                 <CardHeader>
-                   <div className="flex justify-between items-start">
+                   <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                     <div className="flex items-center gap-4">
                         {app.icon && app.icon.startsWith('http') ? (
                             <Image src={app.icon} alt={app.name} width={40} height={40} className="rounded-md" />
@@ -225,7 +225,7 @@ export default function CategoriesPage() {
                             <CardDescription>{app.description}</CardDescription>
                         </div>
                     </div>
-                     <div className="flex gap-2">
+                     <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                         <Button variant="outline" size="sm" onClick={() => handleEditApp(app)}><Pencil className="mr-2 h-4 w-4"/>Edit Category</Button>
                         <Button variant="destructive" size="sm" onClick={() => handleDeleteApp(app.id)}><Trash2 className="mr-2 h-4 w-4"/>Delete Category</Button>
                      </div>
