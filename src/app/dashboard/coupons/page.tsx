@@ -255,57 +255,56 @@ export default function CouponsPage() {
   return (
     <>
     <div className="container py-10">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 mb-1">
-            <div>
-                <h1 className="text-4xl font-bold">Manage Coupons</h1>
-                <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
-            </div>
-             <div className="flex items-center gap-2">
-              {!isBatchDeleteMode ? (
-                <>
-                  <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
-                    <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
-                  </Button>
-                  <Button onClick={handleAddNew}>
-                    <PlusCircle className="mr-2 h-4 w-4" /> Create Coupon
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="destructive"
-                    onClick={() => setFinalDeleteConfirmOpen(true)}
-                    disabled={selectedIds.size === 0}
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
-                  </Button>
-                   <Button
-                    variant="secondary"
-                    onClick={() => {
-                      setBatchDeleteMode(false);
-                      setSelectedIds(new Set());
-                    }}
-                  >
-                    <ShieldX className="mr-2 h-4 w-4" /> Cancel
-                  </Button>
-                </>
-              )}
-            </div>
-        </div>
-        <p className="text-sm text-muted-foreground mb-8">
+      <div>
+        <h1 className="text-4xl font-bold">Manage Coupons</h1>
+        <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
+        <p className="text-sm text-muted-foreground mt-2">
             Tip: Search "expired" or "limit reached" to filter coupons.
         </p>
+      </div>
 
-        <div className="relative flex-grow mb-4">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-                type="search"
-                placeholder="Search by coupon code..."
-                className="w-full rounded-lg bg-background pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-            />
-        </div>
+      <div className="flex flex-col-reverse md:flex-row md:justify-end gap-2 my-4">
+        {!isBatchDeleteMode ? (
+          <>
+            <Button variant="outline" onClick={() => setEnableBatchConfirmOpen(true)}>
+              <Trash2 className="mr-2 h-4 w-4" /> Batch Delete
+            </Button>
+            <Button onClick={handleAddNew}>
+              <PlusCircle className="mr-2 h-4 w-4" /> Create Coupon
+            </Button>
+          </>
+        ) : (
+          <>
+            <Button
+              variant="destructive"
+              onClick={() => setFinalDeleteConfirmOpen(true)}
+              disabled={selectedIds.size === 0}
+            >
+              <Trash2 className="mr-2 h-4 w-4" /> Delete Selected ({selectedIds.size})
+            </Button>
+              <Button
+              variant="secondary"
+              onClick={() => {
+                setBatchDeleteMode(false);
+                setSelectedIds(new Set());
+              }}
+            >
+              <ShieldX className="mr-2 h-4 w-4" /> Cancel
+            </Button>
+          </>
+        )}
+      </div>
+
+      <div className="relative flex-grow mb-4">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+              type="search"
+              placeholder="Search by coupon code..."
+              className="w-full rounded-lg bg-background pl-8"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+          />
+      </div>
 
         {/* Desktop Table */}
         <Card className="hidden md:block">
