@@ -6,7 +6,7 @@ import Header from "./_components/header";
 import Footer from "./_components/footer";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getSiteInfo } from "@/lib/firestore-service";
 
 const defaultSiteInfo = {
