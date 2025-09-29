@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown, CalendarDays } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
@@ -27,6 +27,19 @@ const Icon = ({ name, className }: { name: string; className: string }) => {
   }
   return <LucideIcon className={className} />;
 };
+
+function formatSubscriptionDuration(days?: number) {
+    if (!days) return null;
+    if (days >= 365) {
+        const years = Math.floor(days / 365);
+        return `per ${years > 1 ? `${years} years` : 'year'}`;
+    }
+    if (days >= 30) {
+        const months = Math.floor(days / 30);
+        return `per ${months > 1 ? `${months} months` : 'month'}`;
+    }
+    return `for ${days} days`;
+}
 
 
 export default function CategoriesPage() {
@@ -196,12 +209,29 @@ export default function CategoriesPage() {
                     )}
                 </div>
                  
-                 {product.coinAmount && product.coinAmount > 0 && (
-                    <p className="text-xs font-bold text-amber-500 flex items-center gap-1 mt-1">
-                        🪙
-                        {product.coinAmount.toLocaleString()} Coins
-                    </p>
-                )}
+                 <div className="mt-2 space-y-1 text-xs">
+                    {product.type === 'subscription' && product.subscriptionDays && (
+                        <div className="flex justify-between items-center">
+                            <p className="text-muted-foreground flex items-center gap-1">
+                                <CalendarDays className="h-3 w-3" />
+                                {formatSubscriptionDuration(product.subscriptionDays)}
+                            </p>
+                            {product.coinAmount && product.coinAmount > 0 && (
+                                <p className="font-bold text-amber-500 flex items-center gap-1">
+                                    🪙
+                                    {product.coinAmount.toLocaleString()} Coins
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {product.type === 'coins' && product.coinAmount && product.coinAmount > 0 && (
+                        <p className="font-bold text-amber-500 flex items-center gap-1">
+                            🪙
+                            {product.coinAmount.toLocaleString()} Coins
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
         <CardContent className="p-4 pt-0">
