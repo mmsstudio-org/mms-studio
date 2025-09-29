@@ -87,7 +87,7 @@ export default function ShopSlugPage() {
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
           {app.name} Store
         </h1>
-        <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+        <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto whitespace-pre-wrap">
           {app.description}
         </p>
       </div>

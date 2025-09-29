@@ -171,7 +171,7 @@ export default function CategoriesPage() {
         </div>
         <div className="p-4 flex-grow flex flex-col">
             <h5 className="font-bold truncate">{product.name}</h5>
-            {product.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{product.description}</p>}
+            {product.description && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{product.description}</p>}
             <div className="mt-2 text-sm flex items-baseline gap-2">
                 {product.discountedPrice && product.discountedPrice > 0 ? (
                     <>
@@ -222,7 +222,7 @@ export default function CategoriesPage() {
                         )}
                         <div>
                             <CardTitle>{app.name}</CardTitle>
-                            <CardDescription>{app.description}</CardDescription>
+                            <CardDescription className="whitespace-pre-wrap">{app.description}</CardDescription>
                         </div>
                     </div>
                      <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">

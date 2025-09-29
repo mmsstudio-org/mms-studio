@@ -55,7 +55,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
-        <CardDescription className="flex-grow min-h-[40px]">{product.description}</CardDescription>
+        <CardDescription className="flex-grow min-h-[40px] whitespace-pre-wrap">{product.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex items-baseline gap-2">
