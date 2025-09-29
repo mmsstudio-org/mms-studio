@@ -41,17 +41,17 @@ export default function Footer() {
     });
   }, []);
 
- const socialLinks = [
-    { href: siteInfo?.githubUrl, icon: Github, label: "GitHub" },
-    { href: siteInfo?.linkedinUrl, icon: Linkedin, label: "LinkedIn" },
-    { href: siteInfo?.xUrl, icon: XIcon, label: "X" },
-    { href: siteInfo?.instagramUrl, icon: Instagram, label: "Instagram" },
-    { href: siteInfo?.facebookUrl, icon: Facebook, label: "Facebook" },
-    { href: siteInfo?.youtubeUrl, icon: Youtube, label: "YouTube" },
-    { href: siteInfo?.whatsappUrl, icon: WhatsAppIcon, label: "WhatsApp" },
-    { href: siteInfo?.telegramUrl, icon: TelegramIcon, label: "Telegram" },
-    { href: siteInfo?.email, icon: Mail, label: "Email" },
-  ].filter(link => link.href); // Filter out links with empty href
+  const socialLinks = !siteInfo ? [] : [
+    { href: siteInfo.githubUrl, icon: Github, label: "GitHub", target: "_blank" },
+    { href: siteInfo.linkedinUrl, icon: Linkedin, label: "LinkedIn", target: "_blank" },
+    { href: siteInfo.xUrl, icon: XIcon, label: "X", target: "_blank" },
+    { href: siteInfo.instagramUrl, icon: Instagram, label: "Instagram", target: "_blank" },
+    { href: siteInfo.facebookUrl, icon: Facebook, label: "Facebook", target: "_blank" },
+    { href: siteInfo.youtubeUrl, icon: Youtube, label: "YouTube", target: "_blank" },
+    { href: siteInfo.whatsappUrl, icon: WhatsAppIcon, label: "WhatsApp", target: "_blank" },
+    { href: siteInfo.telegramUrl, icon: TelegramIcon, label: "Telegram", target: "_blank" },
+    { href: siteInfo.email ? `mailto:${siteInfo.email}` : undefined, icon: Mail, label: "Email", target: "_self" },
+  ].filter(link => link.href);
 
   return (
     <>
@@ -81,8 +81,8 @@ export default function Footer() {
                     <Link
                       key={link.label}
                       href={link.href!}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      target={link.target}
+                      rel={link.target === '_blank' ? 'noopener noreferrer' : undefined}
                       className="text-sm text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <link.icon/>
