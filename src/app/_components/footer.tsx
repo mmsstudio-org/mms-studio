@@ -28,11 +28,10 @@ export default function Footer() {
     <>
       <footer className="py-12 px-6 border-t border-border/40">
         <div className="container mx-auto">
-          <div className="flex flex-wrap justify-between items-center mb-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-8">
             {/* theme === "dark" ? */}
             <div
-              className={`text-2xl font-['Orbitron'] font-bold 
-                 mb-4 md:mb-0 flex items-center gap-2 mr-6 `}
+              className={`text-2xl font-['Orbitron'] font-bold flex items-center gap-2`}
             >
               <Image
                 src="/favicon.png"
@@ -43,7 +42,7 @@ export default function Footer() {
               />
               MMS Studio
             </div>
-            <div className="flex flex-wrap gap-6">
+            <div className="flex flex-wrap justify-center gap-6">
               {footerLinks.map((link) => (
                 <Link
                   key={link.label}
