@@ -98,6 +98,7 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     const dataToSave = {
         ...siteInfo,
         bkashQrCodeUrl: siteInfo.bkashQrCodeUrl || '',
+        paymentNotice: siteInfo.paymentNotice || '',
         githubUrl: siteInfo.githubUrl || '',
         linkedinUrl: siteInfo.linkedinUrl || '',
         xUrl: siteInfo.xUrl || '',

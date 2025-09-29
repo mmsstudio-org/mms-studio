@@ -26,6 +26,7 @@ const siteInfoSchema = z.object({
   webDescription: z.string().min(10, 'Description must be at least 10 characters.'),
   bkashNumber: z.string().min(11, 'bKash number must be at least 11 characters.'),
   bkashQrCodeUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  paymentNotice: z.string().optional(),
   githubUrl: z.string().url().optional().or(z.literal('')),
   linkedinUrl: z.string().url().optional().or(z.literal('')),
   xUrl: z.string().url().optional().or(z.literal('')),
@@ -72,6 +73,7 @@ export default function SiteInfoPage() {
       webDescription: '',
       bkashNumber: '',
       bkashQrCodeUrl: '',
+      paymentNotice: '',
       githubUrl: '',
       linkedinUrl: '',
       xUrl: '',
@@ -224,6 +226,19 @@ export default function SiteInfoPage() {
                                 <FormLabel>bKash QR Code Image URL</FormLabel>
                                 <FormControl>
                                 <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="paymentNotice"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Payment Notice</FormLabel>
+                                <FormControl>
+                                <Textarea {...field} placeholder="e.g., Verification can take 2 mins to 6 hours..." />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

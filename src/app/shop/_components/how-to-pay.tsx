@@ -159,21 +159,14 @@ export const HowToPayContent = ({
         <Alert variant="default" className="bg-muted/30">
           <AlertTitle>Important Note</AlertTitle>
           <AlertDescription className="space-y-2">
+            {siteInfo.paymentNotice && (
+                 <p className="whitespace-pre-wrap">{siteInfo.paymentNotice}</p>
+            )}
             <p>
-              Verification can take from{" "}
-              <span className="font-bold">2 minutes to 6 hours</span>. Please be
-              patient.
-            </p>
-            <p>
-              Payments made between{" "}
-              <span className="font-bold">5 AM to 10 AM</span> might be verified
-              after this period.
-            </p>
-            <p>
-              If your verification exceeds 6 hours, please contact us via the{" "}
+              If any issues occur, please contact us via the{" "}
               <button
                 onClick={() => setHelpOpen(true)}
-                className="underline font-medium"
+                className="underline font-medium hover:text-accent"
               >
                 Help Center
               </button>

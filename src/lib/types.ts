@@ -55,6 +55,7 @@ export interface SiteInfo {
   webDescription?: string;
   bkashNumber?: string;
   bkashQrCodeUrl?: string;
+  paymentNotice?: string;
   githubUrl?: string;
   linkedinUrl?: string;
   xUrl?: string;
