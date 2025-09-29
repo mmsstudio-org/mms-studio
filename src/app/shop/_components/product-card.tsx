@@ -14,21 +14,21 @@ type ProductCardProps = {
 };
 
 function formatSubscriptionDuration(days?: number) {
-    if (!days) return null;
-    if (days >= 365) {
-        const years = Math.floor(days / 365);
-        return `per ${years > 1 ? `${years} years` : 'year'}`;
-    }
-    if (days >= 30) {
-        const months = Math.floor(days / 30);
-        return `per ${months > 1 ? `${months} months` : 'month'}`;
-    }
-    return `for ${days} days`;
+  if (!days) return null;
+  if (days >= 365) {
+    const years = Math.floor(days / 365);
+    return `per ${years > 1 ? `${years} years` : 'year'}`;
+  }
+  if (days >= 30) {
+    const months = Math.floor(days / 30);
+    return `per ${months > 1 ? `${months} months` : 'month'}`;
+  }
+  return `for ${days} days`;
 }
 
 export default function ProductCard({ product, onPurchaseClick, onEditClick }: ProductCardProps) {
   const { user } = useAuth();
-  
+
   const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
   const isCombo = product.type === 'subscription' && product.coinAmount && product.coinAmount > 0;
 
@@ -57,7 +57,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
         ) : (
           <CircleDollarSign className="h-24 w-24 text-foreground/50" />
         )}
-         {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
+        {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
@@ -65,56 +65,57 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex items-baseline gap-2 flex-wrap">
-            {product.discountedPrice && product.discountedPrice > 0 ? (
-                <>
-                    <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
-                    <span className="text-lg text-muted-foreground line-through">৳{product.regularPrice}</span>
-                </>
-            ) : (
-                <span className="text-3xl font-bold">৳{product.regularPrice}</span>
-            )}
-            {savedPercentage > 0 && (
+          {product.discountedPrice && product.discountedPrice > 0 ? (
+            <>
+              <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
+              <span className="text-lg text-muted-foreground line-through">৳{product.regularPrice}</span>
+              {savedPercentage > 0 && (
                 <Badge variant="secondary">
-                    Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+                  Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
                 </Badge>
-            )}
-        </div>
-        
-        <div className="mt-2 space-y-1">
-          {product.type === 'subscription' && product.subscriptionDays && (
-              <div className="flex justify-between items-center">
-                  <p className="text-sm text-muted-foreground flex items-center gap-1">
-                      <CalendarDays className="h-4 w-4" />
-                      {formatSubscriptionDuration(product.subscriptionDays)}
-                  </p>
-                  {product.coinAmount && product.coinAmount > 0 && (
-                      <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
-                          🪙
-                          {product.coinAmount.toLocaleString()} Coins
-                      </p>
-                  )}
-              </div>
+              )}
+            </>
+          ) : (
+            <span className="text-3xl font-bold">৳{product.regularPrice}</span>
           )}
 
-          {product.type === 'coins' && product.coinAmount && product.coinAmount > 0 && (
-              <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
+        </div>
+
+        <div className="mt-2 space-y-1">
+          {product.type === 'subscription' && product.subscriptionDays && (
+            <div className="flex justify-start items-center gap-3">
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <CalendarDays className="h-4 w-4" />
+                {formatSubscriptionDuration(product.subscriptionDays)}
+              </p>
+              {product.coinAmount && product.coinAmount > 0 ? (
+                <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
                   🪙
                   {product.coinAmount.toLocaleString()} Coins
-              </p>
+                </p>
+              ) : ""}
+            </div>
           )}
+
+          {product.type === 'coins' && product.coinAmount && product.coinAmount > 0 ? (
+            <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
+              🪙
+              {product.coinAmount.toLocaleString()} Coins
+            </p>
+          ) : ""}
         </div>
       </CardContent>
       <CardFooter className="mt-auto">
         {user ? (
-           <Button className="w-full" onClick={onEditClick}>
-             <Pencil className="mr-2 h-4 w-4" />
-             Edit
-           </Button>
+          <Button className="w-full" onClick={onEditClick}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit
+          </Button>
         ) : (
-            <Button className="w-full bg-primary hover:bg-primary/90" onClick={onPurchaseClick}>
-                <ShoppingCart className="mr-2 h-4 w-4" />
-                Purchase
-            </Button>
+          <Button className="w-full bg-primary hover:bg-primary/90" onClick={onPurchaseClick}>
+            <ShoppingCart className="mr-2 h-4 w-4" />
+            Purchase
+          </Button>
         )}
       </CardFooter>
     </Card>

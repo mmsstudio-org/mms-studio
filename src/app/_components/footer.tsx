@@ -2,8 +2,8 @@
 "use client";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { 
-    Github, Home, Instagram, HelpCircle, Linkedin, Mail, Youtube, Facebook, Twitter
+import {
+  Github, Home, Instagram, HelpCircle, Linkedin, Mail, Youtube, Facebook, Twitter
 } from "lucide-react";
 import HelpCenterModal from "./help-center-modal";
 import Image from "next/image";
@@ -14,13 +14,14 @@ import { Skeleton } from "@/components/ui/skeleton";
 // Custom icons for brands not in lucide-react
 const XIcon = Twitter;
 const WhatsAppIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M16.75 13.96c.25.13.43.2.6.35.2.16.32.34.4.55.12.3.18.6.18.98 0 .4-.1.78-.33 1.13-.23.35-.55.64-1 .85-.45.2-1 .3-1.6.3-.58 0-1.15-.1-1.7-.34-.55-.23-1.1-.55-1.63-.93-.53-.38-1.03-.8-1.5-1.25-.47-.45-.9-1-1.28-1.5s-.7-1-1-1.5c-.3-.5-.56-.98-.78-1.45-.22-.47-.38-.9-.42-1.3-.04-.4.04-.8.2-1.15.17-.35.4-.64.7-.84.3-.2.6-.3.9-.3.3 0 .6.04.8.13.2.1.35.2.45.3s.18.2.2.34c.03.14.02.28 0 .42-.02.14-.08.28-.17.4s-.18.23-.28.34c-.1.1-.2.2-.3.3s-.18.17-.25.24c-.07.07-.12.13-.15.18-.03.05-.05.1-.05.16 0 .06.02.12.06.18.04.06.1.13.18.2.08.07.18.14.28.2.1.08.23.15.35.23.12.08.24.14.35.18.1.04.2.07.28.1.08.03.15.04.2.04.05 0 .1-.02.15-.05.05-.03.1-.08.15-.14.05-.06.1-.12.14-.18.04-.06.08-.1.1-.13h.02z M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/>
-    </svg>
+  <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
+    <path fill="currentColor" d="M16.6 14c-.2-.1-1.5-.7-1.7-.8c-.2-.1-.4-.1-.6.1c-.2.2-.6.8-.8 1c-.1.2-.3.2-.5.1c-.7-.3-1.4-.7-2-1.2c-.5-.5-1-1.1-1.4-1.7c-.1-.2 0-.4.1-.5c.1-.1.2-.3.4-.4c.1-.1.2-.3.2-.4c.1-.1.1-.3 0-.4c-.1-.1-.6-1.3-.8-1.8c-.1-.7-.3-.7-.5-.7h-.5c-.2 0-.5.2-.6.3c-.6.6-.9 1.3-.9 2.1c.1.9.4 1.8 1 2.6c1.1 1.6 2.5 2.9 4.2 3.7c.5.2.9.4 1.4.5c.5.2 1 .2 1.6.1c.7-.1 1.3-.6 1.7-1.2c.2-.4.2-.8.1-1.2l-.4-.2m2.5-9.1C15.2 1 8.9 1 5 4.9c-3.2 3.2-3.8 8.1-1.6 12L2 22l5.3-1.4c1.5.8 3.1 1.2 4.7 1.2c5.5 0 9.9-4.4 9.9-9.9c.1-2.6-1-5.1-2.8-7m-2.7 14c-1.3.8-2.8 1.3-4.4 1.3c-1.5 0-2.9-.4-4.2-1.1l-.3-.2l-3.1.8l.8-3l-.2-.3c-2.4-4-1.2-9 2.7-11.5S16.6 3.7 19 7.5c2.4 3.9 1.3 9-2.6 11.4" />
+  </svg>
 );
+
 const TelegramIcon = () => (
-     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M22 2 2 8.67l6.16 2.16 2.16 6.16L22 2Zm-6.53 8.87-5.54 3.53-1.4-4.59 9.38-6.1-2.44 7.16Z" />
+  <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 24 24" fill="currentColor">
+    <path fill="currentColor" d="m16.463 8.846l-1.09 6.979a.588.588 0 0 1-.894.407l-3.65-2.287a.588.588 0 0 1-.095-.923l3.03-2.904c.034-.032-.006-.085-.046-.061l-4.392 2.628a1.23 1.23 0 0 1-.87.153l-1.59-.307c-.574-.111-.653-.899-.114-1.122l8.502-3.515a.882.882 0 0 1 1.21.952" /><path fill="currentColor" fill-rule="evenodd" d="M12 1.706C6.315 1.706 1.706 6.315 1.706 12S6.315 22.294 12 22.294S22.294 17.685 22.294 12S17.685 1.706 12 1.706M3.47 12a8.53 8.53 0 1 1 17.06 0a8.53 8.53 0 0 1-17.06 0" clip-rule="evenodd" />
     </svg>
 );
 
@@ -68,32 +69,32 @@ export default function Footer() {
             </div>
 
             <div className="flex flex-wrap justify-center items-center gap-6">
-                <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors"><Home className="h-5 w-5" /><span className="sr-only">Home</span></Link>
-                
-                {loading ? (
-                    <Skeleton className="h-5 w-32" />
-                ) : (
-                   socialLinks.map((link) => (
-                    <Link
-                      key={link.label}
-                      href={link.href!}
-                      target={link.target}
-                      rel={link.target === '_blank' ? 'noopener noreferrer' : undefined}
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                    >
-                      <link.icon/>
-                      <span className="sr-only">{link.label}</span>
-                    </Link>
-                  ))
-                )}
-                
-                <button
-                    onClick={() => setHelpOpen(true)}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-                    >
-                    <HelpCircle className="h-5 w-5" />
-                    <span className="sr-only">Help Center</span>
-                </button>
+              <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors"><Home className="h-5 w-5" /><span className="sr-only">Home</span></Link>
+
+              {loading ? (
+                <Skeleton className="h-5 w-32" />
+              ) : (
+                socialLinks.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href!}
+                    target={link.target}
+                    rel={link.target === '_blank' ? 'noopener noreferrer' : undefined}
+                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <link.icon />
+                    <span className="sr-only">{link.label}</span>
+                  </Link>
+                ))
+              )}
+
+              <button
+                onClick={() => setHelpOpen(true)}
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+              >
+                <HelpCircle className="h-5 w-5" />
+                <span className="sr-only">Help Center</span>
+              </button>
             </div>
           </div>
           <div className="text-center text-muted-foreground">
