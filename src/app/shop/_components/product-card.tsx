@@ -2,7 +2,7 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays, Sparkles } from 'lucide-react';
+import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -64,7 +64,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
         <CardDescription className="flex-grow min-h-[40px] whitespace-pre-wrap">{product.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
-        <div className="flex items-baseline gap-2">
+        <div className="flex items-baseline gap-2 flex-wrap">
             {product.discountedPrice && product.discountedPrice > 0 ? (
                 <>
                     <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
@@ -73,12 +73,13 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
             ) : (
                 <span className="text-3xl font-bold">৳{product.regularPrice}</span>
             )}
+            {savedPercentage > 0 && (
+                <Badge variant="secondary">
+                    Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+                </Badge>
+            )}
         </div>
-        {savedPercentage > 0 && (
-            <Badge variant="secondary" className="mt-1">
-                Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
-            </Badge>
-        )}
+        
         {product.type === 'subscription' && product.subscriptionDays && (
             <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
                 <CalendarDays className="h-4 w-4" />
@@ -87,8 +88,8 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
         )}
         {product.coinAmount && product.coinAmount > 0 && (
             <p className={cn("text-sm font-bold text-amber-500 flex items-center gap-1", product.type === 'subscription' ? 'mt-1' : 'mt-2')}>
-                <Sparkles className="h-4 w-4" />
-                {product.coinAmount.toLocaleString()} Coins {product.type === 'subscription' && '(Bonus)'}
+                🪙
+                {product.coinAmount.toLocaleString()} Coins
             </p>
         )}
       </CardContent>

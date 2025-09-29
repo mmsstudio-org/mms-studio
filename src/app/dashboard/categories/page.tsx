@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown, Sparkles } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
@@ -180,7 +180,7 @@ export default function CategoriesPage() {
             <h5 className="font-bold truncate">{product.name}</h5>
             {product.description && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{product.description}</p>}
             <div className="mt-auto pt-2">
-                <div className="text-sm flex items-baseline gap-2">
+                <div className="text-sm flex items-baseline gap-2 flex-wrap">
                     {product.discountedPrice && product.discountedPrice > 0 ? (
                         <>
                             <span className="font-bold text-accent">৳{product.discountedPrice}</span>
@@ -189,16 +189,17 @@ export default function CategoriesPage() {
                     ) : (
                         <span className="font-bold">৳{product.regularPrice}</span>
                     )}
+                    {savedPercentage > 0 && (
+                        <Badge variant="secondary">
+                            Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+                        </Badge>
+                    )}
                 </div>
-                 {savedPercentage > 0 && (
-                    <Badge variant="secondary" className="mt-1 text-xs">
-                        Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
-                    </Badge>
-                )}
+                 
                  {product.coinAmount && product.coinAmount > 0 && (
                     <p className="text-xs font-bold text-amber-500 flex items-center gap-1 mt-1">
-                        <Sparkles className="h-3 w-3" />
-                        {product.coinAmount.toLocaleString()} Coins {product.type === 'subscription' && '(Bonus)'}
+                        🪙
+                        {product.coinAmount.toLocaleString()} Coins
                     </p>
                 )}
             </div>
