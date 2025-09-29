@@ -18,9 +18,12 @@ export default function Header() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
+  
+  const isHomePage = pathname === '/';
 
   const navLinks = [
     { href: "/shop", label: "Shop" },
+    ...(isHomePage ? [{ href: "#contact", label: "Contact" }] : []),
     ...(user ? [{ href: "/dashboard", label: "Dashboard" }] : []),
   ];
 
@@ -49,7 +52,7 @@ export default function Header() {
                   href={link.href}
                   className={cn(
                     "transition-colors hover:text-foreground/80 text-glow",
-                    pathname.startsWith(link.href)
+                    pathname === link.href || (link.href !== '/' && pathname.startsWith(link.href))
                       ? "text-foreground"
                       : "text-foreground/60"
                   )}

@@ -22,18 +22,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Mail, MapPin, Phone, Github, Linkedin, Twitter, Instagram, Facebook, Youtube } from 'lucide-react';
+import { Loader2, Mail, MapPin, Phone, Github, Linkedin, Instagram, Facebook, Youtube, Twitter } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { getSiteInfo } from '@/lib/firestore-service';
 import type { SiteInfo } from '@/lib/types';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const XIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-    </svg>
-);
+const XIcon = Twitter;
 const WhatsAppIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
         <path d="M16.75 13.96c.25.13.43.2.6.35.2.16.32.34.4.55.12.3.18.6.18.98 0 .4-.1.78-.33 1.13-.23.35-.55.64-1 .85-.45.2-1 .3-1.6.3-.58 0-1.15-.1-1.7-.34-.55-.23-1.1-.55-1.63-.93-.53-.38-1.03-.8-1.5-1.25-.47-.45-.9-1-1.28-1.5s-.7-1-1-1.5c-.3-.5-.56-.98-.78-1.45-.22-.47-.38-.9-.42-1.3-.04-.4.04-.8.2-1.15.17-.35.4-.64.7-.84.3-.2.6-.3.9-.3.3 0 .6.04.8.13.2.1.35.2.45.3s.18.2.2.34c.03.14.02.28 0 .42-.02.14-.08.28-.17.4s-.18.23-.28.34c-.1.1-.2.2-.3.3s-.18.17-.25.24c-.07.07-.12.13-.15.18-.03.05-.05.1-.05.16 0 .06.02.12.06.18.04.06.1.13.18.2.08.07.18.14.28.2.1.08.23.15.35.23.12.08.24.14.35.18.1.04.2.07.28.1.08.03.15.04.2.04.05 0 .1-.02.15-.05.05-.03.1-.08.15-.14.05-.06.1-.12.14-.18.04-.06.08-.1.1-.13h.02z M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8z"/>
@@ -147,7 +143,7 @@ export default function ContactSection() {
   };
 
   return (
-    <section id="contact" className="py-20">
+    <section id="contact" className="py-20 scroll-mt-20">
       <div className="text-center mb-12">
         <h2 className="text-4xl font-['Orbitron'] font-bold neon-text">Get in Touch</h2>
         <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
@@ -184,7 +180,7 @@ export default function ContactSection() {
                             <FormItem><FormLabel>Subject*</FormLabel><FormControl><Input placeholder="e.g., E-commerce Website, Android App" {...field} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <FormField control={form.control} name="message" render={({ field }) => (
-                            <FormItem><FormLabel>Your Message*</FormLabel><FormControl><Textarea placeholder="Describe your project vision, key features, and any questions you have." {...field} rows={5} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Your Message*</FormLabel><FormControl><Textarea placeholder="Describe your project vision, key features, and any questions you have." {...field} rows={8} /></FormControl><FormMessage /></FormItem>
                         )} />
                         <div className="flex flex-col gap-4">
                             <Button type="submit" disabled={isSubmitting} size="lg" className="w-full">

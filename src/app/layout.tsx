@@ -34,7 +34,7 @@ export default function RootLayout({
   }, []);
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning style={{ scrollBehavior: 'smooth' }}>
       <head>
         <title>{defaultSiteInfo.title}</title>
         {/* <title>MMS Studio - Official Website</title> */}
