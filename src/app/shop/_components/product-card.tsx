@@ -81,28 +81,20 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
 
         </div>
 
-        <div className="mt-2 space-y-1">
-          {product.type === 'subscription' && product.subscriptionDays && (
-            <div className="flex justify-start items-center gap-3">
-              <p className="text-sm text-muted-foreground flex items-center gap-1">
-                <CalendarDays className="h-4 w-4" />
-                {formatSubscriptionDuration(product.subscriptionDays)}
-              </p>
-              {product.coinAmount && product.coinAmount > 0 ? (
-                <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
-                  🪙
-                  {product.coinAmount.toLocaleString()} Coins
+        <div className="mt-4 space-y-1">
+            {product.type === 'subscription' && product.subscriptionDays && (
+                <p className="text-sm text-muted-foreground flex items-center gap-1">
+                    <CalendarDays className="h-4 w-4" />
+                    <span>{formatSubscriptionDuration(product.subscriptionDays)}</span>
                 </p>
-              ) : ""}
-            </div>
-          )}
+            )}
 
-          {product.type === 'coins' && product.coinAmount && product.coinAmount > 0 ? (
-            <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
-              🪙
-              {product.coinAmount.toLocaleString()} Coins
-            </p>
-          ) : ""}
+            {product.coinAmount && product.coinAmount > 0 && (
+                 <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
+                    {product.type === 'subscription' && <span>+</span>}
+                    <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
+                </p>
+            )}
         </div>
       </CardContent>
       <CardFooter className="mt-auto">

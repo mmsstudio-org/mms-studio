@@ -211,24 +211,16 @@ export default function CategoriesPage() {
                  
                  <div className="mt-2 space-y-1 text-xs">
                     {product.type === 'subscription' && product.subscriptionDays && (
-                        <div className="flex justify-between items-center">
-                            <p className="text-muted-foreground flex items-center gap-1">
-                                <CalendarDays className="h-3 w-3" />
-                                {formatSubscriptionDuration(product.subscriptionDays)}
-                            </p>
-                            {product.coinAmount && product.coinAmount > 0 && (
-                                <p className="font-bold text-amber-500 flex items-center gap-1">
-                                    🪙
-                                    {product.coinAmount.toLocaleString()} Coins
-                                </p>
-                            )}
-                        </div>
+                        <p className="text-muted-foreground flex items-center gap-1">
+                            <CalendarDays className="h-3 w-3" />
+                            {formatSubscriptionDuration(product.subscriptionDays)}
+                        </p>
                     )}
 
-                    {product.type === 'coins' && product.coinAmount && product.coinAmount > 0 && (
-                        <p className="font-bold text-amber-500 flex items-center gap-1">
-                            🪙
-                            {product.coinAmount.toLocaleString()} Coins
+                    {product.coinAmount && product.coinAmount > 0 && (
+                         <p className="font-bold text-amber-500 flex items-center gap-1">
+                            {product.type === 'subscription' && <span>+</span>}
+                            <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
                         </p>
                     )}
                 </div>
