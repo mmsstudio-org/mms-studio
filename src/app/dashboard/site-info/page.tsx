@@ -35,6 +35,9 @@ const siteInfoSchema = z.object({
   email: z.string().email().optional().or(z.literal('')),
   youtubeUrl: z.string().url().optional().or(z.literal('')),
   facebookUrl: z.string().url().optional().or(z.literal('')),
+  location: z.string().optional(),
+  contactNumber: z.string().optional(),
+  googleMapsUrl: z.string().url().optional().or(z.literal('')),
 });
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
@@ -77,6 +80,9 @@ export default function SiteInfoPage() {
       email: '',
       youtubeUrl: '',
       facebookUrl: '',
+      location: '',
+      contactNumber: '',
+      googleMapsUrl: '',
     },
   });
   
@@ -226,6 +232,21 @@ export default function SiteInfoPage() {
 
                 <Card>
                     <CardHeader>
+                        <CardTitle>Contact & Location Details</CardTitle>
+                        <CardDescription>Provide contact info and location for the 'Contact Us' section.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField control={siteInfoForm.control} name="contactNumber" render={({ field }) => (<FormItem><FormLabel>Contact Phone Number</FormLabel><FormControl><Input placeholder="+880 123 456 7890" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="location" render={({ field }) => (<FormItem><FormLabel>Location</FormLabel><FormControl><Input placeholder="Your business address" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <div className="md:col-span-2">
+                        <FormField control={siteInfoForm.control} name="googleMapsUrl" render={({ field }) => (<FormItem><FormLabel>Google Maps Embed URL</FormLabel><FormControl><Input placeholder="https://www.google.com/maps/embed?..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        </div>
+                    </CardContent>
+                </Card>
+
+
+                <Card>
+                    <CardHeader>
                         <CardTitle>Social & Contact Links</CardTitle>
                         <CardDescription>Add URLs for your social media profiles and contact methods. Leave blank to hide.</CardDescription>
                     </CardHeader>
@@ -238,7 +259,7 @@ export default function SiteInfoPage() {
                         <FormField control={siteInfoForm.control} name="youtubeUrl" render={({ field }) => (<FormItem><FormLabel>YouTube URL</FormLabel><FormControl><Input placeholder="https://youtube.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={siteInfoForm.control} name="whatsappUrl" render={({ field }) => (<FormItem><FormLabel>WhatsApp URL</FormLabel><FormControl><Input placeholder="https://wa.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={siteInfoForm.control} name="telegramUrl" render={({ field }) => (<FormItem><FormLabel>Telegram URL</FormLabel><FormControl><Input placeholder="https://t.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-                        <FormField control={siteInfoForm.control} name="email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input placeholder="mailto:your@email.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input placeholder="your@email.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
                     </CardContent>
                 </Card>
 

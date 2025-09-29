@@ -107,6 +107,9 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
         email: siteInfo.email || '',
         youtubeUrl: siteInfo.youtubeUrl || '',
         facebookUrl: siteInfo.facebookUrl || '',
+        location: siteInfo.location || '',
+        contactNumber: siteInfo.contactNumber || '',
+        googleMapsUrl: siteInfo.googleMapsUrl || '',
     };
     await setDoc(docRef, dataToSave, { merge: true });
 }

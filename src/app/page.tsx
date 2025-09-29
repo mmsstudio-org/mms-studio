@@ -19,6 +19,7 @@ import {
   Briefcase,
 } from "lucide-react";
 import Image from "next/image";
+import ContactSection from "./_components/contact-section";
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
   const LucideIcon = (LucideIcons as any)[name];
@@ -227,6 +228,8 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      <ContactSection />
     </div>
   );
 }

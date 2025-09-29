@@ -64,6 +64,9 @@ export interface SiteInfo {
   email?: string;
   youtubeUrl?: string;
   facebookUrl?: string;
+  location?: string;
+  contactNumber?: string;
+  googleMapsUrl?: string;
 }
 
 export interface Coupon {
