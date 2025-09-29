@@ -25,7 +25,7 @@ import { ConfirmationDialog } from '../purchases/_components/confirmation-dialog
 import CouponEditModal from './_components/coupon-edit-modal';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
-
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function CouponsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -34,6 +34,10 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
 
   // Modal states
   const [isModalOpen, setModalOpen] = useState(false);
@@ -125,7 +129,7 @@ export default function CouponsPage() {
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if (checked) {
-      setSelectedIds(new Set(filteredCoupons.map(p => p.id)));
+      setSelectedIds(new Set(paginatedCoupons.map(p => p.id)));
     } else {
       setSelectedIds(new Set());
     }
@@ -161,21 +165,35 @@ export default function CouponsPage() {
     const lowercasedQuery = searchQuery.toLowerCase();
     if (!lowercasedQuery) return coupons;
 
-    if (lowercasedQuery === 'active') {
-        return coupons.filter(c => getStatusText(c) === 'Active');
+    switch (lowercasedQuery) {
+        case 'active':
+            return coupons.filter(c => getStatusText(c) === 'Active');
+        case 'expired':
+            return coupons.filter(c => getStatusText(c) === 'Expired');
+        case 'redeemed':
+            return coupons.filter(c => getStatusText(c) === 'Redeemed');
+        case 'limit reached':
+            return coupons.filter(c => getStatusText(c) === 'Limit Reached');
+        case 'true':
+            return coupons.filter(c => c.show_ads === true);
+        case 'false':
+            return coupons.filter(c => c.show_ads === false);
+        default:
+            return coupons.filter(c => c.code.toLowerCase().includes(lowercasedQuery));
     }
-    if (lowercasedQuery === 'expired') {
-      return coupons.filter(c => getStatusText(c) === 'Expired');
-    }
-    if (lowercasedQuery === 'redeemed') {
-      return coupons.filter(c => getStatusText(c) === 'Redeemed');
-    }
-    if (lowercasedQuery === 'limit reached') {
-      return coupons.filter(c => getStatusText(c) === 'Limit Reached');
-    }
-
-    return coupons.filter(c => c.code.toLowerCase().includes(lowercasedQuery));
   }, [coupons, searchQuery]);
+
+  const paginatedCoupons = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredCoupons.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredCoupons, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredCoupons.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setSelectedIds(new Set());
+  }, [searchQuery, itemsPerPage]);
 
 
   if (authLoading || loadingData) {
@@ -267,7 +285,7 @@ export default function CouponsPage() {
           <h1 className="text-4xl font-bold">Manage Coupons</h1>
           <p className="text-muted-foreground">Create, edit, and manage all coupons.</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Tip: Search "active", "expired", "redeemed", or "limit reached" to filter coupons.
+            Tip: Search "active", "expired", "redeemed", "limit reached", "true", or "false" to filter coupons.
           </p>
         </div>
 
@@ -307,7 +325,7 @@ export default function CouponsPage() {
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             type="search"
-            placeholder="Search by coupon code..."
+            placeholder="Search by coupon code or filter..."
             className="w-full rounded-lg bg-background pl-8"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -323,7 +341,7 @@ export default function CouponsPage() {
                   <TableHead className="w-[50px]">
                     <Checkbox
                       onCheckedChange={handleSelectAll}
-                      checked={selectedIds.size > 0 && selectedIds.size === filteredCoupons.length}
+                      checked={selectedIds.size > 0 && selectedIds.size === paginatedCoupons.length}
                       aria-label="Select all"
                     />
                   </TableHead>
@@ -340,7 +358,7 @@ export default function CouponsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredCoupons.map(c => {
+              {paginatedCoupons.map(c => {
                 const status = getStatusText(c);
                 return (
                   <TableRow key={c.id} data-state={selectedIds.has(c.id) && "selected"}>
@@ -398,7 +416,7 @@ export default function CouponsPage() {
                   </TableRow>
                 )
               })}
-              {filteredCoupons.length === 0 && (
+              {paginatedCoupons.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={10} className="text-center h-24">No coupons found.</TableCell>
                 </TableRow>
@@ -409,7 +427,50 @@ export default function CouponsPage() {
 
         {/* Mobile View */}
         <div className="md:hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {filteredCoupons.length > 0 ? filteredCoupons.map(renderCouponCard) : <p className="text-center text-muted-foreground col-span-full">No coupons found.</p>}
+          {paginatedCoupons.length > 0 ? paginatedCoupons.map(renderCouponCard) : <p className="text-center text-muted-foreground col-span-full">No coupons found.</p>}
+        </div>
+
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between space-x-2 py-4">
+            <div className="text-sm text-muted-foreground">
+              {filteredCoupons.length} total coupons.
+            </div>
+            <div className="flex items-center space-x-2">
+                <Select
+                    value={String(itemsPerPage)}
+                    onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Results per page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="50">50 per page</SelectItem>
+                        <SelectItem value="100">100 per page</SelectItem>
+                        <SelectItem value="200">200 per page</SelectItem>
+                        <SelectItem value="500">500 per page</SelectItem>
+                        <SelectItem value="1000">1000 per page</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
         </div>
       </div>
       <CouponEditModal
@@ -464,5 +525,3 @@ export default function CouponsPage() {
     </>
   );
 }
-
-    

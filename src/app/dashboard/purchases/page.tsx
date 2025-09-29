@@ -23,6 +23,7 @@ import { format } from 'date-fns';
 import { MoreHorizontal, Search, Trash2, ShieldX, Loader2 } from 'lucide-react';
 import { ConfirmationDialog } from './_components/confirmation-dialog';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function formatDelay(sentTime: number, receivedTime: number): string {
     const delaySeconds = Math.round((receivedTime - sentTime) / 1000);
@@ -49,6 +50,11 @@ export default function PurchasesPage() {
   const [purchases, setPurchases] = useState<Purchase[]>([]);
   const [loadingData, setLoadingData] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(50);
+  
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null);
   const [isStatusConfirmOpen, setStatusConfirmOpen] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -124,7 +130,7 @@ export default function PurchasesPage() {
 
   const handleSelectAll = (checked: boolean | 'indeterminate') => {
     if(checked) {
-        setSelectedIds(new Set(filteredPurchases.map(p => p.id)));
+        setSelectedIds(new Set(paginatedPurchases.map(p => p.id)));
     } else {
         setSelectedIds(new Set());
     }
@@ -162,6 +168,18 @@ export default function PurchasesPage() {
       (p.sender && p.sender.toLowerCase().includes(lowercasedQuery))
     );
   }, [purchases, searchQuery]);
+
+  const paginatedPurchases = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return filteredPurchases.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredPurchases, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredPurchases.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+    setSelectedIds(new Set());
+  }, [searchQuery, itemsPerPage]);
 
   const summaryStats = useMemo(() => {
     return purchases.reduce((acc, p) => {
@@ -314,7 +332,7 @@ export default function PurchasesPage() {
                         <TableHead className="w-[50px]">
                             <Checkbox 
                                 onCheckedChange={handleSelectAll}
-                                checked={selectedIds.size > 0 && selectedIds.size === filteredPurchases.length}
+                                checked={selectedIds.size > 0 && selectedIds.size === paginatedPurchases.length}
                                 aria-label="Select all"
                             />
                         </TableHead>
@@ -331,7 +349,7 @@ export default function PurchasesPage() {
                 </TableRow>
             </TableHeader>
             <TableBody>
-                {filteredPurchases.map(purchase => (
+                {paginatedPurchases.map(purchase => (
                     <TableRow key={purchase.id} data-state={selectedIds.has(purchase.id) && "selected"}>
                         {isBatchDeleteMode && (
                            <TableCell>
@@ -357,7 +375,7 @@ export default function PurchasesPage() {
                          </TableCell>
                     </TableRow>
                 ))}
-                {filteredPurchases.length === 0 && (
+                {paginatedPurchases.length === 0 && (
                     <TableRow>
                         <TableCell colSpan={isBatchDeleteMode ? 10 : 9} className="text-center h-24">No purchases found.</TableCell>
                     </TableRow>
@@ -368,7 +386,7 @@ export default function PurchasesPage() {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {filteredPurchases.map(purchase => (
+        {paginatedPurchases.map(purchase => (
             <Card key={purchase.id} className={selectedIds.has(purchase.id) ? "border-primary" : ""}>
                 <CardHeader>
                     <div className="flex justify-between items-start">
@@ -396,12 +414,55 @@ export default function PurchasesPage() {
                 </CardContent>
             </Card>
         ))}
-        {filteredPurchases.length === 0 && (
+        {paginatedPurchases.length === 0 && (
            <Card className="text-center h-24 flex items-center justify-center">
              <p className="text-muted-foreground">No purchases found.</p>
            </Card>
         )}
       </div>
+      
+        {/* Pagination Controls */}
+        <div className="flex items-center justify-between space-x-2 py-4">
+            <div className="text-sm text-muted-foreground">
+              {filteredPurchases.length} total purchases.
+            </div>
+            <div className="flex items-center space-x-2">
+                <Select
+                    value={String(itemsPerPage)}
+                    onValueChange={(value) => setItemsPerPage(Number(value))}
+                >
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Results per page" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="50">50 per page</SelectItem>
+                        <SelectItem value="100">100 per page</SelectItem>
+                        <SelectItem value="200">200 per page</SelectItem>
+                        <SelectItem value="500">500 per page</SelectItem>
+                        <SelectItem value="1000">1000 per page</SelectItem>
+                    </SelectContent>
+                </Select>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
+        </div>
     </div>
     <ConfirmationDialog
       isOpen={isStatusConfirmOpen}
