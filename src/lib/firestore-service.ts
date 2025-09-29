@@ -94,10 +94,19 @@ export async function getSiteInfo(): Promise<SiteInfo> {
 
 export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
     const docRef = doc(siteInfoCollection, 'info');
-    // Ensure optional fields are handled correctly.
+    // Ensure optional fields are handled correctly by setting them to an empty string if they are falsy.
     const dataToSave = {
         ...siteInfo,
         bkashQrCodeUrl: siteInfo.bkashQrCodeUrl || '',
+        githubUrl: siteInfo.githubUrl || '',
+        linkedinUrl: siteInfo.linkedinUrl || '',
+        xUrl: siteInfo.xUrl || '',
+        instagramUrl: siteInfo.instagramUrl || '',
+        whatsappUrl: siteInfo.whatsappUrl || '',
+        telegramUrl: siteInfo.telegramUrl || '',
+        email: siteInfo.email || '',
+        youtubeUrl: siteInfo.youtubeUrl || '',
+        facebookUrl: siteInfo.facebookUrl || '',
     };
     await setDoc(docRef, dataToSave, { merge: true });
 }

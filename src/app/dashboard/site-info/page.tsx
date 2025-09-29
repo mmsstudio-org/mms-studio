@@ -1,3 +1,4 @@
+
 'use client';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
@@ -25,6 +26,15 @@ const siteInfoSchema = z.object({
   webDescription: z.string().min(10, 'Description must be at least 10 characters.'),
   bkashNumber: z.string().min(11, 'bKash number must be at least 11 characters.'),
   bkashQrCodeUrl: z.string().url('Please enter a valid URL.').optional().or(z.literal('')),
+  githubUrl: z.string().url().optional().or(z.literal('')),
+  linkedinUrl: z.string().url().optional().or(z.literal('')),
+  xUrl: z.string().url().optional().or(z.literal('')),
+  instagramUrl: z.string().url().optional().or(z.literal('')),
+  whatsappUrl: z.string().optional(),
+  telegramUrl: z.string().optional(),
+  email: z.string().email().optional().or(z.literal('')),
+  youtubeUrl: z.string().url().optional().or(z.literal('')),
+  facebookUrl: z.string().url().optional().or(z.literal('')),
 });
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
@@ -58,6 +68,15 @@ export default function SiteInfoPage() {
       webDescription: '',
       bkashNumber: '',
       bkashQrCodeUrl: '',
+      githubUrl: '',
+      linkedinUrl: '',
+      xUrl: '',
+      instagramUrl: '',
+      whatsappUrl: '',
+      telegramUrl: '',
+      email: '',
+      youtubeUrl: '',
+      facebookUrl: '',
     },
   });
   
@@ -142,77 +161,96 @@ export default function SiteInfoPage() {
     <>
       <div className="container py-10">
         <h1 className="text-4xl font-bold mb-8">Manage Site Information</h1>
-        <div className="grid gap-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>General & Payment Info</CardTitle>
-              <CardDescription>Update your website's main details and bKash payment information.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...siteInfoForm}>
-                <form onSubmit={siteInfoForm.handleSubmit(handleSiteInfoSubmit)} className="space-y-6">
-                  <FormField
-                    control={siteInfoForm.control}
-                    name="webName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Website Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={siteInfoForm.control}
-                    name="webDescription"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Website Description</FormLabel>
-                        <FormControl>
-                          <Textarea {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={siteInfoForm.control}
-                    name="bkashNumber"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>bKash Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={siteInfoForm.control}
-                    name="bkashQrCodeUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>bKash QR Code Image URL</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" disabled={isSubmitting}>
+        <Form {...siteInfoForm}>
+            <form onSubmit={siteInfoForm.handleSubmit(handleSiteInfoSubmit)} className="space-y-8">
+                <Card>
+                    <CardHeader>
+                    <CardTitle>General & Payment Info</CardTitle>
+                    <CardDescription>Update your website's main details and bKash payment information.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="webName"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Website Name</FormLabel>
+                                <FormControl>
+                                <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="webDescription"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Website Description</FormLabel>
+                                <FormControl>
+                                <Textarea {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="bkashNumber"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>bKash Number</FormLabel>
+                                <FormControl>
+                                <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="bkashQrCodeUrl"
+                            render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>bKash QR Code Image URL</FormLabel>
+                                <FormControl>
+                                <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                            )}
+                        />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Social & Contact Links</CardTitle>
+                        <CardDescription>Add URLs for your social media profiles and contact methods. Leave blank to hide.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField control={siteInfoForm.control} name="githubUrl" render={({ field }) => (<FormItem><FormLabel>GitHub URL</FormLabel><FormControl><Input placeholder="https://github.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="linkedinUrl" render={({ field }) => (<FormItem><FormLabel>LinkedIn URL</FormLabel><FormControl><Input placeholder="https://linkedin.com/in/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="xUrl" render={({ field }) => (<FormItem><FormLabel>X (Twitter) URL</FormLabel><FormControl><Input placeholder="https://x.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="instagramUrl" render={({ field }) => (<FormItem><FormLabel>Instagram URL</FormLabel><FormControl><Input placeholder="https://instagram.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="facebookUrl" render={({ field }) => (<FormItem><FormLabel>Facebook URL</FormLabel><FormControl><Input placeholder="https://facebook.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="youtubeUrl" render={({ field }) => (<FormItem><FormLabel>YouTube URL</FormLabel><FormControl><Input placeholder="https://youtube.com/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="whatsappUrl" render={({ field }) => (<FormItem><FormLabel>WhatsApp URL</FormLabel><FormControl><Input placeholder="https://wa.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="telegramUrl" render={({ field }) => (<FormItem><FormLabel>Telegram URL</FormLabel><FormControl><Input placeholder="https://t.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+                        <FormField control={siteInfoForm.control} name="email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input placeholder="mailto:your@email.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </CardContent>
+                </Card>
+
+                <Button type="submit" disabled={isSubmitting} className="w-full">
                     {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Save All Info
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-
-          <Card>
+                </Button>
+            </form>
+        </Form>
+        
+        <div className="grid gap-8 mt-8">
+            <Card>
               <CardHeader>
                   <div className="flex justify-between items-center">
                       <div>
@@ -254,7 +292,7 @@ export default function SiteInfoPage() {
                   ))
                 )}
               </CardContent>
-          </Card>
+            </Card>
         </div>
       </div>
       <FeatureEditModal

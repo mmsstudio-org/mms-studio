@@ -55,6 +55,15 @@ export interface SiteInfo {
   webDescription?: string;
   bkashNumber?: string;
   bkashQrCodeUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  xUrl?: string;
+  instagramUrl?: string;
+  whatsappUrl?: string;
+  telegramUrl?: string;
+  email?: string;
+  youtubeUrl?: string;
+  facebookUrl?: string;
 }
 
 export interface Coupon {
