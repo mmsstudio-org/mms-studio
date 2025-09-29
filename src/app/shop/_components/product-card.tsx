@@ -89,12 +89,12 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
                 </p>
             )}
 
-            {product.coinAmount && product.coinAmount > 0 && (
+            {product.coinAmount && product.coinAmount > 0 ? (
                  <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
                     {product.type === 'subscription' && <span>+</span>}
                     <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
                 </p>
-            )}
+            ):""}
         </div>
       </CardContent>
       <CardFooter className="mt-auto">

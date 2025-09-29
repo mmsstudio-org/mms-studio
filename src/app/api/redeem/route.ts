@@ -5,6 +5,7 @@ import {getCoupon, updateCoupon} from '@/lib/firestore-service';
 export async function GET(request: NextRequest) {
   const {searchParams} = new URL(request.url);
   const code = searchParams.get('code');
+  const note = searchParams.get('note');
 
   if (!code) {
     return NextResponse.json({success: false, message: 'Coupon code is required.'}, {status: 400});
@@ -43,9 +44,20 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({success: false, message: 'Invalid coupon type.'}, {status: 500});
     }
 
-    // Increment redeem_count
-    const newRedeemCount = coupon.redeem_count + 1;
-    await updateCoupon(coupon.id, {redeem_count: newRedeemCount});
+    // Prepare data for update
+    const updateData: { redeem_count: number; note?: string } = {
+      redeem_count: coupon.redeem_count + 1,
+    };
+
+    // Append note if provided for single-use coupons
+    if (note && coupon.type === 'single') {
+        const prevNote = coupon.note || '';
+        const newNote = `${prevNote}\n-Redeem Info: ${note}`;
+        updateData.note = newNote.trim();
+    }
+
+    // Increment redeem_count and potentially update note
+    await updateCoupon(coupon.id, updateData);
 
     const validityDate = new Date(coupon.validity);
     
