@@ -2,9 +2,10 @@ import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { Product } from '@/lib/types';
-import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
+import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays, Sparkles } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 type ProductCardProps = {
   product: Product;
@@ -29,6 +30,10 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
   const { user } = useAuth();
   
   const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
+  const isCombo = product.type === 'subscription' && product.coinAmount && product.coinAmount > 0;
+
+  const savedAmount = product.discountedPrice ? product.regularPrice - product.discountedPrice : 0;
+  const savedPercentage = product.discountedPrice ? Math.round((savedAmount / product.regularPrice) * 100) : 0;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1 h-full">
@@ -52,6 +57,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
         ) : (
           <CircleDollarSign className="h-24 w-24 text-foreground/50" />
         )}
+         {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
@@ -59,7 +65,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex items-baseline gap-2">
-            {product.discountedPrice ? (
+            {product.discountedPrice && product.discountedPrice > 0 ? (
                 <>
                     <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
                     <span className="text-lg text-muted-foreground line-through">৳{product.regularPrice}</span>
@@ -68,15 +74,21 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
                 <span className="text-3xl font-bold">৳{product.regularPrice}</span>
             )}
         </div>
+        {savedPercentage > 0 && (
+            <Badge variant="secondary" className="mt-1">
+                Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+            </Badge>
+        )}
         {product.type === 'subscription' && product.subscriptionDays && (
-            <p className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
+            <p className="text-sm text-muted-foreground mt-2 flex items-center gap-1">
                 <CalendarDays className="h-4 w-4" />
                 {formatSubscriptionDuration(product.subscriptionDays)}
             </p>
         )}
-        {product.type === 'coins' && product.coinAmount && (
-            <p className="text-sm font-bold text-amber-500 mt-1">
-                {product.coinAmount.toLocaleString()} Coins
+        {product.coinAmount && product.coinAmount > 0 && (
+            <p className={cn("text-sm font-bold text-amber-500 flex items-center gap-1", product.type === 'subscription' ? 'mt-1' : 'mt-2')}>
+                <Sparkles className="h-4 w-4" />
+                {product.coinAmount.toLocaleString()} Coins {product.type === 'subscription' && '(Bonus)'}
             </p>
         )}
       </CardContent>

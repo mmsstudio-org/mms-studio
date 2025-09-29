@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import type { AppDetail, Product } from '@/lib/types';
 import { getApps, getProductsForApp, deleteApp } from '@/lib/firestore-service';
-import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown } from 'lucide-react';
+import { Loader2, PlusCircle, Trash2, Pencil, ArrowUpNarrowWide, ArrowDownWideNarrow, Package, CircleDollarSign, ChevronsUpDown, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import AppEditModal from './_components/app-edit-modal';
 import ProductEditModal from '@/app/shop/_components/product-edit-modal';
@@ -17,6 +17,7 @@ import Image from 'next/image';
 import * as LucideIcons from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Badge } from '@/components/ui/badge';
 
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
@@ -158,7 +159,12 @@ export default function CategoriesPage() {
     );
   }
 
-  const renderProductCard = (product: Product) => (
+  const renderProductCard = (product: Product) => {
+    const isCombo = product.type === 'subscription' && product.coinAmount && product.coinAmount > 0;
+    const savedAmount = product.discountedPrice ? product.regularPrice - product.discountedPrice : 0;
+    const savedPercentage = product.discountedPrice ? Math.round((savedAmount / product.regularPrice) * 100) : 0;
+
+    return (
     <Card key={product.id} className="flex flex-col">
         <div className="relative w-full aspect-video flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-accent/10">
             {product.imageUrl ? (
@@ -168,26 +174,41 @@ export default function CategoriesPage() {
             ) : (
                 <CircleDollarSign className="h-12 w-12 text-muted-foreground" />
             )}
+             {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
         </div>
         <div className="p-4 flex-grow flex flex-col">
             <h5 className="font-bold truncate">{product.name}</h5>
             {product.description && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{product.description}</p>}
-            <div className="mt-2 text-sm flex items-baseline gap-2">
-                {product.discountedPrice && product.discountedPrice > 0 ? (
-                    <>
-                        <span className="font-bold text-accent">৳{product.discountedPrice}</span>
-                        <span className="text-muted-foreground line-through">৳{product.regularPrice}</span>
-                    </>
-                ) : (
-                    <span className="font-bold">৳{product.regularPrice}</span>
+            <div className="mt-auto pt-2">
+                <div className="text-sm flex items-baseline gap-2">
+                    {product.discountedPrice && product.discountedPrice > 0 ? (
+                        <>
+                            <span className="font-bold text-accent">৳{product.discountedPrice}</span>
+                            <span className="text-muted-foreground line-through">৳{product.regularPrice}</span>
+                        </>
+                    ) : (
+                        <span className="font-bold">৳{product.regularPrice}</span>
+                    )}
+                </div>
+                 {savedPercentage > 0 && (
+                    <Badge variant="secondary" className="mt-1 text-xs">
+                        Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+                    </Badge>
+                )}
+                 {product.coinAmount && product.coinAmount > 0 && (
+                    <p className="text-xs font-bold text-amber-500 flex items-center gap-1 mt-1">
+                        <Sparkles className="h-3 w-3" />
+                        {product.coinAmount.toLocaleString()} Coins {product.type === 'subscription' && '(Bonus)'}
+                    </p>
                 )}
             </div>
         </div>
-        <CardContent className="mt-auto p-4 pt-0">
+        <CardContent className="p-4 pt-0">
             <Button className="w-full" size="sm" variant="outline" onClick={() => handleEditProduct(product)}><Pencil className="mr-2 h-4 w-4" /> Edit</Button>
         </CardContent>
     </Card>
-  );
+    )
+  };
 
   return (
     <div className="container py-10">
