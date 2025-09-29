@@ -38,6 +38,7 @@ const siteInfoSchema = z.object({
   location: z.string().optional(),
   contactNumber: z.string().optional(),
   googleMapsUrl: z.string().url().optional().or(z.literal('')),
+  appAdsTxt: z.string().optional(),
 });
 
 const Icon = ({ name, className }: { name: string; className: string }) => {
@@ -83,6 +84,7 @@ export default function SiteInfoPage() {
       location: '',
       contactNumber: '',
       googleMapsUrl: '',
+      appAdsTxt: '',
     },
   });
   
@@ -260,6 +262,28 @@ export default function SiteInfoPage() {
                         <FormField control={siteInfoForm.control} name="whatsappUrl" render={({ field }) => (<FormItem><FormLabel>WhatsApp URL</FormLabel><FormControl><Input placeholder="https://wa.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={siteInfoForm.control} name="telegramUrl" render={({ field }) => (<FormItem><FormLabel>Telegram URL</FormLabel><FormControl><Input placeholder="https://t.me/..." {...field} /></FormControl><FormMessage /></FormItem>)} />
                         <FormField control={siteInfoForm.control} name="email" render={({ field }) => (<FormItem><FormLabel>Contact Email</FormLabel><FormControl><Input placeholder="your@email.com" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>App Ads</CardTitle>
+                        <CardDescription>Manage the content of your app-ads.txt file for ad network verification.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <FormField
+                            control={siteInfoForm.control}
+                            name="appAdsTxt"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>app-ads.txt content</FormLabel>
+                                    <FormControl>
+                                        <Textarea className="font-mono h-48" placeholder="google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
                     </CardContent>
                 </Card>
 

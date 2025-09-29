@@ -67,6 +67,7 @@ export interface SiteInfo {
   location?: string;
   contactNumber?: string;
   googleMapsUrl?: string;
+  appAdsTxt?: string;
 }
 
 export interface Coupon {

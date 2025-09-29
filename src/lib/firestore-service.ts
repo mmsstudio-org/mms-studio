@@ -110,6 +110,7 @@ export async function updateSiteInfo(siteInfo: SiteInfo): Promise<void> {
         location: siteInfo.location || '',
         contactNumber: siteInfo.contactNumber || '',
         googleMapsUrl: siteInfo.googleMapsUrl || '',
+        appAdsTxt: siteInfo.appAdsTxt || '',
     };
     await setDoc(docRef, dataToSave, { merge: true });
 }
