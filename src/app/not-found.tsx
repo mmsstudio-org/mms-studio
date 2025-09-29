@@ -1,10 +1,12 @@
-
 'use client';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Home, Briefcase } from 'lucide-react';
+import { Home, Briefcase, Undo } from 'lucide-react';
 
 export default function NotFound() {
+  const router = useRouter();
+
   return (
     <div className="container mx-auto flex h-full flex-col items-center justify-center text-center py-20">
       <div className="relative">
@@ -31,6 +33,12 @@ export default function NotFound() {
             Visit Portfolio
           </Link>
         </div>
+      </div>
+      <div className="mt-4">
+        <Button variant="link" onClick={() => router.back()} className="text-muted-foreground hover:text-foreground">
+          <Undo className="mr-2 h-4 w-4" />
+          Go Back
+        </Button>
       </div>
     </div>
   );
