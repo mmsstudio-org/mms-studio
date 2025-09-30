@@ -13,7 +13,7 @@ import type { Coupon } from '@/lib/types';
 import { getCoupons, deleteCoupon, deleteCouponsBatch } from '@/lib/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { MoreHorizontal, Search, PlusCircle, Trash2, Copy, Pencil, Info, ShieldX, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Search, PlusCircle, Trash2, Copy, Pencil, Info, ShieldX, Loader2, Eye } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +26,7 @@ import CouponEditModal from './_components/coupon-edit-modal';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import CouponDetailModal from './_components/coupon-detail-modal';
 
 export default function CouponsPage() {
   const { user, loading: authLoading } = useAuth();
@@ -41,6 +42,7 @@ export default function CouponsPage() {
 
   // Modal states
   const [isModalOpen, setModalOpen] = useState(false);
+  const [isDetailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState<Coupon | null>(null);
   const [modalMode, setModalMode] = useState<'add' | 'edit' | 'clone'>('add');
 
@@ -98,6 +100,11 @@ export default function CouponsPage() {
   const handleDelete = (coupon: Coupon) => {
     setCouponToDelete(coupon);
     setDeleteConfirmOpen(true);
+  }
+  
+  const handleViewDetails = (coupon: Coupon) => {
+    setSelectedCoupon(coupon);
+    setDetailModalOpen(true);
   }
 
   const confirmDelete = async () => {
@@ -242,6 +249,7 @@ export default function CouponsPage() {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => handleViewDetails(coupon)}><Eye className="mr-2 h-4 w-4" />Details</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleEdit(coupon)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleClone(coupon)}><Copy className="mr-2 h-4 w-4" />Clone</DropdownMenuItem>
                 <DropdownMenuSeparator />
@@ -404,6 +412,7 @@ export default function CouponsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleViewDetails(c)}><Eye className="mr-2 h-4 w-4" />Details</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleEdit(c)}><Pencil className="mr-2 h-4 w-4" />Edit</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleClone(c)}><Copy className="mr-2 h-4 w-4" />Clone</DropdownMenuItem>
                           <DropdownMenuSeparator />
@@ -485,6 +494,11 @@ export default function CouponsPage() {
           fetchCoupons();
         }}
       />
+       <CouponDetailModal
+        isOpen={isDetailModalOpen}
+        onOpenChange={setDetailModalOpen}
+        coupon={selectedCoupon}
+      />
       <ConfirmationDialog
         isOpen={isDeleteConfirmOpen}
         onOpenChange={setDeleteConfirmOpen}
@@ -527,5 +541,3 @@ export default function CouponsPage() {
     </>
   );
 }
-
-    
