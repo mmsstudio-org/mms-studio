@@ -18,6 +18,7 @@ import { z } from 'zod';
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -193,6 +194,9 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
                 render={({ field }) => (
                     <FormItem>
                     <FormLabel>Package Name (Optional)</FormLabel>
+                    <FormDescription>
+                        If set, coupons from this category will require this package name for redemption.
+                    </FormDescription>
                     <FormControl>
                         <Input placeholder="e.g., com.example.app" {...field} />
                     </FormControl>
