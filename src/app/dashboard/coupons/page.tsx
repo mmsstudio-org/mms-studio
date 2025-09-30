@@ -431,16 +431,16 @@ export default function CouponsPage() {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex items-center justify-between space-x-2 py-4">
-            <div className="text-sm text-muted-foreground">
-              {filteredCoupons.length} total coupons.
+        <div className="flex flex-col-reverse md:flex-row md:items-center md:justify-between gap-4 py-4">
+            <div className="text-sm text-muted-foreground text-center md:text-left">
+              Showing {paginatedCoupons.length} of {filteredCoupons.length} coupons.
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-col md:flex-row items-center gap-4">
                 <Select
                     value={String(itemsPerPage)}
                     onValueChange={(value) => setItemsPerPage(Number(value))}
                 >
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-full md:w-[180px]">
                         <SelectValue placeholder="Results per page" />
                     </SelectTrigger>
                     <SelectContent>
@@ -451,25 +451,27 @@ export default function CouponsPage() {
                         <SelectItem value="1000">1000 per page</SelectItem>
                     </SelectContent>
                 </Select>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </Button>
-                <span className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                    disabled={currentPage === totalPages}
-                >
-                    Next
-                </Button>
+                <div className="flex items-center justify-center space-x-2">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                        disabled={currentPage === 1}
+                    >
+                        Previous
+                    </Button>
+                    <span className="text-sm text-muted-foreground">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                    >
+                        Next
+                    </Button>
+                </div>
             </div>
         </div>
       </div>
@@ -525,3 +527,5 @@ export default function CouponsPage() {
     </>
   );
 }
+
+    
