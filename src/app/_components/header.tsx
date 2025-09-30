@@ -23,8 +23,8 @@ export default function Header() {
 
   const navLinks = [
     { href: "/shop", label: "Shop" },
-    ...(isHomePage ? [{ href: "#contact", label: "Contact" }] : []),
     ...(user ? [{ href: "/dashboard", label: "Dashboard" }] : []),
+    ...(isHomePage ? [{ href: "#contact", label: "Contact" }] : []),
   ];
 
   return (

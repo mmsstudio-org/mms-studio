@@ -28,6 +28,7 @@ import { getSiteInfo } from '@/lib/firestore-service';
 import type { SiteInfo } from '@/lib/types';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
+import HelpCenterModal from './help-center-modal';
 
 const XIcon = Twitter;
 const WhatsAppIcon = () => (
@@ -57,6 +58,7 @@ export default function ContactSection() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isHelpOpen, setHelpOpen] = useState(false);
 
     useEffect(() => {
         getSiteInfo().then(info => {
@@ -187,9 +189,13 @@ export default function ContactSection() {
                                 <div className="flex flex-col gap-4">
                                     <Button type="submit" disabled={isSubmitting} size="lg" className="w-full">
                                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                        Submit Query
+                                        Send Message
                                     </Button>
-                                    <p className="text-xs text-center text-muted-foreground">We will contact you via your provided email or phone number as soon as possible.</p>
+                                    <p className="text-xs text-center text-muted-foreground">
+                                        For product support or purchase issues, please use the{' '}
+                                        <button type="button" onClick={() => setHelpOpen(true)} className="underline font-medium hover:text-accent">Help Center</button>
+                                        {' '}for a faster response.
+                                    </p>
                                 </div>
                             </form>
                         </Form>
@@ -283,6 +289,7 @@ export default function ContactSection() {
                     </p>
                 </div>
             </div>
+            <HelpCenterModal isOpen={isHelpOpen} onOpenChange={setHelpOpen} />
         </section>
     );
 }
