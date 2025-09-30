@@ -54,7 +54,7 @@ export default function CategoriesPage() {
   const [selectedApp, setSelectedApp] = useState<AppDetail | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [appForNewProduct, setAppForNewProduct] = useState<AppDetail | null>(null);
-  const [sortOrders, setSortOrders] = useState<{ [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc' } }>({});
+  const [sortOrders, setSortOrders] = useState<{ [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc', combos: 'asc' | 'desc' } }>({});
 
   const fetchAllData = useCallback(async () => {
     setLoadingData(true);
@@ -70,9 +70,9 @@ export default function CategoriesPage() {
         setProducts(productsMap);
 
         const initialSortOrders = fetchedApps.reduce((acc, app) => {
-            acc[app.id] = { subscriptions: 'asc', coins: 'asc' };
+            acc[app.id] = { subscriptions: 'asc', coins: 'asc', combos: 'asc' };
             return acc;
-        }, {} as { [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc' } });
+        }, {} as { [key: string]: { subscriptions: 'asc' | 'desc', coins: 'asc' | 'desc', combos: 'asc' | 'desc' } });
         setSortOrders(initialSortOrders);
 
     } catch(e) {
@@ -82,7 +82,7 @@ export default function CategoriesPage() {
     }
   }, [toast]);
 
-  const handleSortToggle = (appId: string, type: 'subscriptions' | 'coins') => {
+  const handleSortToggle = (appId: string, type: 'subscriptions' | 'coins' | 'combos') => {
     setSortOrders(prev => ({
         ...prev,
         [appId]: {
@@ -106,12 +106,13 @@ export default function CategoriesPage() {
 
   const getSortedProducts = useCallback((appId: string) => {
     const appProducts = products[appId] || [];
-    const appSortOrders = sortOrders[appId] || { subscriptions: 'asc', coins: 'asc' };
+    const appSortOrders = sortOrders[appId] || { subscriptions: 'asc', coins: 'asc', combos: 'asc' };
     
-    const subscriptions = sortProducts(appProducts.filter(p => p.type === 'subscription'), appSortOrders.subscriptions);
+    const subscriptions = sortProducts(appProducts.filter(p => p.type === 'subscription' && (!p.coinAmount || p.coinAmount === 0)), appSortOrders.subscriptions);
     const coins = sortProducts(appProducts.filter(p => p.type === 'coins'), appSortOrders.coins);
+    const combos = sortProducts(appProducts.filter(p => p.type === 'subscription' && p.coinAmount && p.coinAmount > 0), appSortOrders.combos);
     
-    return { subscriptions, coins };
+    return { subscriptions, coins, combos };
   }, [products, sortOrders, sortProducts]);
 
 
@@ -219,8 +220,7 @@ export default function CategoriesPage() {
 
                     {product.coinAmount && product.coinAmount > 0 && (
                          <p className="font-bold text-amber-500 flex items-center gap-1">
-                            {product.type === 'subscription' && <span>+</span>}
-                            <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
+                            + <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
                         </p>
                     )}
                 </div>
@@ -248,8 +248,8 @@ export default function CategoriesPage() {
             <p className="text-center text-muted-foreground py-10">No app categories found. Add one to get started.</p>
         )}
         {apps.map(app => {
-            const { subscriptions, coins } = getSortedProducts(app.id);
-            const appSorts = sortOrders[app.id] || { subscriptions: 'asc', coins: 'asc' };
+            const { subscriptions, coins, combos } = getSortedProducts(app.id);
+            const appSorts = sortOrders[app.id] || { subscriptions: 'asc', coins: 'asc', combos: 'asc' };
             return (
             <Card key={app.id}>
                 <CardHeader>
@@ -283,14 +283,14 @@ export default function CategoriesPage() {
                                 <ChevronsUpDown className="h-4 w-4 ml-2 group-data-[state=open]:rotate-180 transition-transform" />
                            </Button>
                         </CollapsibleTrigger>
-                        <CollapsibleContent className="mt-4 pt-4 border-t">
+                        <CollapsibleContent className="mt-4 pt-4 border-t space-y-8">
                             <div className="flex flex-col items-start gap-2 md:flex-row md:items-center md:justify-between mb-4">
                                 <h3 className="font-semibold">Products for {app.name}</h3>
                                 <Button variant="secondary" size="sm" onClick={() => handleAddNewProduct(app)}><PlusCircle className="mr-2 h-4 w-4" /> Add New Product</Button>
                             </div>
                             
                             {subscriptions.length > 0 && (
-                                <div className="mb-6">
+                                <div>
                                     <div className="flex justify-between items-center mb-2">
                                         <h4 className="font-medium text-muted-foreground">Subscriptions</h4>
                                         <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'subscriptions')}>
@@ -300,6 +300,21 @@ export default function CategoriesPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {subscriptions.map(renderProductCard)}
+                                    </div>
+                                </div>
+                            )}
+
+                            {combos.length > 0 && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-medium text-muted-foreground">Combo Packages</h4>
+                                        <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'combos')}>
+                                            Sort by price
+                                            {appSorts.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {combos.map(renderProductCard)}
                                     </div>
                                 </div>
                             )}
@@ -349,3 +364,5 @@ export default function CategoriesPage() {
     </div>
   );
 }
+
+    

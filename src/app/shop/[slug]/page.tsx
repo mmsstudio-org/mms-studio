@@ -7,8 +7,9 @@ import type { Product, AppDetail } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getProductsForApp, getApp } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
-import { ArrowUpNarrowWide, ArrowDownWideNarrow } from 'lucide-react';
+import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -16,8 +17,11 @@ export default function ShopSlugPage() {
   const [app, setApp] = useState<AppDetail | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [subscriptionSort, setSubscriptionSort] = useState<'asc' | 'desc'>('asc');
-  const [coinSort, setCoinSort] = useState<'asc' | 'desc'>('asc');
+  const [sortOrders, setSortOrders] = useState({
+    subscriptions: 'asc' as 'asc' | 'desc',
+    coins: 'asc' as 'asc' | 'desc',
+    combos: 'asc' as 'asc' | 'desc',
+  });
   const [appFound, setAppFound] = useState<boolean | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -42,6 +46,13 @@ export default function ShopSlugPage() {
     notFound();
   }
 
+  const handleSortToggle = (type: 'subscriptions' | 'coins' | 'combos') => {
+    setSortOrders(prev => ({
+        ...prev,
+        [type]: prev[type] === 'asc' ? 'desc' : 'asc',
+    }));
+  };
+
   const sortProducts = useCallback((products: Product[], order: 'asc' | 'desc'): Product[] => {
     return [...products].sort((a, b) => {
         const priceA = a.discountedPrice || a.regularPrice;
@@ -49,21 +60,28 @@ export default function ShopSlugPage() {
         if (order === 'asc') {
             return priceA - priceB;
         } else {
-            return priceB - a.regularPrice;
+            return priceB - priceA;
         }
     });
   }, []);
   
   const subscriptions = useMemo(() => {
-    const subs = products.filter(p => p.type === 'subscription');
-    return sortProducts(subs, subscriptionSort);
-  }, [products, subscriptionSort, sortProducts]);
-
+    const subs = products.filter(p => p.type === 'subscription' && (!p.coinAmount || p.coinAmount === 0));
+    return sortProducts(subs, sortOrders.subscriptions);
+  }, [products, sortOrders.subscriptions, sortProducts]);
+  
   const coins = useMemo(() => {
     const coinsList = products.filter(p => p.type === 'coins');
-    return sortProducts(coinsList, coinSort);
-  }, [products, coinSort, sortProducts]);
+    return sortProducts(coinsList, sortOrders.coins);
+  }, [products, sortOrders.coins, sortProducts]);
 
+  const combos = useMemo(() => {
+      const comboList = products.filter(p => p.type === 'subscription' && p.coinAmount && p.coinAmount > 0);
+      return sortProducts(comboList, sortOrders.combos);
+  }, [products, sortOrders.combos, sortProducts]);
+  
+  const hasProducts = subscriptions.length > 0 || coins.length > 0 || combos.length > 0;
+  const hasMultipleSections = [subscriptions, coins, combos].filter(s => s.length > 0).length > 1;
 
   if (loading || !app) {
      return (
@@ -81,6 +99,21 @@ export default function ShopSlugPage() {
      )
   }
   
+  const scrollTo = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+        // Adjust for header height and some padding
+        const headerOffset = 80;
+        const elementPosition = element.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+        
+        window.scrollTo({
+             top: offsetPosition,
+             behavior: "smooth"
+        });
+    }
+  }
+
   return (
     <div className="container mx-auto py-10">
       <div className="text-center mb-12">
@@ -92,35 +125,57 @@ export default function ShopSlugPage() {
         </p>
       </div>
 
+      {hasMultipleSections && (
+          <div className="sticky top-14 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 border-b">
+              <div className="flex justify-center flex-wrap gap-2">
+                  {subscriptions.length > 0 && <Button variant="outline" onClick={() => scrollTo('subscriptions')}><Package className="mr-2 h-4 w-4" /> Subscriptions</Button>}
+                  {combos.length > 0 && <Button variant="outline" onClick={() => scrollTo('combos')}><Star className="mr-2 h-4 w-4" /> Combo Offers</Button>}
+                  {coins.length > 0 && <Button variant="outline" onClick={() => scrollTo('coins')}><Coins className="mr-2 h-4 w-4" /> Coins</Button>}
+              </div>
+          </div>
+      )}
       
       <div className="space-y-16">
         {subscriptions.length > 0 && (
-          <section>
+          <section id="subscriptions" className="scroll-mt-24">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
                 <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
-                <Button variant="ghost" onClick={() => setSubscriptionSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
+                <Button variant="ghost" onClick={() => handleSortToggle('subscriptions')} className="text-xs md:text-sm">
                   Sort by price
-                  {subscriptionSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                  {sortOrders.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                 </Button>
             </div>
             <ProductList products={subscriptions} onProductUpdate={fetchData} app={app} />
           </section>
         )}
 
+        {combos.length > 0 && (
+            <section id="combos" className="scroll-mt-24">
+                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                    <h2 className="text-2xl md:text-3xl font-bold">Combo Packages</h2>
+                    <Button variant="ghost" onClick={() => handleSortToggle('combos')} className="text-xs md:text-sm">
+                        Sort by price
+                        {sortOrders.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                    </Button>
+                </div>
+                <ProductList products={combos} onProductUpdate={fetchData} app={app} />
+            </section>
+        )}
+
         {coins.length > 0 && (
-          <section>
+          <section id="coins" className="scroll-mt-24">
               <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
                   <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
-                  <Button variant="ghost" onClick={() => setCoinSort(s => s === 'asc' ? 'desc' : 'asc')} className="text-xs md:text-sm">
+                  <Button variant="ghost" onClick={() => handleSortToggle('coins')} className="text-xs md:text-sm">
                       Sort by price
-                      {coinSort === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                      {sortOrders.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
                   </Button>
             </div>
             <ProductList products={coins} onProductUpdate={fetchData} app={app} />
           </section>
         )}
 
-        {products.length === 0 && !loading && (
+        {!hasProducts && !loading && (
           <div className="text-center py-20 border-2 border-dashed rounded-lg">
               <p className="text-muted-foreground">No products available for this app yet.</p>
           </div>
@@ -151,3 +206,5 @@ export default function ShopSlugPage() {
     </div>
   );
 }
+
+    
