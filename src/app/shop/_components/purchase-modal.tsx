@@ -71,8 +71,8 @@ export default function PurchaseModal({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!product) {
-        toast({ variant: 'destructive', title: 'Product Error', description: 'No product selected for purchase.' });
+    if (!product || !app) {
+        toast({ variant: 'destructive', title: 'Product Error', description: 'No product or app context for purchase.' });
         return;
     }
     setIsSubmitting(true);
@@ -120,7 +120,6 @@ export default function PurchaseModal({
       const newCoupon = {
         code: txnId,
         validity: validityDate.getTime(),
-        // coins: product.type === "subscription" ? 1 : (product.coinAmount || 1),
         coins: product.coinAmount || 0,
         type: 'single' as const,
         show_ads: product.type !== "subscription",
@@ -128,6 +127,7 @@ export default function PurchaseModal({
         created: Date.now(),
         redeem_count: 0,
         redeem_limit: 1,
+        pkg: app.pkg || null,
       };
       
       await addCoupon(newCoupon);

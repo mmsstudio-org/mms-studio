@@ -47,6 +47,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   icon: z.union([z.string().url(), z.string().length(0), z.string().refine(s => !s.startsWith('http'))]).optional(),
   youtubeVideoUrl: youtubeIdOrUrlSchema,
+  pkg: z.string().optional(),
 });
 
 type AppEditModalProps = {
@@ -67,6 +68,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
         description: '',
         icon: '',
         youtubeVideoUrl: '',
+        pkg: '',
     },
   });
 
@@ -77,6 +79,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
         description: app.description || '',
         icon: app.icon || '',
         youtubeVideoUrl: app.youtubeVideoId || '',
+        pkg: app.pkg || '',
       });
     } else {
         form.reset({
@@ -84,6 +87,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
             description: '',
             icon: '',
             youtubeVideoUrl: '',
+            pkg: '',
         });
     }
   }, [app, form]);
@@ -111,6 +115,7 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
         description: values.description || "",
         icon: values.icon || "",
         youtubeVideoId: videoId,
+        pkg: values.pkg || "",
     }
 
     try {
@@ -177,6 +182,19 @@ export default function AppEditModal({ isOpen, onOpenChange, app, onAppUpdate }:
                     <FormLabel>Icon (Lucide name or URL)</FormLabel>
                     <FormControl>
                         <Input placeholder="e.g., Smartphone or https://example.com/icon.png" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
+            <FormField
+                control={form.control}
+                name="pkg"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Package Name (Optional)</FormLabel>
+                    <FormControl>
+                        <Input placeholder="e.g., com.example.app" {...field} />
                     </FormControl>
                     <FormMessage />
                     </FormItem>

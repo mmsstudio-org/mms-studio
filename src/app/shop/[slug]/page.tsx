@@ -10,6 +10,16 @@ import { Button } from '@/components/ui/button';
 import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import * as LucideIcons from 'lucide-react';
+
+const Icon = ({ name, className }: { name: string; className: string }) => {
+  const LucideIcon = (LucideIcons as any)[name];
+  if (!LucideIcon) {
+    return null;
+  }
+  return <LucideIcon className={className} />;
+};
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -116,7 +126,16 @@ export default function ShopSlugPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="text-center mb-12">
+      <div className="text-center mb-12 flex flex-col items-center gap-4">
+        {app.icon && app.icon.startsWith('http') ? (
+            <Image src={app.icon} alt={app.name} width={64} height={64} className="rounded-lg" />
+        ) : app.icon ? (
+            <Icon name={app.icon} className="h-16 w-16 text-accent" />
+        ) : (
+            <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center text-accent font-bold text-3xl">
+                {app.name.charAt(0)}
+            </div>
+        )}
         <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
           {app.name}
         </h1>

@@ -20,6 +20,7 @@ export interface AppDetail {
   description?: string;
   icon?: string; // URL to an icon or a lucide-icon name
   youtubeVideoId?: string; // YouTube video ID
+  pkg?: string; // Optional package name
 }
 
 export interface Purchase {
@@ -82,4 +83,5 @@ export interface Coupon {
     redeem_limit: number | null;
     redeem_count: number;
     note: string | null;
+    pkg?: string; // Optional package name
 }

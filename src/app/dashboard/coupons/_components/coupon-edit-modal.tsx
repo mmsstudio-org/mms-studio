@@ -50,6 +50,7 @@ const formSchema = z.object({
   redeem_limit: z.coerce.number().positive().optional().or(z.literal('')),
   show_ads: z.boolean(),
   note: z.string().optional(),
+  pkg: z.string().optional(),
 }).refine(data => {
     if (data.type === 'certain amount') {
         return !!data.redeem_limit && Number(data.redeem_limit) > 0;
@@ -83,6 +84,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
         redeem_limit: '',
         show_ads: false,
         note: '',
+        pkg: '',
     },
   });
   
@@ -106,6 +108,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
             redeem_limit: coupon.redeem_limit || '',
             show_ads: coupon.show_ads,
             note: coupon.note || '',
+            pkg: coupon.pkg || '',
           });
         } else {
             initialDate = defaultValidity;
@@ -117,6 +120,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                 redeem_limit: '',
                 show_ads: false,
                 note: '',
+                pkg: '',
             });
         }
         setCalendarMonth(initialDate);
@@ -147,6 +151,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
             validity: values.validity.getTime(),
             redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
             note: values.note || null,
+            pkg: values.pkg || null,
         };
 
         console.log("Prepared coupon data:", couponData);
@@ -287,6 +292,23 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
                     />
                 )}
             </div>
+            
+            <FormField
+                control={form.control}
+                name="pkg"
+                render={({ field }) => (
+                    <FormItem>
+                    <FormLabel>Package Name (Optional)</FormLabel>
+                     <FormDescription>
+                        If set, the redemption request must include this exact package name.
+                    </FormDescription>
+                    <FormControl>
+                        <Input placeholder="com.example.app" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                    </FormItem>
+                )}
+            />
 
             <FormField
                 control={form.control}

@@ -6,6 +6,7 @@ export async function GET(request: NextRequest) {
   const {searchParams} = new URL(request.url);
   const code = searchParams.get('code');
   const note = searchParams.get('note');
+  const pkg = searchParams.get('pkg');
 
   if (!code) {
     return NextResponse.json({success: false, message: 'Coupon code is required.'}, {status: 400});
@@ -20,6 +21,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({success: false, message: 'Invalid coupon code.'}, {status: 404});
     }
 
+    // Check package name if required
+    if (coupon.pkg && coupon.pkg !== pkg) {
+        return NextResponse.json({success: false, message: 'This coupon is not valid for this application.'}, {status: 403});
+    }
+    
     // Check validity
     if (coupon.validity < Date.now()) {
       return NextResponse.json({success: false, message: 'This coupon has expired.'}, {status: 400});
