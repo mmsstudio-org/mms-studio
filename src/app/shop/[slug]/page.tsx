@@ -126,11 +126,11 @@ export default function ShopSlugPage() {
       </div>
 
       {hasMultipleSections && (
-          <div className="sticky top-14 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 border-b">
-              <div className="flex justify-center flex-wrap gap-2">
+          <div className="sticky top-14 z-40 bg-transparent py-4 mb-8 border-b">
+              <div className="flex justify-start flex-wrap gap-2 flex-grow-1 shrink-0">
                   {subscriptions.length > 0 && <Button variant="outline" onClick={() => scrollTo('subscriptions')}><Package className="mr-2 h-4 w-4" /> Subscriptions</Button>}
-                  {combos.length > 0 && <Button variant="outline" onClick={() => scrollTo('combos')}><Star className="mr-2 h-4 w-4" /> Combo Offers</Button>}
                   {coins.length > 0 && <Button variant="outline" onClick={() => scrollTo('coins')}><Coins className="mr-2 h-4 w-4" /> Coins</Button>}
+                  {combos.length > 0 && <Button variant="outline" onClick={() => scrollTo('combos')}><Star className="mr-2 h-4 w-4" /> Combo Offers</Button>}
               </div>
           </div>
       )}
@@ -149,19 +149,6 @@ export default function ShopSlugPage() {
           </section>
         )}
 
-        {combos.length > 0 && (
-            <section id="combos" className="scroll-mt-24">
-                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                    <h2 className="text-2xl md:text-3xl font-bold">Combo Packages</h2>
-                    <Button variant="ghost" onClick={() => handleSortToggle('combos')} className="text-xs md:text-sm">
-                        Sort by price
-                        {sortOrders.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                    </Button>
-                </div>
-                <ProductList products={combos} onProductUpdate={fetchData} app={app} />
-            </section>
-        )}
-
         {coins.length > 0 && (
           <section id="coins" className="scroll-mt-24">
               <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
@@ -173,6 +160,19 @@ export default function ShopSlugPage() {
             </div>
             <ProductList products={coins} onProductUpdate={fetchData} app={app} />
           </section>
+        )}
+
+        {combos.length > 0 && (
+            <section id="combos" className="scroll-mt-24">
+                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+                    <h2 className="text-2xl md:text-3xl font-bold">Combo Packages</h2>
+                    <Button variant="ghost" onClick={() => handleSortToggle('combos')} className="text-xs md:text-sm">
+                        Sort by price
+                        {sortOrders.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+                    </Button>
+                </div>
+                <ProductList products={combos} onProductUpdate={fetchData} app={app} />
+            </section>
         )}
 
         {!hasProducts && !loading && (
@@ -206,5 +206,3 @@ export default function ShopSlugPage() {
     </div>
   );
 }
-
-    

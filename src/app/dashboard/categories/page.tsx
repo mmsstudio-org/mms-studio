@@ -174,7 +174,6 @@ export default function CategoriesPage() {
   }
 
   const renderProductCard = (product: Product) => {
-    const isCombo = product.type === 'subscription' && product.coinAmount && product.coinAmount > 0;
     const savedAmount = product.discountedPrice ? product.regularPrice - product.discountedPrice : 0;
     const savedPercentage = product.discountedPrice ? Math.round((savedAmount / product.regularPrice) * 100) : 0;
 
@@ -188,7 +187,11 @@ export default function CategoriesPage() {
             ) : (
                 <CircleDollarSign className="h-12 w-12 text-muted-foreground" />
             )}
-             {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
+             {savedPercentage > 0 && (
+                <Badge variant="destructive" className="absolute top-2 right-2">
+                    Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+                </Badge>
+            )}
         </div>
         <div className="p-4 flex-grow flex flex-col">
             <h5 className="font-bold truncate">{product.name}</h5>
@@ -202,11 +205,6 @@ export default function CategoriesPage() {
                         </>
                     ) : (
                         <span className="font-bold">৳{product.regularPrice}</span>
-                    )}
-                    {savedPercentage > 0 && (
-                        <Badge variant="secondary">
-                            Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
-                        </Badge>
                     )}
                 </div>
                  
@@ -304,21 +302,6 @@ export default function CategoriesPage() {
                                 </div>
                             )}
 
-                            {combos.length > 0 && (
-                                <div>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h4 className="font-medium text-muted-foreground">Combo Packages</h4>
-                                        <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'combos')}>
-                                            Sort by price
-                                            {appSorts.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
-                                        </Button>
-                                    </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                        {combos.map(renderProductCard)}
-                                    </div>
-                                </div>
-                            )}
-
                             {coins.length > 0 && (
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
@@ -330,6 +313,21 @@ export default function CategoriesPage() {
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                         {coins.map(renderProductCard)}
+                                    </div>
+                                </div>
+                            )}
+
+                            {combos.length > 0 && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h4 className="font-medium text-muted-foreground">Combo Packages</h4>
+                                        <Button variant="ghost" size="sm" onClick={() => handleSortToggle(app.id, 'combos')}>
+                                            Sort by price
+                                            {appSorts.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                        {combos.map(renderProductCard)}
                                     </div>
                                 </div>
                             )}
@@ -364,5 +362,3 @@ export default function CategoriesPage() {
     </div>
   );
 }
-
-    

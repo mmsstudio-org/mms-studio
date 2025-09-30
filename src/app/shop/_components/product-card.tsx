@@ -30,7 +30,6 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
   const { user } = useAuth();
 
   const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
-  const isCombo = product.type === 'subscription' && product.coinAmount && product.coinAmount > 0;
 
   const savedAmount = product.discountedPrice ? product.regularPrice - product.discountedPrice : 0;
   const savedPercentage = product.discountedPrice ? Math.round((savedAmount / product.regularPrice) * 100) : 0;
@@ -57,7 +56,11 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
         ) : (
           <CircleDollarSign className="h-24 w-24 text-foreground/50" />
         )}
-        {isCombo && <Badge variant="destructive" className="absolute top-2 right-2">Combo</Badge>}
+        {savedPercentage > 0 && (
+            <Badge variant="destructive" className="absolute top-2 right-2">
+                Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+            </Badge>
+        )}
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
@@ -69,11 +72,6 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
             <>
               <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
               <span className="text-lg text-muted-foreground line-through">৳{product.regularPrice}</span>
-              {savedPercentage > 0 && (
-                <Badge variant="secondary">
-                  Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
-                </Badge>
-              )}
             </>
           ) : (
             <span className="text-3xl font-bold">৳{product.regularPrice}</span>
@@ -94,7 +92,7 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
                     {product.type === 'subscription' && <span>+</span>}
                     <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
                 </p>
-            ):""}
+            ) : null}
         </div>
       </CardContent>
       <CardFooter className="mt-auto">
