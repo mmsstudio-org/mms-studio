@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     // Append note if provided for single-use coupons
     if (note && coupon.type === 'single') {
         const prevNote = coupon.note || '';
-        const newNote = `${prevNote}\n-Redeem Info: ${note}`;
+        const newNote = `${prevNote}, | Redeemed By ⇒ ${note}`;
         updateData.note = newNote.trim();
     }
 

@@ -72,8 +72,8 @@ export default function PurchaseModal({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!product || !app) {
-        toast({ variant: 'destructive', title: 'Product Error', description: 'No product or app context for purchase.' });
-        return;
+      toast({ variant: 'destructive', title: 'Product Error', description: 'No product or app context for purchase.' });
+      return;
     }
     setIsSubmitting(true);
     const txnId = values.bkashTxnId.toUpperCase();
@@ -88,14 +88,14 @@ export default function PurchaseModal({
       if (!purchaseRecord) {
         throw new Error("Invalid Transaction ID.");
       }
-      
+
       // 2. Check if already redeemed
       if (purchaseRecord.is_redeemed) {
         throw new Error(
           `This transaction ID has already been used. Your coupon code is "${txnId}".`
         );
       }
-      
+
       // 3. Match Amount
       const transactionAmount = Number(purchaseRecord.amount);
       if (transactionAmount < productPrice) {
@@ -106,7 +106,7 @@ export default function PurchaseModal({
 
       // 4. Check if a coupon with this code already exists
       const existingCoupon = await getCoupon(txnId);
-      if(existingCoupon) {
+      if (existingCoupon) {
         // This case should be rare if is_redeemed flag is working correctly, but it's a good safeguard.
         throw new Error(`This transaction ID has already been used to generate a coupon. Your coupon code is "${txnId}".`);
       }
@@ -129,7 +129,7 @@ export default function PurchaseModal({
         redeem_limit: 1,
         pkg: app.pkg || null,
       };
-      
+
       await addCoupon(newCoupon);
 
       // 6. Mark as Redeemed
@@ -190,7 +190,7 @@ export default function PurchaseModal({
 
         {showHowToPay ? (
           <div>
-            <HowToPayContent productPrice={price} youtubeVideoId={app?.youtubeVideoId}/>
+            <HowToPayContent productPrice={price} youtubeVideoId={app?.youtubeVideoId} />
             <Button
               variant="outline"
               className="w-full mt-4"
@@ -202,8 +202,7 @@ export default function PurchaseModal({
         ) : (
           <>
             <p className="text-sm text-muted-foreground">
-              Please complete your payment via bKash and enter the Transaction
-              ID below to submit for verification.
+              Please process your payment using bKash or a supported MFS, as specified in the 'How to Pay's Important Note.' Submit the Transaction ID below for verification.
             </p>
             <Form {...form}>
               <form
@@ -215,9 +214,9 @@ export default function PurchaseModal({
                   name="bkashTxnId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>bKash Transaction ID</FormLabel>
+                      <FormLabel>Transaction ID</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 9A4B7C2D1E" {...field} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
+                        <Input placeholder="e.g., CI9A4B7C2D" {...field} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
