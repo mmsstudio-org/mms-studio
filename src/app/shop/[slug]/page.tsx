@@ -126,7 +126,7 @@ export default function ShopSlugPage() {
       </div>
 
       {hasMultipleSections && (
-          <div className="sticky top-14 z-40 bg-transparent py-4 mb-8 border-b">
+          <div className="sticky top-14 z-40 bg-background/80 backdrop-blur-sm py-4 mb-8 border-b">
               <div className="flex justify-start flex-wrap gap-2 flex-grow-1 shrink-0">
                   {subscriptions.length > 0 && <Button variant="outline" onClick={() => scrollTo('subscriptions')}><Package className="mr-2 h-4 w-4" /> Subscriptions</Button>}
                   {coins.length > 0 && <Button variant="outline" onClick={() => scrollTo('coins')}><Coins className="mr-2 h-4 w-4" /> Coins</Button>}
