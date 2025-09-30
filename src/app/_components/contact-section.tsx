@@ -137,14 +137,6 @@ export default function ContactSection() {
         }
     }
 
-    const copyToClipboard = (text: string, type: string) => {
-        navigator.clipboard.writeText(text);
-        toast({
-            title: "Copied!",
-            description: `${type} copied to clipboard.`,
-        });
-    };
-
     return (
         <section id="contact" className="py-20 scroll-mt-20">
             
@@ -191,11 +183,14 @@ export default function ContactSection() {
                                         {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                                         Send Message
                                     </Button>
-                                    <p className="text-xs text-center text-muted-foreground">
-                                        For product support or purchase issues, please use the{' '}
-                                        <button type="button" onClick={() => setHelpOpen(true)} className="underline font-medium hover:text-accent">Help Center</button>
-                                        {' '}for a faster response.
-                                    </p>
+                                    <div className="text-xs text-center text-muted-foreground space-y-2">
+                                        <p>This form is for project inquiries. We will contact you via email or phone as soon as possible.</p>
+                                        <p>
+                                            For product support or purchase issues, please use the{' '}
+                                            <button type="button" onClick={() => setHelpOpen(true)} className="underline font-medium hover:text-accent">Help Center</button>
+                                            {' '}for a faster response.
+                                        </p>
+                                    </div>
                                 </div>
                             </form>
                         </Form>
@@ -230,7 +225,7 @@ export default function ContactSection() {
                                             <Mail className="h-6 w-6 text-accent mt-1" />
                                             <div>
                                                 <h4 className="font-semibold">Email Us</h4>
-                                                <p className="text-muted-foreground break-all cursor-pointer hover:text-accent" onClick={() => copyToClipboard(siteInfo.email!, 'Email')}>{siteInfo.email}</p>
+                                                <a href={`mailto:${siteInfo.email}`} className="text-muted-foreground break-all hover:text-accent">{siteInfo.email}</a>
                                             </div>
                                         </div>
                                     )}
@@ -239,7 +234,7 @@ export default function ContactSection() {
                                             <Phone className="h-6 w-6 text-accent mt-1" />
                                             <div>
                                                 <h4 className="font-semibold">Call Us</h4>
-                                                <p className="text-muted-foreground cursor-pointer hover:text-accent" onClick={() => copyToClipboard(siteInfo.contactNumber!, 'Phone number')}>{siteInfo.contactNumber}</p>
+                                                <a href={`tel:${siteInfo.contactNumber}`} className="text-muted-foreground hover:text-accent">{siteInfo.contactNumber}</a>
                                             </div>
                                         </div>
                                     )}
