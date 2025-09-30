@@ -41,76 +41,76 @@ export default function ShopSlugPage() {
   useEffect(() => {
     fetchData();
   }, [slug, fetchData]);
-  
+
   if (appFound === false) {
     notFound();
   }
 
   const handleSortToggle = (type: 'subscriptions' | 'coins' | 'combos') => {
     setSortOrders(prev => ({
-        ...prev,
-        [type]: prev[type] === 'asc' ? 'desc' : 'asc',
+      ...prev,
+      [type]: prev[type] === 'asc' ? 'desc' : 'asc',
     }));
   };
 
   const sortProducts = useCallback((products: Product[], order: 'asc' | 'desc'): Product[] => {
     return [...products].sort((a, b) => {
-        const priceA = a.discountedPrice || a.regularPrice;
-        const priceB = b.discountedPrice || b.regularPrice;
-        if (order === 'asc') {
-            return priceA - priceB;
-        } else {
-            return priceB - priceA;
-        }
+      const priceA = a.discountedPrice || a.regularPrice;
+      const priceB = b.discountedPrice || b.regularPrice;
+      if (order === 'asc') {
+        return priceA - priceB;
+      } else {
+        return priceB - priceA;
+      }
     });
   }, []);
-  
+
   const subscriptions = useMemo(() => {
     const subs = products.filter(p => p.type === 'subscription' && (!p.coinAmount || p.coinAmount === 0));
     return sortProducts(subs, sortOrders.subscriptions);
   }, [products, sortOrders.subscriptions, sortProducts]);
-  
+
   const coins = useMemo(() => {
     const coinsList = products.filter(p => p.type === 'coins');
     return sortProducts(coinsList, sortOrders.coins);
   }, [products, sortOrders.coins, sortProducts]);
 
   const combos = useMemo(() => {
-      const comboList = products.filter(p => p.type === 'subscription' && p.coinAmount && p.coinAmount > 0);
-      return sortProducts(comboList, sortOrders.combos);
+    const comboList = products.filter(p => p.type === 'subscription' && p.coinAmount && p.coinAmount > 0);
+    return sortProducts(comboList, sortOrders.combos);
   }, [products, sortOrders.combos, sortProducts]);
-  
+
   const hasProducts = subscriptions.length > 0 || coins.length > 0 || combos.length > 0;
   const hasMultipleSections = [subscriptions, coins, combos].filter(s => s.length > 0).length > 1;
 
   if (loading || !app) {
-     return (
-        <div className="container mx-auto py-10">
-            <div className="text-center mb-12">
-                <Skeleton className="h-10 w-1/2 mx-auto" />
-                <Skeleton className="h-6 w-3/4 mx-auto mt-4" />
-            </div>
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <Skeleton className="h-[400px] w-full" />
-                <Skeleton className="h-[400px] w-full" />
-                <Skeleton className="h-[400px] w-full" />
-            </div>
+    return (
+      <div className="container mx-auto py-10">
+        <div className="text-center mb-12">
+          <Skeleton className="h-10 w-1/2 mx-auto" />
+          <Skeleton className="h-6 w-3/4 mx-auto mt-4" />
         </div>
-     )
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <Skeleton className="h-[400px] w-full" />
+          <Skeleton className="h-[400px] w-full" />
+          <Skeleton className="h-[400px] w-full" />
+        </div>
+      </div>
+    )
   }
-  
+
   const scrollTo = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-        // Adjust for header height and some padding
-        const headerOffset = 80;
-        const elementPosition = element.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-        
-        window.scrollTo({
-             top: offsetPosition,
-             behavior: "smooth"
-        });
+      // Adjust for header height and some padding
+      const headerOffset = 80;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth"
+      });
     }
   }
 
@@ -126,24 +126,26 @@ export default function ShopSlugPage() {
       </div>
 
       {hasMultipleSections && (
-          <div className="py-4 mb-8 -mx-4 px-4 overflow-x-auto">
-              <div className="flex justify-start items-center gap-2 pb-2">
-                  {subscriptions.length > 0 && <Button variant="outline" onClick={() => scrollTo('subscriptions')}><Package className="mr-2 h-4 w-4" /> Subscriptions</Button>}
-                  {coins.length > 0 && <Button variant="outline" onClick={() => scrollTo('coins')}><Coins className="mr-2 h-4 w-4" /> Coins</Button>}
-                  {combos.length > 0 && <Button variant="outline" onClick={() => scrollTo('combos')}><Star className="mr-2 h-4 w-4" /> Combo Offers</Button>}
-              </div>
+        <div className="py-4 mb-8 -mx-4 px-4 overflow-x-auto"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <div className="flex justify-start items-center gap-2 pb-2">
+            {subscriptions.length > 0 && <Button variant="outline" onClick={() => scrollTo('subscriptions')}><Package className="mr-2 h-4 w-4" /> Subscriptions</Button>}
+            {coins.length > 0 && <Button variant="outline" onClick={() => scrollTo('coins')}><Coins className="mr-2 h-4 w-4" /> Coins</Button>}
+            {combos.length > 0 && <Button variant="outline" onClick={() => scrollTo('combos')}><Star className="mr-2 h-4 w-4" /> Combo Offers</Button>}
           </div>
+        </div>
       )}
-      
+
       <div className="space-y-16">
         {subscriptions.length > 0 && (
           <section id="subscriptions" className="scroll-mt-24">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
-                <Button variant="ghost" onClick={() => handleSortToggle('subscriptions')} className="text-xs md:text-sm">
-                  Sort by price
-                  {sortOrders.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                </Button>
+              <h2 className="text-2xl md:text-3xl font-bold">Subscriptions</h2>
+              <Button variant="ghost" onClick={() => handleSortToggle('subscriptions')} className="text-xs md:text-sm">
+                Sort by price
+                {sortOrders.subscriptions === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+              </Button>
             </div>
             <ProductList products={subscriptions} onProductUpdate={fetchData} app={app} />
           </section>
@@ -151,33 +153,33 @@ export default function ShopSlugPage() {
 
         {coins.length > 0 && (
           <section id="coins" className="scroll-mt-24">
-              <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                  <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
-                  <Button variant="ghost" onClick={() => handleSortToggle('coins')} className="text-xs md:text-sm">
-                      Sort by price
-                      {sortOrders.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                  </Button>
+            <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+              <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
+              <Button variant="ghost" onClick={() => handleSortToggle('coins')} className="text-xs md:text-sm">
+                Sort by price
+                {sortOrders.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+              </Button>
             </div>
             <ProductList products={coins} onProductUpdate={fetchData} app={app} />
           </section>
         )}
 
         {combos.length > 0 && (
-            <section id="combos" className="scroll-mt-24">
-                <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-                    <h2 className="text-2xl md:text-3xl font-bold">Combo Packages</h2>
-                    <Button variant="ghost" onClick={() => handleSortToggle('combos')} className="text-xs md:text-sm">
-                        Sort by price
-                        {sortOrders.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
-                    </Button>
-                </div>
-                <ProductList products={combos} onProductUpdate={fetchData} app={app} />
-            </section>
+          <section id="combos" className="scroll-mt-24">
+            <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
+              <h2 className="text-2xl md:text-3xl font-bold">Combo Packages</h2>
+              <Button variant="ghost" onClick={() => handleSortToggle('combos')} className="text-xs md:text-sm">
+                Sort by price
+                {sortOrders.combos === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
+              </Button>
+            </div>
+            <ProductList products={combos} onProductUpdate={fetchData} app={app} />
+          </section>
         )}
 
         {!hasProducts && !loading && (
           <div className="text-center py-20 border-2 border-dashed rounded-lg">
-              <p className="text-muted-foreground">No products available for this app yet.</p>
+            <p className="text-muted-foreground">No products available for this app yet.</p>
           </div>
         )}
       </div>
