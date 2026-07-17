@@ -1,57 +1,95 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getPublishedBlogs } from '@/lib/firestore-service';
+import { getPublishedBlogsPaginated } from '@/lib/firestore-service';
 import type { Blog } from '@/lib/types';
 import { format } from 'date-fns';
-import { BookOpen, Calendar, ArrowRight, User, Search } from 'lucide-react';
+import { BookOpen, Calendar, ArrowRight, User, Search, Loader2 } from 'lucide-react';
 
 export default function BlogListingPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [visibleCount, setVisibleCount] = useState(9);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSearch, setActiveSearch] = useState('');
 
-  useEffect(() => {
-    async function fetchBlogs() {
-      try {
-        const fetchedBlogs = await getPublishedBlogs();
-        setBlogs(fetchedBlogs);
-      } catch (error) {
-        console.error('Error fetching blogs:', error);
-      } finally {
-        setLoading(false);
-      }
+  // Fetch initial batch of blogs directly from firestore
+  const loadInitialBlogs = useCallback(async (queryStr: string) => {
+    setLoading(true);
+    try {
+      const { blogs: initialBlogs, lastDoc: cursor } = await getPublishedBlogsPaginated(12, null, queryStr);
+      setBlogs(initialBlogs);
+      setLastDoc(cursor);
+      setHasMore(initialBlogs.length === 12);
+    } catch (error) {
+      console.error('Error loading initial blogs:', error);
+    } finally {
+      setLoading(false);
     }
-    fetchBlogs();
   }, []);
 
-  const filteredBlogs = useMemo(() => {
-    if (!activeSearch.trim()) return blogs;
-    const query = activeSearch.toLowerCase().trim();
-    return blogs.filter((blog) => {
-      const matchTitle = blog.title.toLowerCase().includes(query);
-      const matchExcerpt = blog.excerpt?.toLowerCase().includes(query) || false;
-      const matchContent = blog.content?.toLowerCase().includes(query) || false;
-      const matchAuthor = blog.author?.toLowerCase().includes(query) || false;
-      const matchTags = blog.tags?.some(tag => tag.toLowerCase().includes(query)) || false;
-      return matchTitle || matchExcerpt || matchContent || matchAuthor || matchTags;
-    });
-  }, [blogs, activeSearch]);
+  // Fetch next batch of blogs directly from firestore using lastDoc cursor
+  const loadMoreBlogs = useCallback(async () => {
+    if (loadingMore || !hasMore || !lastDoc) return;
+    setLoadingMore(true);
+    try {
+      const { blogs: nextBlogs, lastDoc: cursor } = await getPublishedBlogsPaginated(12, lastDoc, activeSearch);
+      if (nextBlogs.length > 0) {
+        setBlogs((prev) => [...prev, ...nextBlogs]);
+        setLastDoc(cursor);
+        setHasMore(nextBlogs.length === 12);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error loading more blogs:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, lastDoc, activeSearch]);
 
-  const visibleBlogs = useMemo(() => {
-    return filteredBlogs.slice(0, visibleCount);
-  }, [filteredBlogs, visibleCount]);
+  useEffect(() => {
+    loadInitialBlogs('');
+  }, [loadInitialBlogs]);
 
-  const handleLoadMore = () => {
-    setVisibleCount((prev) => prev + 9);
+  // Infinite Scroll event handler
+  useEffect(() => {
+    const handleScroll = () => {
+      // Don't trigger if loading, already fetching, or no more blogs are available
+      if (loading || loadingMore || !hasMore) return;
+
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      // Trigger if user is within 150px of the bottom
+      if (docHeight - (scrollTop + windowHeight) < 150) {
+        loadMoreBlogs();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [loading, loadingMore, hasMore, loadMoreBlogs]);
+
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActiveSearch(searchQuery);
+    await loadInitialBlogs(searchQuery);
+  };
+
+  const handleClearSearch = async () => {
+    setSearchQuery('');
+    setActiveSearch('');
+    await loadInitialBlogs('');
   };
 
   return (
@@ -67,18 +105,11 @@ export default function BlogListingPage() {
       </div>
 
       {/* Search Bar */}
-      {!loading && blogs.length > 0 && (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setActiveSearch(searchQuery);
-            setVisibleCount(9);
-          }}
-          className="max-w-md mx-auto mb-10 flex gap-2"
-        >
+      {!loading && (blogs.length > 0 || activeSearch) && (
+        <form onSubmit={handleSearchSubmit} className="max-w-md mx-auto mb-10 flex gap-2">
           <Input
             type="text"
-            placeholder="Search articles, tags, authors..."
+            placeholder="Search article titles..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="flex-grow bg-card border border-border/80 focus-visible:ring-accent text-foreground"
@@ -109,7 +140,7 @@ export default function BlogListingPage() {
             </Card>
           ))}
         </div>
-      ) : blogs.length === 0 ? (
+      ) : blogs.length === 0 && !activeSearch ? (
         // Empty State (No blogs in database at all)
         <div className="text-center py-20 border-2 border-dashed rounded-lg bg-card/20 border-border/50 max-w-lg mx-auto">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
@@ -118,7 +149,7 @@ export default function BlogListingPage() {
             Check back later for exciting new content.
           </p>
         </div>
-      ) : filteredBlogs.length === 0 ? (
+      ) : blogs.length === 0 && activeSearch ? (
         // Empty Search Results State
         <div className="text-center py-20 border-2 border-dashed rounded-lg bg-card/20 border-border/50 max-w-lg mx-auto">
           <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-bounce" />
@@ -126,15 +157,7 @@ export default function BlogListingPage() {
           <p className="text-muted-foreground mt-2">
             We couldn't find any articles matching "{activeSearch}".
           </p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setSearchQuery('');
-              setActiveSearch('');
-              setVisibleCount(9);
-            }}
-            className="mt-4"
-          >
+          <Button variant="outline" onClick={handleClearSearch} className="mt-4">
             Clear Search
           </Button>
         </div>
@@ -142,7 +165,7 @@ export default function BlogListingPage() {
         // Blog Grid
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
-            {visibleBlogs.map((blog) => {
+            {blogs.map((blog) => {
               const formattedDate = format(new Date(blog.publishedAt), 'MMM dd, yyyy');
               return (
                 <Card
@@ -194,12 +217,10 @@ export default function BlogListingPage() {
             })}
           </div>
 
-          {/* Load More Button */}
-          {filteredBlogs.length > visibleCount && (
-            <div className="flex justify-center mt-12">
-              <Button onClick={handleLoadMore} variant="outline" size="lg">
-                Load More Articles
-              </Button>
+          {/* Loading More Spinner for Infinite Scroll */}
+          {loadingMore && (
+            <div className="flex justify-center py-8">
+              <Loader2 className="h-8 w-8 text-accent animate-spin" />
             </div>
           )}
         </>
