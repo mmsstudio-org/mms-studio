@@ -112,9 +112,9 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
   };
 
   return (
-    <div className="flex flex-col w-full rounded-md border border-input bg-background overflow-hidden focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+    <div className="flex flex-col w-full rounded-md border border-input bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-1 p-2 bg-muted/50 border-b border-input">
+      <div className="sticky top-14 z-30 flex flex-wrap items-center gap-1 p-2 bg-background/95 backdrop-blur-md border-b border-input rounded-t-md">
         {/* Text Formats */}
         <Button
           type="button"
