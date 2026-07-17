@@ -5,16 +5,19 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getPublishedBlogs } from '@/lib/firestore-service';
 import type { Blog } from '@/lib/types';
 import { format } from 'date-fns';
-import { BookOpen, Calendar, ArrowRight, User } from 'lucide-react';
+import { BookOpen, Calendar, ArrowRight, User, Search } from 'lucide-react';
 
 export default function BlogListingPage() {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(9);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
 
   useEffect(() => {
     async function fetchBlogs() {
@@ -30,9 +33,22 @@ export default function BlogListingPage() {
     fetchBlogs();
   }, []);
 
+  const filteredBlogs = useMemo(() => {
+    if (!activeSearch.trim()) return blogs;
+    const query = activeSearch.toLowerCase().trim();
+    return blogs.filter((blog) => {
+      const matchTitle = blog.title.toLowerCase().includes(query);
+      const matchExcerpt = blog.excerpt?.toLowerCase().includes(query) || false;
+      const matchContent = blog.content?.toLowerCase().includes(query) || false;
+      const matchAuthor = blog.author?.toLowerCase().includes(query) || false;
+      const matchTags = blog.tags?.some(tag => tag.toLowerCase().includes(query)) || false;
+      return matchTitle || matchExcerpt || matchContent || matchAuthor || matchTags;
+    });
+  }, [blogs, activeSearch]);
+
   const visibleBlogs = useMemo(() => {
-    return blogs.slice(0, visibleCount);
-  }, [blogs, visibleCount]);
+    return filteredBlogs.slice(0, visibleCount);
+  }, [filteredBlogs, visibleCount]);
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 9);
@@ -49,6 +65,29 @@ export default function BlogListingPage() {
           Insights, updates, and tutorials on web & mobile development, digital assets, and next-gen tech.
         </p>
       </div>
+
+      {/* Search Bar */}
+      {!loading && blogs.length > 0 && (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setActiveSearch(searchQuery);
+            setVisibleCount(9);
+          }}
+          className="max-w-md mx-auto mb-10 flex gap-2"
+        >
+          <Input
+            type="text"
+            placeholder="Search articles, tags, authors..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-grow bg-card border border-border/80 focus-visible:ring-accent text-foreground"
+          />
+          <Button type="submit" variant="default" className="bg-primary hover:bg-primary/95 text-primary-foreground font-semibold flex items-center gap-1.5">
+            <Search className="h-4 w-4" /> Search
+          </Button>
+        </form>
+      )}
 
       {/* Loading Skeletons */}
       {loading ? (
@@ -71,13 +110,33 @@ export default function BlogListingPage() {
           ))}
         </div>
       ) : blogs.length === 0 ? (
-        // Empty State
+        // Empty State (No blogs in database at all)
         <div className="text-center py-20 border-2 border-dashed rounded-lg bg-card/20 border-border/50 max-w-lg mx-auto">
           <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-xl font-bold">No articles found</h3>
           <p className="text-muted-foreground mt-2">
             Check back later for exciting new content.
           </p>
+        </div>
+      ) : filteredBlogs.length === 0 ? (
+        // Empty Search Results State
+        <div className="text-center py-20 border-2 border-dashed rounded-lg bg-card/20 border-border/50 max-w-lg mx-auto">
+          <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4 animate-bounce" />
+          <h3 className="text-xl font-bold">No results found</h3>
+          <p className="text-muted-foreground mt-2">
+            We couldn't find any articles matching "{activeSearch}".
+          </p>
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSearchQuery('');
+              setActiveSearch('');
+              setVisibleCount(9);
+            }}
+            className="mt-4"
+          >
+            Clear Search
+          </Button>
         </div>
       ) : (
         // Blog Grid
@@ -136,7 +195,7 @@ export default function BlogListingPage() {
           </div>
 
           {/* Load More Button */}
-          {blogs.length > visibleCount && (
+          {filteredBlogs.length > visibleCount && (
             <div className="flex justify-center mt-12">
               <Button onClick={handleLoadMore} variant="outline" size="lg">
                 Load More Articles
