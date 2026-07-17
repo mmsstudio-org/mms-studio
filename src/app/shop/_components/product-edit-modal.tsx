@@ -25,6 +25,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/components/ui/confirm-provider';
 import type { Product, AppDetail } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
@@ -99,6 +100,7 @@ const Icon = ({ name, className }: { name: string; className: string }) => {
 
 export default function ProductEditModal({ isOpen, onOpenChange, product, onProductUpdate, appForNewProduct }: ProductEditModalProps) {
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [apps, setApps] = useState<AppDetail[]>([]);
@@ -187,7 +189,14 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
 
   async function handleDelete() {
     if (!product || !product.id) return;
-    if (!window.confirm(`Are you sure you want to delete the product "${product.name}"? This cannot be undone.`)) return;
+    const confirmed = await confirm({
+        title: 'Delete Product',
+        description: `Are you sure you want to delete the product "${product.name}"? This cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+        variant: 'destructive',
+    });
+    if (!confirmed) return;
 
     setIsDeleting(true);
     try {

@@ -6,6 +6,7 @@ import Header from "./_components/header";
 import Footer from "./_components/footer";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ConfirmProvider } from "@/components/ui/confirm-provider";
 import { useEffect } from "react";
 import { getSiteInfo } from "@/lib/firestore-service";
 
@@ -68,10 +69,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
-            <Header />
-            <main className="flex-grow">{children}</main>
-            <Footer />
-            <Toaster />
+            <ConfirmProvider>
+              <Header />
+              <main className="flex-grow">{children}</main>
+              <Footer />
+              <Toaster />
+            </ConfirmProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

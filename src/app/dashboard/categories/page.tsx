@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/components/ui/confirm-provider';
 import type { AppDetail } from '@/lib/types';
 import { getApps, deleteApp } from '@/lib/firestore-service';
 import { PlusCircle, Trash2, Pencil, ExternalLink } from 'lucide-react';
@@ -27,6 +28,7 @@ export default function CategoriesPage() {
     const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     const { toast } = useToast();
+    const confirm = useConfirm();
     const [apps, setApps] = useState<AppDetail[]>([]);
     const [loadingData, setLoadingData] = useState(true);
 
@@ -52,7 +54,14 @@ export default function CategoriesPage() {
     }, [user, authLoading, router, fetchCategories]);
 
     const handleDeleteCategory = async (appId: string, name: string) => {
-        if (!window.confirm(`Are you sure you want to delete the category "${name}" and all its products? This cannot be undone.`)) {
+        const confirmed = await confirm({
+            title: 'Delete Category',
+            description: `Are you sure you want to delete the category "${name}" and all its products? This cannot be undone.`,
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            variant: 'destructive',
+        });
+        if (!confirmed) {
             return;
         }
 

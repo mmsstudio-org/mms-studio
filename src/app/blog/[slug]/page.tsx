@@ -6,6 +6,7 @@ import type { Blog } from '@/lib/types';
 import { getBlogBySlug, updateBlog, deleteBlog, checkSlugUnique } from '@/lib/firestore-service';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/components/ui/confirm-provider';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +43,7 @@ export default function BlogPostPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { toast } = useToast();
+  const confirm = useConfirm();
 
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
@@ -186,7 +188,14 @@ export default function BlogPostPage() {
 
   const handleDelete = async () => {
     if (!blog || !blog.id) return;
-    if (!window.confirm(`Are you sure you want to delete the blog post "${blog.title}"? This action is permanent.`)) {
+    const confirmed = await confirm({
+      title: 'Delete Blog Post',
+      description: `Are you sure you want to delete the blog post "${blog.title}"? This action is permanent.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
 

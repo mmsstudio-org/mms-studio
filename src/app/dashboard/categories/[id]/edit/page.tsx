@@ -22,6 +22,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/components/ui/confirm-provider';
 import { getApp, updateApp, checkCategorySlugUnique, getProductsForApp, deleteProduct } from '@/lib/firestore-service';
 import type { AppDetail, Product } from '@/lib/types';
 import { Loader2, ArrowLeft, PlusCircle, Pencil, Trash2, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
@@ -70,6 +71,7 @@ export default function EditCategoryPage() {
   const categoryId = params.id as string;
   
   const { toast } = useToast();
+  const confirm = useConfirm();
   const [app, setApp] = useState<AppDetail | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -175,7 +177,14 @@ export default function EditCategoryPage() {
   }
 
   const handleDeleteProduct = async (productId: string, name: string) => {
-    if (!window.confirm(`Are you sure you want to delete the product "${name}"? This cannot be undone.`)) {
+    const confirmed = await confirm({
+      title: 'Delete Product',
+      description: `Are you sure you want to delete the product "${name}"? This cannot be undone.`,
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
+    });
+    if (!confirmed) {
       return;
     }
 
@@ -387,7 +396,7 @@ export default function EditCategoryPage() {
                                 <span>{formatSubscriptionDuration(product.subscriptionDays)}</span>
                               </div>
                             )}
-                            {product.coinAmount && product.coinAmount > 0 && (
+                            {!!product.coinAmount && product.coinAmount > 0 && (
                               <div className="text-amber-500 font-semibold">
                                 🪙 {product.coinAmount.toLocaleString()} Coins
                               </div>
