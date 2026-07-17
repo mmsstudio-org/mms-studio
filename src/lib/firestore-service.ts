@@ -381,3 +381,81 @@ export async function getPublishedBlogsPaginated(
   }
 }
 
+export async function getBlogsPaginated(
+  limitNum: number,
+  startAfterDoc?: QueryDocumentSnapshot<DocumentData> | null,
+  searchQuery?: string
+): Promise<{ blogs: Blog[]; lastDoc: QueryDocumentSnapshot<DocumentData> | null }> {
+  try {
+    let q;
+    
+    if (searchQuery && searchQuery.trim()) {
+      const term = searchQuery.trim();
+      q = query(
+        blogsCollection,
+        where('title', '>=', term),
+        where('title', '<=', term + '\uf8ff'),
+        orderBy('title'),
+        limit(limitNum)
+      );
+    } else {
+      q = query(
+        blogsCollection,
+        orderBy('publishedAt', 'desc'),
+        limit(limitNum)
+      );
+    }
+
+    if (startAfterDoc) {
+      q = query(q, startAfter(startAfterDoc));
+    }
+
+    const querySnapshot = await getDocs(q);
+    const blogs = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+    const lastDoc = (querySnapshot.docs[querySnapshot.docs.length - 1] as QueryDocumentSnapshot<DocumentData>) || null;
+
+    return { blogs, lastDoc };
+  } catch (error: any) {
+    console.error("Error in getBlogsPaginated:", error);
+    
+    // In-memory fallback
+    try {
+      console.warn("Running in-memory fallback for getBlogsPaginated...");
+      const allDocsSnapshot = await getDocs(blogsCollection);
+      let allBlogs = allDocsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+      
+      if (searchQuery && searchQuery.trim()) {
+        const term = searchQuery.trim().toLowerCase();
+        allBlogs = allBlogs.filter(blog => blog.title.toLowerCase().includes(term));
+        allBlogs.sort((a, b) => a.title.localeCompare(b.title));
+      } else {
+        allBlogs.sort((a, b) => b.publishedAt - a.publishedAt);
+      }
+      
+      let startIndex = 0;
+      if (startAfterDoc) {
+        const prevIndex = allBlogs.findIndex(b => b.id === startAfterDoc.id);
+        if (prevIndex !== -1) {
+          startIndex = prevIndex + 1;
+        }
+      }
+      
+      const paginatedBlogs = allBlogs.slice(startIndex, startIndex + limitNum);
+      
+      let lastDocSnapshot: QueryDocumentSnapshot<DocumentData> | null = null;
+      if (paginatedBlogs.length > 0) {
+        const lastBlogId = paginatedBlogs[paginatedBlogs.length - 1].id;
+        const matchingDoc = allDocsSnapshot.docs.find(doc => doc.id === lastBlogId);
+        if (matchingDoc) {
+          lastDocSnapshot = matchingDoc as QueryDocumentSnapshot<DocumentData>;
+        }
+      }
+      
+      return { blogs: paginatedBlogs, lastDoc: lastDocSnapshot };
+    } catch (fallbackError) {
+      console.error("Fallback failed:", fallbackError);
+      return { blogs: [], lastDoc: null };
+    }
+  }
+}
+

@@ -10,10 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import type { Blog } from '@/lib/types';
-import { getBlogs, deleteBlog, updateBlog } from '@/lib/firestore-service';
+import { getBlogsPaginated, deleteBlog, updateBlog } from '@/lib/firestore-service';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
-import { Search, PlusCircle, Trash2, Pencil, Globe, FileText, Eye } from 'lucide-react';
+import { Search, PlusCircle, Trash2, Pencil, Globe, FileText, Eye, Loader2 } from 'lucide-react';
 import { ConfirmationDialog } from '../purchases/_components/confirmation-dialog';
 import Link from 'next/link';
 
@@ -23,17 +23,23 @@ export default function DashboardBlogsPage() {
   const { toast } = useToast();
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [lastDoc, setLastDoc] = useState<any>(null);
+  const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [activeSearch, setActiveSearch] = useState('');
 
   // Delete confirmation state
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [blogToDelete, setBlogToDelete] = useState<Blog | null>(null);
 
-  const fetchBlogs = useCallback(async () => {
+  const loadInitialBlogs = useCallback(async (queryStr: string) => {
     setLoadingData(true);
     try {
-      const fetchedBlogs = await getBlogs();
-      setBlogs(fetchedBlogs);
+      const { blogs: initialBlogs, lastDoc: cursor } = await getBlogsPaginated(50, null, queryStr);
+      setBlogs(initialBlogs);
+      setLastDoc(cursor);
+      setHasMore(initialBlogs.length === 50);
     } catch (e) {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch blogs.' });
       console.error(e);
@@ -42,14 +48,51 @@ export default function DashboardBlogsPage() {
     }
   }, [toast]);
 
+  const loadMoreBlogs = useCallback(async () => {
+    if (loadingMore || !hasMore || !lastDoc) return;
+    setLoadingMore(true);
+    try {
+      const { blogs: nextBlogs, lastDoc: cursor } = await getBlogsPaginated(50, lastDoc, activeSearch);
+      if (nextBlogs.length > 0) {
+        setBlogs((prev) => [...prev, ...nextBlogs]);
+        setLastDoc(cursor);
+        setHasMore(nextBlogs.length === 50);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error loading more blogs:', error);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, lastDoc, activeSearch]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/login');
     }
     if (user) {
-      fetchBlogs();
+      loadInitialBlogs('');
     }
-  }, [user, authLoading, router, fetchBlogs]);
+  }, [user, authLoading, router, loadInitialBlogs]);
+
+  // Infinite Scroll event handler
+  useEffect(() => {
+    const handleScroll = () => {
+      if (authLoading || !user || loadingData || loadingMore || !hasMore) return;
+
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const windowHeight = window.innerHeight;
+      const docHeight = document.documentElement.scrollHeight;
+
+      if (docHeight - (scrollTop + windowHeight) < 200) {
+        loadMoreBlogs();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [authLoading, user, loadingData, loadingMore, hasMore, loadMoreBlogs]);
 
   const handleDeleteClick = (blog: Blog) => {
     setBlogToDelete(blog);
@@ -61,7 +104,7 @@ export default function DashboardBlogsPage() {
     try {
       await deleteBlog(blogToDelete.id);
       toast({ title: 'Success', description: 'Blog post deleted successfully.' });
-      fetchBlogs();
+      loadInitialBlogs(activeSearch);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete blog post.' });
     }
@@ -74,21 +117,23 @@ export default function DashboardBlogsPage() {
     try {
       await updateBlog(blog.id, { status: newStatus, updatedAt: Date.now() });
       toast({ title: 'Success', description: `Blog post changed to ${newStatus}.` });
-      fetchBlogs();
+      loadInitialBlogs(activeSearch);
     } catch (error) {
       toast({ variant: 'destructive', title: 'Error', description: 'Failed to toggle status.' });
     }
   };
 
-  const filteredBlogs = useMemo(() => {
-    const query = searchQuery.toLowerCase().trim();
-    if (!query) return blogs;
-    return blogs.filter(b => 
-      b.title.toLowerCase().includes(query) || 
-      b.author.toLowerCase().includes(query) ||
-      (b.tags && b.tags.some(t => t.toLowerCase().includes(query)))
-    );
-  }, [blogs, searchQuery]);
+  const handleSearchSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setActiveSearch(searchQuery);
+    await loadInitialBlogs(searchQuery);
+  };
+
+  const handleClearSearch = async () => {
+    setSearchQuery('');
+    setActiveSearch('');
+    await loadInitialBlogs('');
+  };
 
   if (authLoading || !user) {
     return (
@@ -115,16 +160,22 @@ export default function DashboardBlogsPage() {
 
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by title, author, or tags..."
-              className="pl-8"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <form onSubmit={handleSearchSubmit} className="flex gap-2 w-full max-w-md">
+            <div className="relative flex-grow">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search article titles..."
+                className="pl-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button type="submit" size="sm">Search</Button>
+            {activeSearch && (
+              <Button type="button" variant="outline" size="sm" onClick={handleClearSearch}>Clear</Button>
+            )}
+          </form>
         </CardContent>
       </Card>
 
@@ -136,9 +187,9 @@ export default function DashboardBlogsPage() {
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
-          ) : filteredBlogs.length === 0 ? (
+          ) : blogs.length === 0 ? (
             <div className="p-12 text-center text-muted-foreground">
-              No blog posts found.
+              {activeSearch ? `No search results for "${activeSearch}".` : "No blog posts found."}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -153,7 +204,7 @@ export default function DashboardBlogsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBlogs.map((blog) => {
+                  {blogs.map((blog) => {
                     const formattedDate = format(new Date(blog.publishedAt), 'dd MMM yyyy, hh:mm a');
                     return (
                       <TableRow key={blog.id}>
@@ -199,6 +250,13 @@ export default function DashboardBlogsPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Loading More Spinner for Infinite Scroll */}
+      {loadingMore && (
+        <div className="flex justify-center py-6">
+          <Loader2 className="h-6 w-6 text-accent animate-spin" />
+        </div>
+      )}
 
       <ConfirmationDialog
         isOpen={isDeleteConfirmOpen}
