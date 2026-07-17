@@ -21,6 +21,7 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import RichTextEditor from '@/components/rich-text-editor';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 
 // Helper to convert unix ms timestamp to datetime-local string (local time)
 function msToDateTimeLocal(ms: number): string {
@@ -292,9 +293,12 @@ export default function BlogPostPage() {
               <label className="text-sm font-semibold text-foreground/80">Cover Image URL</label>
               <Input
                 value={editCoverUrl}
-                onChange={(e) => setEditCoverUrl(e.target.value)}
+                onChange={(e) => setEditCoverUrl(convertDriveUrl(e.target.value))}
                 placeholder="https://example.com/cover-image.jpg"
               />
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Google Drive sharing links will be automatically converted to direct download URLs.
+              </p>
             </div>
 
             <div className="space-y-2">

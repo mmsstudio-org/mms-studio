@@ -36,6 +36,28 @@ function dateTimeLocalToMs(dateTimeStr: string): number {
   return new Date(dateTimeStr).getTime();
 }
 
+// Helper to convert Google Drive sharing link to a direct embed/download URL
+export function convertDriveUrl(url: string): string {
+  if (!url) return '';
+  const trimmed = url.trim();
+  
+  // Format 1: /file/d/FILE_ID/view
+  const fileDRegex = /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/;
+  const matchD = trimmed.match(fileDRegex);
+  if (matchD && matchD[1]) {
+    return `https://drive.google.com/uc?export=view&id=${matchD[1]}`;
+  }
+
+  // Format 2: open?id=FILE_ID or uc?id=FILE_ID
+  const fileIdRegex = /drive\.google\.com\/(?:open|uc)\?.*id=([a-zA-Z0-9_-]+)/;
+  const matchId = trimmed.match(fileIdRegex);
+  if (matchId && matchId[1]) {
+    return `https://drive.google.com/uc?export=view&id=${matchId[1]}`;
+  }
+
+  return trimmed;
+}
+
 const formSchema = z.object({
   title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
   slug: z.string().min(3, { message: 'Slug must be at least 3 characters.' }),
@@ -207,8 +229,18 @@ export default function BlogForm({
                 <FormItem>
                   <FormLabel>Cover Image URL (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://example.com/cover.jpg" {...field} />
+                    <Input
+                      placeholder="https://example.com/cover.jpg"
+                      {...field}
+                      onChange={(e) => {
+                        const converted = convertDriveUrl(e.target.value);
+                        field.onChange(converted);
+                      }}
+                    />
                   </FormControl>
+                  <FormDescription>
+                    Google Drive sharing links will be automatically converted to direct download URLs.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

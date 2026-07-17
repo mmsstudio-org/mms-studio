@@ -28,6 +28,7 @@ import { useToast } from '@/hooks/use-toast';
 import type { Product, AppDetail } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 import { addProduct, updateProduct, deleteProduct, getApps } from '@/lib/firestore-service';
 import {
   Select,
@@ -275,8 +276,18 @@ export default function ProductEditModal({ isOpen, onOpenChange, product, onProd
                     <FormItem>
                     <FormLabel>Image URL (Optional)</FormLabel>
                     <FormControl>
-                        <Input placeholder="https://example.com/image.png" {...field} />
+                        <Input
+                            placeholder="https://example.com/image.png"
+                            {...field}
+                            onChange={(e) => {
+                                const converted = convertDriveUrl(e.target.value);
+                                field.onChange(converted);
+                            }}
+                        />
                     </FormControl>
+                    <FormDescription>
+                        Google Drive sharing links will be automatically converted to direct download URLs.
+                    </FormDescription>
                     <FormMessage />
                     </FormItem>
                 )}
