@@ -2,7 +2,7 @@
 
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -67,19 +67,19 @@ export default function NewCategoryPage() {
 
   const nameValue = form.watch('name');
 
-  // Auto-generate slug from name
+  const slugManuallyEdited = useRef(false);
+
+  function generateSlug(name: string) {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+  }
+
+  // Auto-generate slug from name (unless manually edited)
   useEffect(() => {
-    if (nameValue) {
-      const generatedSlug = nameValue
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)/g, '');
-      
-      // Update slug field if it has not been modified manually or is empty
-      const currentSlug = form.getValues('slug');
-      if (!currentSlug || currentSlug === nameValue.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, -1)) {
-        form.setValue('slug', generatedSlug, { shouldValidate: true });
-      }
+    if (nameValue && !slugManuallyEdited.current) {
+      form.setValue('slug', generateSlug(nameValue), { shouldValidate: true });
     }
   }, [nameValue, form]);
 
@@ -184,7 +184,10 @@ export default function NewCategoryPage() {
                   <FormItem>
                     <FormLabel>Slug (URL Path)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., bnc-status-app" {...field} />
+                      <Input placeholder="e.g., bnc-status-app" {...field} onChange={(e) => {
+                        slugManuallyEdited.current = true;
+                        field.onChange(e);
+                      }} />
                     </FormControl>
                     <FormDescription>
                       The slug is used for the public URL path (e.g. <code>/shop/bnc-status-app</code>).
