@@ -30,13 +30,22 @@ import type { AppDetail } from '@/lib/types';
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
   description: z.string().optional(),
-  regularPrice: z.coerce.number().min(0, { message: 'Price must be at least 0.' }),
+  regularPrice: z.coerce.number().min(1, { message: 'Regular price must be at least 1 BDT.' }),
   discountedPrice: z.union([z.coerce.number().min(0), z.string().length(0)]).optional(),
   imageUrl: z.string().optional(),
   type: z.enum(['subscription', 'coins']),
   coinAmount: z.coerce.number().optional(),
   subscriptionDays: z.coerce.number().optional(),
   appId: z.string().min(1, { message: 'Please select a category.' }),
+}).refine(data => {
+  if (data.discountedPrice !== undefined && data.discountedPrice !== '') {
+    const disc = Number(data.discountedPrice);
+    return disc < data.regularPrice;
+  }
+  return true;
+}, {
+  message: "Discounted price must be less than the regular price.",
+  path: ["discountedPrice"],
 });
 
 export default function EditProductPage() {
