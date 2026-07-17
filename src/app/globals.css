@@ -207,6 +207,10 @@
 .blog-content li {
   @apply text-base;
 }
+.blog-content li p {
+  display: inline;
+  margin: 0;
+}
 .blog-content blockquote {
   @apply border-l-4 border-primary/50 pl-4 py-1 my-4 italic text-muted-foreground bg-muted/20 rounded-r-md;
 }
@@ -214,7 +218,7 @@
   @apply bg-muted p-4 rounded-md overflow-x-auto my-4 font-mono text-sm border border-border;
 }
 .blog-content code {
-  @apply bg-muted/60 px-1.5 py-0.5 rounded font-mono text-sm text-accent-foreground;
+  @apply bg-muted/80 px-1.5 py-0.5 rounded font-mono text-sm text-rose-500 dark:text-rose-400;
 }
 .blog-content pre code {
   @apply bg-transparent p-0 rounded-none text-foreground;

@@ -180,6 +180,15 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
                 <span className="text-xs">{color.name}</span>
               </DropdownMenuItem>
             ))}
+            <div className="flex items-center gap-2 p-1.5 border-t border-border mt-1">
+              <input
+                type="color"
+                value={editor.getAttributes('textStyle').color || '#ffffff'}
+                onChange={(e) => handleSetColor(e.target.value)}
+                className="h-5 w-5 rounded cursor-pointer border border-border p-0 bg-transparent flex-shrink-0"
+              />
+              <span className="text-xs font-medium text-foreground/80">Custom Color</span>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
 
