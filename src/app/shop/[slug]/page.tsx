@@ -5,7 +5,7 @@ import ProductList from '../_components/product-list';
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import type { Product, AppDetail } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
-import { getProductsForApp, getApp } from '@/lib/firestore-service';
+import { getProductsForApp, getAppBySlug } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
 import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,16 +36,22 @@ export default function ShopSlugPage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const appDetails = await getApp(slug);
-    if (appDetails) {
-      setApp(appDetails);
-      const appProducts = await getProductsForApp(slug);
-      setProducts(appProducts);
-      setAppFound(true);
-    } else {
+    try {
+      const appDetails = await getAppBySlug(slug);
+      if (appDetails) {
+        setApp(appDetails);
+        const appProducts = await getProductsForApp(appDetails.id);
+        setProducts(appProducts);
+        setAppFound(true);
+      } else {
+        setAppFound(false);
+      }
+    } catch (e) {
+      console.error(e);
       setAppFound(false);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [slug]);
 
   useEffect(() => {

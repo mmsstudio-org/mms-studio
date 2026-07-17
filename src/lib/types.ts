@@ -17,6 +17,7 @@ export interface Product {
 export interface AppDetail {
   id: string; // Firestore document ID
   name: string;
+  slug?: string; // Unique URL identifier
   description?: string;
   icon?: string; // URL to an icon or a lucide-icon name
   youtubeVideoId?: string; // YouTube video ID

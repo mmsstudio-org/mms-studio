@@ -51,7 +51,7 @@ export default function ShopPage() {
         ) : (
           apps.map((app) => {
             return (
-              <Link href={`/shop/${app.id}`} key={app.id} className="flex h-full">
+              <Link href={`/shop/${app.slug || app.id}`} key={app.id} className="flex h-full">
                 <Card className="group flex flex-col w-full overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1">
                   <CardHeader className="flex-grow">
                     <div className="flex justify-between items-start mb-4">

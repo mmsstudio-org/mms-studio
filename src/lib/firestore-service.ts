@@ -20,6 +20,15 @@ export async function getProductsForApp(appId: string): Promise<Product[]> {
     return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
 }
 
+export async function getProduct(productId: string): Promise<Product | null> {
+    const docRef = doc(db, 'web-products', productId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Product;
+    }
+    return null;
+}
+
 export async function addProduct(product: Omit<Product, 'id'>): Promise<void> {
     await addDoc(productsCollection, product);
 }
@@ -60,6 +69,13 @@ export async function updateApp(appId: string, app: Partial<AppDetail>): Promise
 }
 
 export async function deleteApp(appId: string): Promise<void> {
+    // Delete all products belonging to this category
+    const q = query(productsCollection, where('appId', '==', appId));
+    const querySnapshot = await getDocs(q);
+    const deletePromises = querySnapshot.docs.map(doc => deleteDoc(doc.ref));
+    await Promise.all(deletePromises);
+
+    // Delete the category itself
     const appRef = doc(db, 'web-apps', appId);
     await deleteDoc(appRef);
 }
@@ -457,5 +473,44 @@ export async function getBlogsPaginated(
       return { blogs: [], lastDoc: null };
     }
   }
+}
+
+export async function getAppBySlug(slug: string): Promise<AppDetail | null> {
+    try {
+        // 1. Try querying by slug field
+        const q = query(appsCollection, where('slug', '==', slug), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+            const docSnap = querySnapshot.docs[0];
+            return { id: docSnap.id, ...docSnap.data() } as AppDetail;
+        }
+
+        // 2. Fallback: Try querying by document ID for backward compatibility
+        const docRef = doc(db, 'web-apps', slug);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as AppDetail;
+        }
+    } catch (error) {
+        console.error("Error in getAppBySlug:", error);
+    }
+    return null;
+}
+
+export async function checkCategorySlugUnique(slug: string, categoryId?: string): Promise<boolean> {
+    try {
+        const q = query(appsCollection, where('slug', '==', slug));
+        const querySnapshot = await getDocs(q);
+        
+        if (querySnapshot.empty) return true;
+        
+        if (categoryId) {
+            return querySnapshot.docs.every(doc => doc.id === categoryId);
+        }
+        return false;
+    } catch (error) {
+        console.error("Error checking category slug uniqueness:", error);
+        return false;
+    }
 }
 

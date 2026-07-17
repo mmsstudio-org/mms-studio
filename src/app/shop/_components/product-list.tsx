@@ -6,8 +6,7 @@ import type { Product, AppDetail } from '@/lib/types';
 import ProductCard from './product-card';
 import PurchaseModal from './purchase-modal';
 import { useAuth } from '@/hooks/use-auth';
-import ProductEditModal from './product-edit-modal';
-
+import { useRouter } from 'next/navigation';
 
 type ProductListProps = {
   products: Product[];
@@ -16,8 +15,8 @@ type ProductListProps = {
 };
 
 export default function ProductList({ products, onProductUpdate, app }: ProductListProps) {
+  const router = useRouter();
   const [isPurchaseModalOpen, setPurchaseModalOpen] = useState(false);
-  const [isEditModalOpen, setEditModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const { user } = useAuth();
 
@@ -27,8 +26,7 @@ export default function ProductList({ products, onProductUpdate, app }: ProductL
   };
   
   const handleEditClick = (product: Product) => {
-    setSelectedProduct(product);
-    setEditModalOpen(true);
+    router.push(`/dashboard/categories/${app.id}/products/${product.id}/edit`);
   };
 
   return (
@@ -49,17 +47,6 @@ export default function ProductList({ products, onProductUpdate, app }: ProductL
         product={selectedProduct}
         app={app}
       />
-       {user && (
-        <ProductEditModal
-          isOpen={isEditModalOpen}
-          onOpenChange={setEditModalOpen}
-          product={selectedProduct}
-          onProductUpdate={() => {
-            setEditModalOpen(false);
-            onProductUpdate();
-          }}
-        />
-      )}
     </>
   );
 }
