@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit } from 'firebase/firestore';
-import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon } from './types';
+import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog } from './types';
 
 // Collections
 const productsCollection = collection(db, 'web-products');
@@ -10,6 +10,7 @@ const siteInfoCollection = collection(db, 'web-site-info');
 const featuresCollection = collection(db, 'web-features');
 const purchasesCollection = collection(db, 'payment_sms');
 const couponsCollection = collection(db, 'web-coupons');
+const blogsCollection = collection(db, 'blogs');
 
 
 // Product Functions
@@ -195,3 +196,104 @@ export async function deleteCouponsBatch(couponCodes: string[]): Promise<void> {
     });
     await batch.commit();
 }
+
+// Blog Functions
+export async function getBlogs(): Promise<Blog[]> {
+    try {
+        const q = query(blogsCollection, orderBy('publishedAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+    } catch (error) {
+        console.error("Error in getBlogs:", error);
+        return [];
+    }
+}
+
+export async function getPublishedBlogs(): Promise<Blog[]> {
+    try {
+        const q = query(blogsCollection, where('status', '==', 'published'), orderBy('publishedAt', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+    } catch (error) {
+        console.error("Error in getPublishedBlogs:", error);
+        return [];
+    }
+}
+
+export async function getRecentPublishedBlogs(limitNumber: number): Promise<Blog[]> {
+    try {
+        const q = query(
+            blogsCollection,
+            where('status', '==', 'published'),
+            orderBy('publishedAt', 'desc'),
+            limit(limitNumber)
+        );
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+    } catch (error) {
+        console.error("Error in getRecentPublishedBlogs:", error);
+        return [];
+    }
+}
+
+export async function getBlogById(id: string): Promise<Blog | null> {
+    try {
+        const docRef = doc(db, 'blogs', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Blog;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error in getBlogById:", error);
+        return null;
+    }
+}
+
+export async function getBlogBySlug(slug: string): Promise<Blog | null> {
+    try {
+        const q = query(blogsCollection, where('slug', '==', slug), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as Blog;
+    } catch (error) {
+        console.error("Error in getBlogBySlug:", error);
+        return null;
+    }
+}
+
+export async function addBlog(blog: Omit<Blog, 'id'>): Promise<string> {
+    const docRef = await addDoc(blogsCollection, blog);
+    return docRef.id;
+}
+
+export async function updateBlog(id: string, blogData: Partial<Omit<Blog, 'id'>>): Promise<void> {
+    const docRef = doc(db, 'blogs', id);
+    await updateDoc(docRef, blogData);
+}
+
+export async function deleteBlog(id: string): Promise<void> {
+    const docRef = doc(db, 'blogs', id);
+    await deleteDoc(docRef);
+}
+
+export async function checkSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    try {
+        const q = query(blogsCollection, where('slug', '==', slug));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return true;
+        }
+        if (excludeId) {
+            return querySnapshot.docs.every(doc => doc.id === excludeId);
+        }
+        return false;
+    } catch (error) {
+        console.error("Error in checkSlugUnique:", error);
+        return true;
+    }
+}
+

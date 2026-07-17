@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Settings, LayoutGrid, ListOrdered, Ticket } from 'lucide-react';
+import { Settings, LayoutGrid, ListOrdered, Ticket, BookOpen } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -75,17 +75,27 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
            </Link>
-           <Link href="/dashboard/coupons">
-             <Card className="hover:border-primary transition-colors h-full">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Ticket className="h-5 w-5 text-accent" /> Manage Coupons</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>Create and manage discount and access coupons.</CardDescription>
-              </CardContent>
-            </Card>
-           </Link>
-        </div>
+            <Link href="/dashboard/coupons">
+              <Card className="hover:border-primary transition-colors h-full">
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2"><Ticket className="h-5 w-5 text-accent" /> Manage Coupons</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription>Create and manage discount and access coupons.</CardDescription>
+               </CardContent>
+             </Card>
+            </Link>
+            <Link href="/dashboard/blogs">
+              <Card className="hover:border-primary transition-colors h-full">
+               <CardHeader>
+                 <CardTitle className="flex items-center gap-2"><BookOpen className="h-5 w-5 text-accent" /> Manage Blogs</CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <CardDescription>Publish, draft, edit, and delete news and articles.</CardDescription>
+               </CardContent>
+             </Card>
+            </Link>
+         </div>
       </div>
     </>
   );

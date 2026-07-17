@@ -1,11 +1,12 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { getFeatures, getSiteInfo } from "@/lib/firestore-service";
-import type { Feature, SiteInfo } from "@/lib/types";
+import { format } from "date-fns";
+import { getFeatures, getSiteInfo, getRecentPublishedBlogs } from "@/lib/firestore-service";
+import type { Feature, SiteInfo, Blog } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Smartphone,
@@ -17,6 +18,9 @@ import {
   Bot,
   ShoppingBag,
   Briefcase,
+  BookOpen,
+  Calendar,
+  ArrowRight,
 } from "lucide-react";
 import Image from "next/image";
 import ContactSection from "./_components/contact-section";
@@ -77,16 +81,19 @@ const services = [
 export default function Home() {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
+  const [recentBlogs, setRecentBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const [fetchedFeatures, fetchedSiteInfo] = await Promise.all([
+      const [fetchedFeatures, fetchedSiteInfo, fetchedBlogs] = await Promise.all([
         getFeatures(),
         getSiteInfo(),
+        getRecentPublishedBlogs(3),
       ]);
       setFeatures(fetchedFeatures);
       setSiteInfo(fetchedSiteInfo);
+      setRecentBlogs(fetchedBlogs);
       setLoading(false);
     }
     fetchData();
@@ -208,6 +215,75 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* Latest from the Blog Section */}
+      {recentBlogs.length > 0 && (
+        <section className="py-20">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-['Orbitron'] font-bold neon-text">
+              Latest from the Blog
+            </h2>
+            <p className="text-lg text-muted-foreground mt-4 max-w-3xl mx-auto">
+              Stay updated with our latest tutorials, developer news, and insights.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch mb-8">
+            {recentBlogs.map((blog) => {
+              const formattedDate = format(new Date(blog.publishedAt), 'MMM dd, yyyy');
+              return (
+                <Card
+                  key={blog.id}
+                  className="bg-card/50 backdrop-blur-sm border-border/50 flex flex-col h-full overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1"
+                >
+                  {blog.coverImageUrl && (
+                    <div className="relative w-full aspect-video">
+                      <Image
+                        src={blog.coverImageUrl}
+                        alt={blog.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw"
+                      />
+                    </div>
+                  )}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
+                      <span className="flex items-center gap-1 flex-wrap">
+                        <Calendar className="h-3 w-3" />
+                        {formattedDate}
+                      </span>
+                    </div>
+                    <CardTitle className="line-clamp-2 text-xl font-bold leading-snug hover:text-accent transition-colors">
+                      <Link href={`/blog/${blog.slug}`}>{blog.title}</Link>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow pb-4">
+                    <p className="line-clamp-3 text-muted-foreground text-sm leading-relaxed">
+                      {blog.excerpt || (blog.content ? blog.content.replace(/<[^>]*>/g, '').slice(0, 120) + '...' : '')}
+                    </p>
+                  </CardContent>
+                  <CardFooter className="pt-0">
+                    <Button asChild variant="ghost" className="p-0 text-accent hover:text-accent/80 hover:bg-transparent">
+                      <Link href={`/blog/${blog.slug}`} className="flex items-center gap-2 font-semibold">
+                        Read Article
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
+          </div>
+          <div className="flex justify-center">
+            <div className="futuristic-glowing-button-container">
+              <Link href="/blog" className="futuristic-glowing-button">
+                  <BookOpen className="mr-2 h-5 w-5" />
+                  View All Posts
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section id="admin" className="py-20 px-6">
         <div className="container mx-auto text-center">

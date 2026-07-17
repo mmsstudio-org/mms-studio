@@ -85,3 +85,19 @@ export interface Coupon {
     note: string | null;
     pkg?: string; // Optional package name
 }
+
+export interface Blog {
+  id?: string;
+  slug: string;
+  title: string;
+  coverImageUrl?: string;
+  content: string; // Sanitized HTML string
+  excerpt?: string;
+  author: string;
+  createdAt: number; // Unix timestamp in ms
+  updatedAt: number; // Unix timestamp in ms
+  publishedAt: number; // Unix timestamp in ms (for display/sorting)
+  status: 'draft' | 'published';
+  tags?: string[];
+}
+

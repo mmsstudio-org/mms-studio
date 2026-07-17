@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper to check if request is from authenticated user (admin)
+    function isAdmin() {
+      return request.auth != null;
+    }
+
+    // Rules for blogs collection
+    match /blogs/{blogId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Existing collections rules (fallback logic to represent existing system architecture)
+    match /web-products/{productId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /web-apps/{appId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /web-site-info/{infoId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /web-features/{featureId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /payment_sms/{purchaseId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update, delete: if isAdmin();
+    }
+
+    match /web-coupons/{couponId} {
+      allow read: if true; // Allow client/API validation
+      allow write: if isAdmin();
+    }
+  }
+}

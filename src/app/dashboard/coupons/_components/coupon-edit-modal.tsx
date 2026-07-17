@@ -151,7 +151,7 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
             validity: values.validity.getTime(),
             redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
             note: values.note || null,
-            pkg: values.pkg || null,
+            pkg: values.pkg || undefined,
         };
 
         console.log("Prepared coupon data:", couponData);

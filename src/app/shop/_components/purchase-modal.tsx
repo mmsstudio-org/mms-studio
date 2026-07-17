@@ -127,7 +127,7 @@ export default function PurchaseModal({
         created: Date.now(),
         redeem_count: 0,
         redeem_limit: 1,
-        pkg: app.pkg || null,
+        pkg: app.pkg || undefined,
       };
 
       await addCoupon(newCoupon);
