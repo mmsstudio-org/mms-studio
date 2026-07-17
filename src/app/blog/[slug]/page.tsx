@@ -222,7 +222,7 @@ export default function BlogPostPage() {
   }
 
   // Sanitized view content
-  const sanitizedContent = DOMPurify.sanitize(blog.content);
+  const sanitizedContent = DOMPurify.sanitize(blog.content, { ADD_ATTR: ['style'] });
 
   return (
     <div className="container mx-auto py-10 max-w-4xl px-4">

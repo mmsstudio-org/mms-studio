@@ -200,9 +200,9 @@ export async function deleteCouponsBatch(couponCodes: string[]): Promise<void> {
 // Blog Functions
 export async function getBlogs(): Promise<Blog[]> {
     try {
-        const q = query(blogsCollection, orderBy('publishedAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        const querySnapshot = await getDocs(blogsCollection);
+        const list = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        return list.sort((a, b) => b.publishedAt - a.publishedAt);
     } catch (error) {
         console.error("Error in getBlogs:", error);
         return [];
@@ -211,9 +211,11 @@ export async function getBlogs(): Promise<Blog[]> {
 
 export async function getPublishedBlogs(): Promise<Blog[]> {
     try {
-        const q = query(blogsCollection, where('status', '==', 'published'), orderBy('publishedAt', 'desc'));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        const querySnapshot = await getDocs(blogsCollection);
+        const list = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        return list
+            .filter(blog => blog.status === 'published')
+            .sort((a, b) => b.publishedAt - a.publishedAt);
     } catch (error) {
         console.error("Error in getPublishedBlogs:", error);
         return [];
@@ -222,14 +224,12 @@ export async function getPublishedBlogs(): Promise<Blog[]> {
 
 export async function getRecentPublishedBlogs(limitNumber: number): Promise<Blog[]> {
     try {
-        const q = query(
-            blogsCollection,
-            where('status', '==', 'published'),
-            orderBy('publishedAt', 'desc'),
-            limit(limitNumber)
-        );
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        const querySnapshot = await getDocs(blogsCollection);
+        const list = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Blog));
+        return list
+            .filter(blog => blog.status === 'published')
+            .sort((a, b) => b.publishedAt - a.publishedAt)
+            .slice(0, limitNumber);
     } catch (error) {
         console.error("Error in getRecentPublishedBlogs:", error);
         return [];

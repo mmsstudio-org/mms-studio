@@ -5,14 +5,22 @@ import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import Link from '@tiptap/extension-link';
 import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Color } from '@tiptap/extension-color';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Code, FileCode, AlignLeft, AlignCenter, AlignRight, Link2, Unlink,
-  Undo2, Redo2, Minus
+  Undo2, Redo2, Minus, Palette
 } from 'lucide-react';
 import { useEffect } from 'react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 type RichTextEditorProps = {
   value: string;
@@ -43,6 +51,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       TextAlign.configure({
         types: ['heading', 'paragraph'],
       }),
+      TextStyle,
+      Color,
     ],
     content: value,
     editorProps: {
@@ -80,6 +90,25 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     }
 
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+  };
+
+  const colors = [
+    { name: 'Default', value: 'inherit', class: 'bg-foreground' },
+    { name: 'Electric Indigo', value: '#6F00FF', class: 'bg-[#6F00FF]' },
+    { name: 'Cyan Accent', value: '#00FFFF', class: 'bg-[#00FFFF]' },
+    { name: 'Red', value: '#ef4444', class: 'bg-[#ef4444]' },
+    { name: 'Orange', value: '#ff7a00', class: 'bg-[#ff7a00]' },
+    { name: 'Yellow', value: '#f59e0b', class: 'bg-[#f59e0b]' },
+    { name: 'Green', value: '#10b981', class: 'bg-[#10b981]' },
+    { name: 'Grey', value: '#9ca3af', class: 'bg-[#9ca3af]' },
+  ];
+
+  const handleSetColor = (colorVal: string) => {
+    if (colorVal === 'inherit') {
+      editor.chain().focus().unsetColor().run();
+    } else {
+      editor.chain().focus().setColor(colorVal).run();
+    }
   };
 
   return (
@@ -127,6 +156,32 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         >
           <Strikethrough className="h-4 w-4" />
         </Button>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title="Text Color"
+            >
+              <Palette className="h-4 w-4" style={{ color: editor.getAttributes('textStyle').color || undefined }} />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="flex flex-col gap-1 p-1.5 min-w-[150px] bg-background border border-border shadow-md z-50">
+            {colors.map((color) => (
+              <DropdownMenuItem
+                key={color.name}
+                className="flex items-center gap-2 p-1.5 cursor-pointer hover:bg-muted rounded"
+                onClick={() => handleSetColor(color.value)}
+              >
+                <span className={cn("h-3.5 w-3.5 rounded-full border border-border flex-shrink-0", color.class)} />
+                <span className="text-xs">{color.name}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <div className="h-4 w-px bg-input mx-1" />
 
