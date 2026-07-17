@@ -21,6 +21,7 @@ import {
   BookOpen,
   Calendar,
   ArrowRight,
+  User,
 } from "lucide-react";
 import Image from "next/image";
 import ContactSection from "./_components/contact-section";
@@ -248,9 +249,13 @@ export default function Home() {
                   )}
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-4 text-xs text-muted-foreground mb-2">
-                      <span className="flex items-center gap-1 flex-wrap">
+                      <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
                         {formattedDate}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <User className="h-3 w-3" />
+                        {blog.author}
                       </span>
                     </div>
                     <CardTitle className="line-clamp-2 text-xl font-bold leading-snug hover:text-accent transition-colors">

@@ -10,7 +10,7 @@ const siteInfoCollection = collection(db, 'web-site-info');
 const featuresCollection = collection(db, 'web-features');
 const purchasesCollection = collection(db, 'payment_sms');
 const couponsCollection = collection(db, 'web-coupons');
-const blogsCollection = collection(db, 'blogs');
+const blogsCollection = collection(db, 'web-blogs');
 
 
 // Product Functions
@@ -254,7 +254,7 @@ export async function getRecentPublishedBlogs(limitNumber: number): Promise<Blog
 
 export async function getBlogById(id: string): Promise<Blog | null> {
     try {
-        const docRef = doc(db, 'blogs', id);
+        const docRef = doc(db, 'web-blogs', id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
             return { id: docSnap.id, ...docSnap.data() } as Blog;
@@ -287,12 +287,12 @@ export async function addBlog(blog: Omit<Blog, 'id'>): Promise<string> {
 }
 
 export async function updateBlog(id: string, blogData: Partial<Omit<Blog, 'id'>>): Promise<void> {
-    const docRef = doc(db, 'blogs', id);
+    const docRef = doc(db, 'web-blogs', id);
     await updateDoc(docRef, blogData);
 }
 
 export async function deleteBlog(id: string): Promise<void> {
-    const docRef = doc(db, 'blogs', id);
+    const docRef = doc(db, 'web-blogs', id);
     await deleteDoc(docRef);
 }
 

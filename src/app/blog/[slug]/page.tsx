@@ -394,7 +394,7 @@ export default function BlogPostPage() {
             {blog.tags && blog.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 pt-2">
                 {blog.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="bg-primary/10 border-primary/20 text-accent-foreground text-xs">
+                  <Badge key={tag} variant="secondary" className="bg-primary/15 border-primary/30 text-primary dark:text-accent-foreground text-xs">
                     #{tag}
                   </Badge>
                 ))}

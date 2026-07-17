@@ -379,7 +379,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           type="button"
           variant="ghost"
           size="icon"
-          className="h-8 w-8 ml-auto"
+          className="h-8 w-8"
           onClick={() => editor.chain().focus().undo().run()}
           disabled={!editor.can().undo()}
           title="Undo"
