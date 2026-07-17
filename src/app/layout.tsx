@@ -1,4 +1,3 @@
-"use client";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
@@ -7,39 +6,78 @@ import Footer from "./_components/footer";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { ConfirmProvider } from "@/components/ui/confirm-provider";
-import { useEffect } from "react";
 import { getSiteInfo } from "@/lib/firestore-service";
+import type { Metadata } from "next";
 
-const defaultSiteInfo = {
-  title: "MMS Studio - Digital Assets",
-  description: "Your gateway to the future of digital assets.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const info = await getSiteInfo().catch(() => ({} as any));
+  const title = info.webName || "MMS Studio - Digital Assets";
+  const description = info.webDescription || "Your gateway to the future of digital assets.";
+  
+  return {
+    title: {
+      default: title,
+      template: `%s | ${title}`,
+    },
+    description,
+    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://mms-studio.org"),
+    alternates: {
+      canonical: "/",
+    },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-video-preview': -1,
+        'max-image-preview': 'large',
+        'max-snippet': -1,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      siteName: title,
+      locale: "en_US",
+      images: [
+        {
+          url: "/og-image.png",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/og-image.png"],
+      creator: "@mms_studio",
+    },
+    icons: {
+      icon: [
+        { url: "/favicon.png", type: "image/png" },
+        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      ],
+      apple: [
+        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      ],
+    },
+  };
+}
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  useEffect(() => {
-    getSiteInfo().then((info) => {
-      if (info.webName) {
-        document.title = info.webName;
-      }
-      if (info.webDescription) {
-        const metaDesc = document.querySelector('meta[name="description"]');
-        if (metaDesc) {
-          metaDesc.setAttribute("content", info.webDescription);
-        }
-      }
-    });
-  }, []);
-
   return (
     <html lang="en" suppressHydrationWarning style={{ scrollBehavior: 'smooth' }}>
       <head>
-        <title>{defaultSiteInfo.title}</title>
-        {/* <title>MMS Studio - Official Website</title> */}
-        <meta name="description" content={defaultSiteInfo.description} />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
@@ -81,3 +119,4 @@ export default function RootLayout({
     </html>
   );
 }
+
