@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough, Heading1, Heading2, Heading3,
   List, ListOrdered, Quote, Code, FileCode, AlignLeft, AlignCenter, AlignRight, Link2, Unlink,
-  Undo2, Redo2, Minus, Palette
+  Undo2, Redo2, Minus, Palette, Indent, Outdent
 } from 'lucide-react';
 import { useEffect } from 'react';
 import {
@@ -248,6 +248,28 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
           title="Numbered List"
         >
           <ListOrdered className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => editor.chain().focus().sinkListItem('listItem').run()}
+          disabled={!editor.can().sinkListItem('listItem')}
+          title="Indent / Nest List (Tab)"
+        >
+          <Indent className="h-4 w-4" />
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => editor.chain().focus().liftListItem('listItem').run()}
+          disabled={!editor.can().liftListItem('listItem')}
+          title="Outdent / Lift List (Shift+Tab)"
+        >
+          <Outdent className="h-4 w-4" />
         </Button>
         <Button
           type="button"
