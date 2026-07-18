@@ -185,27 +185,10 @@ export default function PortfolioForm({
     // Filter empty gallery URLs
     const cleanGalleryUrls = galleryUrls.map(url => url.trim()).filter(Boolean);
 
-    // Title limit slice warning logic
-    let finalTitle = values.title.trim();
-    if (finalTitle.length > 80) {
-      finalTitle = finalTitle.substring(0, 80).trim();
-      toast({
-        title: 'Title Truncated',
-        description: 'The project title was automatically sliced to the 80 character limit to fit the UI.',
-      });
-    }
-
-    // Short Description limit slice warning logic
-    let finalShortDescription = values.shortDescription?.trim();
-    if (finalShortDescription && finalShortDescription.length > 200) {
-      finalShortDescription = finalShortDescription.substring(0, 200).trim();
-      toast({
-        title: 'Short Description Truncated',
-        description: 'Your custom short description was automatically sliced to the 200 character limit.',
-      });
-    } else if (!finalShortDescription) {
-      finalShortDescription = generateShortDescription(values.description);
-    }
+    const finalTitle = values.title.trim().substring(0, 80);
+    const finalShortDescription = values.shortDescription?.trim()
+      ? values.shortDescription.trim().substring(0, 200)
+      : generateShortDescription(values.description);
 
     const payload: PortfolioProject = {
       ...initialData,
@@ -258,9 +241,23 @@ export default function PortfolioForm({
                       placeholder="e.g. MMS Wallet, E-Commerce Platform"
                       {...field}
                       onChange={handleTitleChange}
+                      onPaste={(e) => {
+                        const pastedText = e.clipboardData.getData('text');
+                        if (pastedText.length > 80) {
+                          toast({
+                            title: 'Title Truncated',
+                            description: 'Pasted title was automatically truncated to the 80 character limit.',
+                          });
+                        }
+                      }}
+                      maxLength={80}
                       className="bg-card border-border/80 focus-visible:ring-accent"
                     />
                   </FormControl>
+                  <FormDescription className="text-[11px] text-muted-foreground flex justify-between">
+                    <span>Used as the display name of this project.</span>
+                    <span>{field.value?.length || 0}/80 chars</span>
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -385,6 +382,16 @@ export default function PortfolioForm({
                     placeholder="Leave empty to auto-generate from project details, or write a custom 150-160 character preview..."
                     rows={2}
                     {...field}
+                    onPaste={(e) => {
+                      const pastedText = e.clipboardData.getData('text');
+                      if (pastedText.length > 200) {
+                        toast({
+                          title: 'Description Truncated',
+                          description: 'Pasted short description was automatically truncated to the 200 character limit.',
+                        });
+                      }
+                    }}
+                    maxLength={200}
                     className="bg-card border-border/80 focus-visible:ring-accent font-body text-sm"
                   />
                 </FormControl>

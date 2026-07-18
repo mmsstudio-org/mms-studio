@@ -251,7 +251,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
               
               {project.storeUrl && (
-                <Button asChild variant="outline" className="flex-1 border-primary/30 text-foreground dark:text-white hover:bg-primary/10 font-semibold">
+                <Button asChild variant="outline" className="flex-1 border-primary/30 text-foreground dark:text-white hover:bg-primary/10 hover:text-primary dark:hover:text-white font-semibold">
                   <Link href={project.storeUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                     {getStoreLinkType(project.storeUrl) === 'apple' && <AppStoreIcon className="h-4 w-4 text-accent" />}
                     {getStoreLinkType(project.storeUrl) === 'google' && <PlayStoreIcon className="h-4 w-4 text-accent" />}
