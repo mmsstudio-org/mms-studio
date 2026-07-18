@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,6 +12,7 @@ import {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
+  type CarouselApi
 } from '@/components/ui/carousel';
 import type { PortfolioProject } from '@/lib/types';
 import DOMPurify from 'isomorphic-dompurify';
@@ -101,6 +102,17 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
   const allImages = [project.coverImageUrl, ...(project.galleryImageUrls || [])].filter(Boolean);
   const isSlider = allImages.length > 1;
 
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+
+  useEffect(() => {
+    if (!api) return;
+    setCurrent(api.selectedScrollSnap());
+    api.on('select', () => {
+      setCurrent(api.selectedScrollSnap());
+    });
+  }, [api]);
+
   // Sanitized view content
   const sanitizedDescription = DOMPurify.sanitize(project.description, { ADD_ATTR: ['style'] });
 
@@ -132,7 +144,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
         <div className="lg:col-span-7 space-y-4">
           {isSlider ? (
             <div className="relative group">
-              <Carousel className="w-full relative overflow-hidden rounded-2xl border border-border/50 bg-card/10">
+              <Carousel setApi={setApi} className="w-full relative overflow-hidden rounded-2xl border border-border/50 bg-card/10">
                 <CarouselContent>
                   {allImages.map((imageUrl, idx) => (
                     <CarouselItem key={idx} className="relative w-full aspect-video">
@@ -153,6 +165,20 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
                 <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 border-none text-white h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                   <ChevronRight className="h-5 w-5" />
                 </CarouselNext>
+
+                {/* Indicator Dots Overlay */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex gap-1.5 bg-black/30 backdrop-blur-sm px-2.5 py-1.5 rounded-full">
+                  {allImages.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => api?.scrollTo(idx)}
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        current === idx ? 'w-4 bg-white' : 'w-1.5 bg-white/40 hover:bg-white/70'
+                      }`}
+                      aria-label={`Go to slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
               </Carousel>
             </div>
           ) : (
