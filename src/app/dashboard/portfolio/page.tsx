@@ -396,7 +396,7 @@ export default function DashboardPortfolioPage() {
         <Card className="border-2 border-dashed bg-card/15 border-border/50 text-center py-20 max-w-lg mx-auto">
           <CardContent className="flex flex-col items-center justify-center p-6">
             <Briefcase className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-bold font-heading text-white">No projects found</h3>
+            <h3 className="text-xl font-bold font-heading">No projects found</h3>
             <p className="text-muted-foreground mt-2 font-body max-w-xs">
               Get started by creating your first showcase project!
             </p>
