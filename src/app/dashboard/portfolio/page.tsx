@@ -179,7 +179,7 @@ function SortableProjectRow({
           size="sm"
           onClick={() => onToggleStatus(project)}
           disabled={isUpdating === project.id}
-          className={`h-8 min-w-[90px] font-semibold border-border/80 text-xs rounded-lg ${
+          className={`h-8 min-w-[90px] font-semibold border-border/80 text-xs rounded-lg hover:text-none ${
             project.status === 'published'
               ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25'
               : 'bg-card/80 text-muted-foreground border-border hover:bg-muted/20'
