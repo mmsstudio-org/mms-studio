@@ -102,3 +102,28 @@ export interface Blog {
   tags?: string[];
 }
 
+export interface PortfolioProject {
+  id?: string;
+  slug: string;
+  title: string;
+  description: string; // Sanitized HTML from TipTap
+  shortDescription?: string; // Plain text description used for previews and SEO meta
+  coverImageUrl: string;
+  galleryImageUrls?: string[];
+  projectType: 'app' | 'web' | 'other';
+  techStack?: string[];
+  client?: string;
+  role?: string;
+  timeline?: string;
+  liveUrl?: string;
+  githubUrl?: string;
+  storeUrl?: string;
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+  publishedAt: number;
+  status: 'draft' | 'published';
+  featured?: boolean;
+}
+
+

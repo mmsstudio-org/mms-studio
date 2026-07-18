@@ -1,12 +1,13 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import * as LucideIcons from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
-import { getFeatures, getSiteInfo, getRecentPublishedBlogs } from "@/lib/firestore-service";
-import type { Feature, SiteInfo, Blog } from "@/lib/types";
+import { getFeatures, getSiteInfo, getRecentPublishedBlogs, getFeaturedPortfolio } from "@/lib/firestore-service";
+import type { Feature, SiteInfo, Blog, PortfolioProject } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Smartphone,
@@ -83,18 +84,21 @@ export default function Home() {
   const [features, setFeatures] = useState<Feature[]>([]);
   const [siteInfo, setSiteInfo] = useState<SiteInfo | null>(null);
   const [recentBlogs, setRecentBlogs] = useState<Blog[]>([]);
+  const [featuredProjects, setFeaturedProjects] = useState<PortfolioProject[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchData() {
-      const [fetchedFeatures, fetchedSiteInfo, fetchedBlogs] = await Promise.all([
+      const [fetchedFeatures, fetchedSiteInfo, fetchedBlogs, fetchedProjects] = await Promise.all([
         getFeatures(),
         getSiteInfo(),
         getRecentPublishedBlogs(3),
+        getFeaturedPortfolio(3).catch(() => []),
       ]);
       setFeatures(fetchedFeatures);
       setSiteInfo(fetchedSiteInfo);
       setRecentBlogs(fetchedBlogs);
+      setFeaturedProjects(fetchedProjects);
       setLoading(false);
     }
     fetchData();
@@ -290,23 +294,150 @@ export default function Home() {
         </section>
       )}
 
-      <section id="admin" className="py-20 px-6">
-        <div className="container mx-auto text-center">
-          <h2 className="text-4xl font-['Orbitron'] font-bold mb-8 neon-text">
-            Our Projects & Portfolio
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Explore our developer portfolio to discover our innovative projects,
-            apps, and digital solutions.
-          </p>
-          <div className="flex justify-center">
-            <div className="futuristic-glowing-button-container">
-              <Link href="https://sabbirmms.github.io" target="_blank" className="futuristic-glowing-button">
-                  <Briefcase className="mr-2 h-5 w-5" />
-                  Visit Portfolio
-              </Link>
-            </div>
+      <section id="portfolio" className="py-20 px-6 max-w-7xl mx-auto">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-['Orbitron'] font-bold mb-4 neon-text">
+              Featured Projects
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
+              Explore our developer portfolio to discover our innovative apps, custom web solutions, and tools.
+            </p>
           </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="flex flex-col h-[400px]">
+                  <Skeleton className="w-full aspect-video rounded-t-lg" />
+                  <CardHeader className="space-y-2">
+                    <Skeleton className="h-4 w-1/4" />
+                    <Skeleton className="h-6 w-3/4" />
+                  </CardHeader>
+                  <CardContent className="space-y-2 flex-grow">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-5/6" />
+                  </CardContent>
+                  <CardFooter>
+                    <Skeleton className="h-9 w-28" />
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          ) : featuredProjects.length === 0 ? (
+            <div className="flex justify-center mt-8">
+              <div className="futuristic-glowing-button-container">
+                <Link href="/portfolio" className="futuristic-glowing-button">
+                    <Briefcase className="mr-2 h-5 w-5" />
+                    Visit Portfolio
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch mb-12">
+                {featuredProjects.map((project) => {
+                  const getProjectIcon = (type: 'app' | 'web' | 'other') => {
+                    switch (type) {
+                      case 'app':
+                        return <Smartphone className="h-3.5 w-3.5 text-accent" />;
+                      case 'web':
+                        return <Globe className="h-3.5 w-3.5 text-accent" />;
+                      default:
+                        return <Code className="h-3.5 w-3.5 text-accent" />;
+                    }
+                  };
+                  
+                  const getProjectTypeLabel = (type: 'app' | 'web' | 'other') => {
+                    switch (type) {
+                      case 'app':
+                        return 'Mobile App';
+                      case 'web':
+                        return 'Web App';
+                      default:
+                        return 'Project';
+                    }
+                  };
+
+                  return (
+                    <Card
+                      key={project.id}
+                      className="flex flex-col overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1 h-full bg-card/40 border-border/50 backdrop-blur-sm"
+                    >
+                      {project.coverImageUrl && (
+                        <div className="relative w-full aspect-video border-b border-border/30 overflow-hidden">
+                          <Image
+                            src={project.coverImageUrl}
+                            alt={project.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                            className="object-cover transition-transform duration-500 hover:scale-105"
+                          />
+                          <div className="absolute top-3 right-3 z-10 flex gap-2">
+                            {project.featured && (
+                              <Badge className="bg-amber-500 hover:bg-amber-500 text-black font-semibold text-[10px] tracking-wider uppercase">
+                                ⭐ Featured
+                              </Badge>
+                            )}
+                            <Badge className="bg-primary/90 text-white font-semibold text-[10px] tracking-wider uppercase flex items-center gap-1.5">
+                              {getProjectIcon(project.projectType)}
+                              <span>{getProjectTypeLabel(project.projectType)}</span>
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+                      <CardHeader className="pb-3 flex-grow">
+                        <CardTitle className="text-xl font-bold leading-snug hover:text-accent transition-colors font-heading text-white line-clamp-2">
+                          <Link href={`/portfolio/${project.slug}`}>{project.title}</Link>
+                        </CardTitle>
+                        <CardDescription className="line-clamp-3 text-sm text-muted-foreground mt-2 font-body">
+                          {project.shortDescription || ""}
+                        </CardDescription>
+                      </CardHeader>
+                      
+                      {project.techStack && project.techStack.length > 0 && (
+                        <div className="px-6 pb-4 flex flex-wrap gap-1.5">
+                          {project.techStack.slice(0, 3).map((tech) => (
+                            <Badge key={tech} variant="secondary" className="bg-primary/10 border-primary/20 text-primary dark:text-accent-foreground text-[10px] font-medium">
+                              {tech}
+                            </Badge>
+                          ))}
+                          {project.techStack.length > 3 && (
+                            <Badge variant="secondary" className="bg-muted border-muted-foreground/20 text-muted-foreground text-[10px] font-medium">
+                              +{project.techStack.length - 3}
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      <CardFooter className="pt-3 border-t border-border/30 flex justify-between items-center bg-card/10">
+                        {project.timeline ? (
+                          <span className="text-xs text-muted-foreground flex items-center gap-1 font-body">
+                            <Calendar className="h-3.5 w-3.5 text-accent" />
+                            {project.timeline}
+                          </span>
+                        ) : (
+                          <span />
+                        )}
+                        <Link href={`/portfolio/${project.slug}`} className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:text-white transition-colors">
+                          Details <ArrowRight className="h-3.5 w-3.5" />
+                        </Link>
+                      </CardFooter>
+                    </Card>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-center">
+                <div className="futuristic-glowing-button-container">
+                  <Link href="/portfolio" className="futuristic-glowing-button">
+                      <Briefcase className="mr-2 h-5 w-5" />
+                      View All Projects
+                  </Link>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 

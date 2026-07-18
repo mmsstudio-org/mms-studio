@@ -23,6 +23,7 @@ export default function Header() {
 
   const navLinks = [
     { href: "/shop", label: "Shop" },
+    { href: "/portfolio", label: "Portfolio" },
     { href: "/blog", label: "Blog" },
     ...(user ? [{ href: "/dashboard", label: "Dashboard" }] : []),
     ...(isHomePage ? [{ href: "#contact", label: "Contact" }] : []),

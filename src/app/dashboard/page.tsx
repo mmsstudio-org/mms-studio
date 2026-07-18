@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Settings, LayoutGrid, ListOrdered, Ticket, BookOpen } from 'lucide-react';
+import { Settings, LayoutGrid, ListOrdered, Ticket, BookOpen, Briefcase } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -95,6 +95,16 @@ export default function DashboardPage() {
                </CardContent>
              </Card>
             </Link>
+            <Link href="/dashboard/portfolio">
+               <Card className="hover:border-primary transition-colors h-full">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2"><Briefcase className="h-5 w-5 text-accent" /> Manage Portfolio</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription>Create, edit, delete, and drag-and-drop sort portfolio projects.</CardDescription>
+                </CardContent>
+              </Card>
+             </Link>
          </div>
       </div>
     </>

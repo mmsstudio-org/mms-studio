@@ -12,6 +12,17 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /web-blogs/{blogId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
+    // Rules for portfolio collection
+    match /web-portfolio/{projectId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
+
     // Existing collections rules (fallback logic to represent existing system architecture)
     match /web-products/{productId} {
       allow read: if true;

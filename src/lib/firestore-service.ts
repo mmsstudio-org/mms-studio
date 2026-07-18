@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog } from './types';
+import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog, PortfolioProject } from './types';
 
 // Collections
 const productsCollection = collection(db, 'web-products');
@@ -11,6 +11,7 @@ const featuresCollection = collection(db, 'web-features');
 const purchasesCollection = collection(db, 'payment_sms');
 const couponsCollection = collection(db, 'web-coupons');
 const blogsCollection = collection(db, 'web-blogs');
+const portfolioCollection = collection(db, 'web-portfolio');
 
 
 // Product Functions
@@ -513,4 +514,187 @@ export async function checkCategorySlugUnique(slug: string, categoryId?: string)
         return false;
     }
 }
+
+// Portfolio Functions
+export async function addPortfolioProject(project: Omit<PortfolioProject, 'id'>): Promise<string> {
+    const q = query(portfolioCollection, orderBy('order', 'desc'), limit(1));
+    const snapshot = await getDocs(q);
+    let maxOrder = 0;
+    if (!snapshot.empty) {
+        maxOrder = snapshot.docs[0].data().order || 0;
+    }
+    
+    const newProject = {
+        ...project,
+        order: maxOrder + 1,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+    };
+    
+    const docRef = await addDoc(portfolioCollection, newProject);
+    return docRef.id;
+}
+
+export async function updatePortfolioProject(id: string, projectData: Partial<Omit<PortfolioProject, 'id'>>): Promise<void> {
+    const docRef = doc(db, 'web-portfolio', id);
+    await updateDoc(docRef, {
+        ...projectData,
+        updatedAt: Date.now()
+    });
+}
+
+export async function deletePortfolioProject(id: string): Promise<void> {
+    const docRef = doc(db, 'web-portfolio', id);
+    await deleteDoc(docRef);
+}
+
+export async function getPortfolioProject(id: string): Promise<PortfolioProject | null> {
+    try {
+        const docRef = doc(db, 'web-portfolio', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as PortfolioProject;
+        }
+    } catch (error) {
+        console.error("Error in getPortfolioProject:", error);
+    }
+    return null;
+}
+
+export async function getPortfolioProjectBySlug(slug: string): Promise<PortfolioProject | null> {
+    try {
+        const q = query(portfolioCollection, where('slug', '==', slug), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        const docSnap = querySnapshot.docs[0];
+        return { id: docSnap.id, ...docSnap.data() } as PortfolioProject;
+    } catch (error) {
+        console.error("Error in getPortfolioProjectBySlug:", error);
+        return null;
+    }
+}
+
+export async function checkPortfolioSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    try {
+        const q = query(portfolioCollection, where('slug', '==', slug));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return true;
+        }
+        if (excludeId) {
+            return querySnapshot.docs.every(docSnap => docSnap.id === excludeId);
+        }
+        return false;
+    } catch (error) {
+        console.error("Error in checkPortfolioSlugUnique:", error);
+        return true;
+    }
+}
+
+export async function getPublishedPortfolio(): Promise<PortfolioProject[]> {
+    try {
+        const q = query(
+            portfolioCollection,
+            where('status', '==', 'published'),
+            orderBy('order', 'asc'),
+            orderBy('publishedAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
+    } catch (error) {
+        console.warn("Index may be missing for published portfolio. Falling back to in-memory filter/sort.");
+        try {
+            const snapshot = await getDocs(portfolioCollection);
+            const list = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
+            return list
+                .filter(p => p.status === 'published')
+                .sort((a, b) => {
+                    if (a.order !== b.order) return a.order - b.order;
+                    return b.publishedAt - a.publishedAt;
+                });
+        } catch (fallbackErr) {
+            console.error("Fallback failed in getPublishedPortfolio:", fallbackErr);
+            return [];
+        }
+    }
+}
+
+export async function getAllPortfolioAdmin(): Promise<PortfolioProject[]> {
+    try {
+        const q = query(portfolioCollection, orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
+    } catch (error) {
+        console.warn("Index may be missing for admin portfolio list. Falling back to in-memory sort.");
+        try {
+            const snapshot = await getDocs(portfolioCollection);
+            return snapshot.docs
+                .map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject))
+                .sort((a, b) => a.order - b.order);
+        } catch (fallbackErr) {
+            console.error("Fallback failed in getAllPortfolioAdmin:", fallbackErr);
+            return [];
+        }
+    }
+}
+
+export async function updatePortfolioOrders(orderedIds: string[]): Promise<void> {
+    const batch = writeBatch(db);
+    orderedIds.forEach((id, index) => {
+        const docRef = doc(db, 'web-portfolio', id);
+        batch.update(docRef, { order: index, updatedAt: Date.now() });
+    });
+    await batch.commit();
+}
+
+export async function getFeaturedPortfolio(limitNum?: number): Promise<PortfolioProject[]> {
+    try {
+        const q = query(
+            portfolioCollection,
+            where('status', '==', 'published'),
+            where('featured', '==', true),
+            orderBy('order', 'asc'),
+            orderBy('publishedAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        let list = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
+        if (limitNum) {
+            list = list.slice(0, limitNum);
+        }
+        if (list.length === 0) {
+            const allPublished = await getPublishedPortfolio();
+            return limitNum ? allPublished.slice(0, limitNum) : allPublished;
+        }
+        return list;
+    } catch (error) {
+        console.warn("Index may be missing for featured portfolio. Falling back to in-memory filter/sort.");
+        try {
+            const snapshot = await getDocs(portfolioCollection);
+            const all = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
+            const published = all.filter(p => p.status === 'published');
+            let featured = published.filter(p => p.featured === true);
+            featured.sort((a, b) => {
+                if (a.order !== b.order) return a.order - b.order;
+                return b.publishedAt - a.publishedAt;
+            });
+            if (limitNum) {
+                featured = featured.slice(0, limitNum);
+            }
+            if (featured.length === 0) {
+                published.sort((a, b) => {
+                    if (a.order !== b.order) return a.order - b.order;
+                    return b.publishedAt - a.publishedAt;
+                });
+                return limitNum ? published.slice(0, limitNum) : published;
+            }
+            return featured;
+        } catch (fallbackErr) {
+            console.error("Fallback failed in getFeaturedPortfolio:", fallbackErr);
+            return [];
+        }
+    }
+}
+
 
