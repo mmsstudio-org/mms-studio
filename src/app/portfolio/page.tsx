@@ -15,23 +15,33 @@ export const metadata: Metadata = {
 };
 
 // Map project types to icons
-function getProjectIcon(type: 'app' | 'web' | 'other') {
+function getProjectIcon(type: 'app' | 'web' | 'both' | 'other') {
   switch (type) {
     case 'app':
       return <Smartphone className="h-3.5 w-3.5 text-accent" />;
     case 'web':
       return <Globe className="h-3.5 w-3.5 text-accent" />;
+    case 'both':
+      return (
+        <span className="flex items-center gap-0.5">
+          <Globe className="h-3.5 w-3.5 text-accent" />
+          <span className="text-muted-foreground/60 text-[10px] select-none">+</span>
+          <Smartphone className="h-3.5 w-3.5 text-accent" />
+        </span>
+      );
     default:
       return <FolderGit2 className="h-3.5 w-3.5 text-accent" />;
   }
 }
 
-function getProjectTypeLabel(type: 'app' | 'web' | 'other') {
+function getProjectTypeLabel(type: 'app' | 'web' | 'both' | 'other') {
   switch (type) {
     case 'app':
       return 'Mobile App';
     case 'web':
       return 'Web App';
+    case 'both':
+      return 'Web & App';
     default:
       return 'Project';
   }

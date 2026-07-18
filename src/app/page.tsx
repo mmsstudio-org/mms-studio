@@ -337,23 +337,33 @@ export default function Home() {
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch mb-12">
                 {featuredProjects.map((project) => {
-                  const getProjectIcon = (type: 'app' | 'web' | 'other') => {
+                  const getProjectIcon = (type: 'app' | 'web' | 'both' | 'other') => {
                     switch (type) {
                       case 'app':
                         return <Smartphone className="h-3.5 w-3.5 text-accent" />;
                       case 'web':
                         return <Globe className="h-3.5 w-3.5 text-accent" />;
+                      case 'both':
+                        return (
+                          <span className="flex items-center gap-0.5">
+                            <Globe className="h-3.5 w-3.5 text-accent" />
+                            <span className="text-muted-foreground/60 text-[10px] select-none">+</span>
+                            <Smartphone className="h-3.5 w-3.5 text-accent" />
+                          </span>
+                        );
                       default:
                         return <Code className="h-3.5 w-3.5 text-accent" />;
                     }
                   };
                   
-                  const getProjectTypeLabel = (type: 'app' | 'web' | 'other') => {
+                  const getProjectTypeLabel = (type: 'app' | 'web' | 'both' | 'other') => {
                     switch (type) {
                       case 'app':
                         return 'Mobile App';
                       case 'web':
                         return 'Web App';
+                      case 'both':
+                        return 'Web & App';
                       default:
                         return 'Project';
                     }

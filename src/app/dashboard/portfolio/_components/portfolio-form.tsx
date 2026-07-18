@@ -69,7 +69,7 @@ const formSchema = z.object({
     .or(z.literal('')),
   coverImageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
   description: z.string().min(5, { message: 'Description must be at least 5 characters.' }),
-  projectType: z.enum(['app', 'web', 'other']),
+  projectType: z.enum(['app', 'web', 'both', 'other']),
   techStack: z.string().optional(),
   client: z.string().optional(),
   role: z.string().optional(),
@@ -285,6 +285,7 @@ export default function PortfolioForm({
                     >
                       <option value="web" className="bg-card">Web Application</option>
                       <option value="app" className="bg-card">Mobile App</option>
+                      <option value="both" className="bg-card">Web & App</option>
                       <option value="other" className="bg-card">Other Project</option>
                     </select>
                   </FormControl>

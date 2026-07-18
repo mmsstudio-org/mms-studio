@@ -61,23 +61,33 @@ function getStoreLinkType(url: string): 'apple' | 'google' | 'generic' {
   return 'generic';
 }
 
-function getProjectIcon(type: 'app' | 'web' | 'other') {
+function getProjectIcon(type: 'app' | 'web' | 'both' | 'other') {
   switch (type) {
     case 'app':
       return <Smartphone className="h-5 w-5 text-accent" />;
     case 'web':
       return <Globe className="h-5 w-5 text-accent" />;
+    case 'both':
+      return (
+        <span className="flex items-center gap-0.5">
+          <Globe className="h-5 w-5 text-accent" />
+          <span className="text-muted-foreground/60 text-xs select-none">+</span>
+          <Smartphone className="h-5 w-5 text-accent" />
+        </span>
+      );
     default:
       return <FolderGit2 className="h-5 w-5 text-accent" />;
   }
 }
 
-function getProjectTypeLabel(type: 'app' | 'web' | 'other') {
+function getProjectTypeLabel(type: 'app' | 'web' | 'both' | 'other') {
   switch (type) {
     case 'app':
       return 'Mobile Application';
     case 'web':
       return 'Web Application';
+    case 'both':
+      return 'Web & App';
     default:
       return 'Software Project';
   }

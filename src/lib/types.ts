@@ -110,7 +110,7 @@ export interface PortfolioProject {
   shortDescription?: string; // Plain text description used for previews and SEO meta
   coverImageUrl: string;
   galleryImageUrls?: string[];
-  projectType: 'app' | 'web' | 'other';
+  projectType: 'app' | 'web' | 'both' | 'other';
   techStack?: string[];
   client?: string;
   role?: string;

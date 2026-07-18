@@ -83,12 +83,20 @@ function SortableProjectRow({
     zIndex: isDragging ? 50 : 'auto',
   };
 
-  const getProjectIcon = (type: 'app' | 'web' | 'other') => {
+  const getProjectIcon = (type: 'app' | 'web' | 'both' | 'other') => {
     switch (type) {
       case 'app':
         return <Smartphone className="h-4 w-4 text-accent" />;
       case 'web':
         return <Globe className="h-4 w-4 text-accent" />;
+      case 'both':
+        return (
+          <span className="flex items-center gap-0.5">
+            <Globe className="h-4 w-4 text-accent" />
+            <span className="text-muted-foreground/60 text-[10px] select-none">+</span>
+            <Smartphone className="h-4 w-4 text-accent" />
+          </span>
+        );
       default:
         return <FolderGit2 className="h-4 w-4 text-accent" />;
     }

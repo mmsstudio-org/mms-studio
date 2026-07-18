@@ -77,7 +77,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
   const canonicalUrl = `${appUrl}/portfolio/${slug}`;
 
   // Structured Data (JSON-LD)
-  const isApp = project.projectType === 'app';
+  const isApp = project.projectType === 'app' || project.projectType === 'both';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': isApp ? 'SoftwareApplication' : 'CreativeWork',
