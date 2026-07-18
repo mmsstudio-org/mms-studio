@@ -18,42 +18,30 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: '**',
       },
-      /*{
+      {
         protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
+        hostname: 'drive.google.com',
       },
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
+        hostname: 'docs.google.com',
       },
       {
         protocol: 'https',
-        hostname: 'images.pexels.com',
-        port: '',
-        pathname: '/**',
+        hostname: 'lh3.googleusercontent.com',
       },
       {
         protocol: 'https',
         hostname: 'play-lh.googleusercontent.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'img001.prntscr.com',
-        port: '',
-        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'avatars.githubusercontent.com',
-        port: '',
-        pathname: '/**',
-      },*/
+      },
+      {
+        protocol: 'https',
+        hostname: 'github.com',
+      },
     ],
   },
 };

@@ -604,7 +604,7 @@ export async function getPublishedPortfolio(): Promise<PortfolioProject[]> {
         const snapshot = await getDocs(q);
         return snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));
     } catch (error) {
-        console.warn("Index may be missing for published portfolio. Falling back to in-memory filter/sort.");
+        console.warn("Index may be missing for published portfolio. Falling back to in-memory filter/sort.", error);
         try {
             const snapshot = await getDocs(portfolioCollection);
             const list = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() } as PortfolioProject));

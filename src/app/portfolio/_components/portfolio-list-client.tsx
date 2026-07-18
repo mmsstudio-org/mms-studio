@@ -1,18 +1,14 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import { getPublishedPortfolio } from '@/lib/firestore-service';
+import type { PortfolioProject } from '@/lib/types';
 import { Smartphone, Globe, FolderGit2, Calendar, ArrowRight, Briefcase } from 'lucide-react';
-import type { Metadata } from 'next';
-
-export const metadata: Metadata = {
-  title: 'Portfolio | MMS Studio',
-  description: 'Explore our latest application categories, custom web tools, mobile apps, and other software projects built by the MMS Studio team.',
-  alternates: {
-    canonical: '/portfolio',
-  },
-};
 
 // Map project types to icons
 function getProjectIcon(type: 'app' | 'web' | 'both' | 'other') {
@@ -47,10 +43,57 @@ function getProjectTypeLabel(type: 'app' | 'web' | 'both' | 'other') {
   }
 }
 
-export const dynamic = 'force-dynamic';
+export default function PortfolioListClient() {
+  const [projects, setProjects] = useState<PortfolioProject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-export default async function PortfolioPage() {
-  const projects = await getPublishedPortfolio();
+  useEffect(() => {
+    async function loadProjects() {
+      try {
+        const list = await getPublishedPortfolio();
+        setProjects(list);
+      } catch (error) {
+        console.error("Failed to load portfolio projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadProjects();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-12 px-4 max-w-7xl">
+        <div className="text-center mb-16">
+          <h1 className="text-4xl md:text-5xl font-['Orbitron'] font-black mb-4 tracking-wide uppercase">
+            <span className="gradient-text">Our Portfolio</span>
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto font-body">
+            A showcase of our developer tools, apps, client work, and high-performance digital projects.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="flex flex-col h-[400px]">
+              <Skeleton className="w-full aspect-video rounded-t-lg" />
+              <CardHeader className="space-y-2">
+                <Skeleton className="h-4 w-1/4" />
+                <Skeleton className="h-6 w-3/4" />
+              </CardHeader>
+              <CardContent className="space-y-2 flex-grow">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+              </CardContent>
+              <CardFooter className="flex justify-between items-center">
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-9 w-20" />
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-12 px-4 max-w-7xl">

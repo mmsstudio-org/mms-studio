@@ -213,10 +213,9 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
             <h1 className="text-xl md:text-2xl font-['Orbitron'] font-black leading-tight tracking-tight text-foreground">
               {project.title}
             </h1>
-            {/* Short description - commented out */}
-            {/* <p className="text-muted-foreground text-sm leading-relaxed font-body">
+            <p className="text-muted-foreground text-sm leading-relaxed font-body">
               {project.shortDescription}
-            </p> */}
+            </p>
           </div>
 
           {/* Project Details Box */}

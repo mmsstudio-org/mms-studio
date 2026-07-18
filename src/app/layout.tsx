@@ -60,11 +60,11 @@ export async function generateMetadata(): Promise<Metadata> {
     icons: {
       icon: [
         { url: "/favicon.png", type: "image/png" },
-        { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-        { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+        { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+        { url: "/favicon.png", sizes: "16x16", type: "image/png" },
       ],
       apple: [
-        { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+        { url: "/favicon.png", sizes: "180x180", type: "image/png" },
       ],
     },
   };
@@ -76,7 +76,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning style={{ scrollBehavior: 'smooth' }}>
+    <html lang="en" suppressHydrationWarning style={{ scrollBehavior: 'smooth' }} data-scroll-behavior="smooth">
       <head>
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
