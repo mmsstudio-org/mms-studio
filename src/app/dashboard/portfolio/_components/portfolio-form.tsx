@@ -223,7 +223,7 @@ export default function PortfolioForm({
         <Link href="/dashboard/portfolio" className="text-muted-foreground hover:text-accent p-1.5 rounded-lg hover:bg-muted/30 transition-colors">
           <ArrowLeft className="h-5 w-5" />
         </Link>
-        <h2 className="text-2xl font-bold font-['Orbitron'] text-white">{titleText}</h2>
+        <h2 className="text-2xl font-bold font-['Orbitron']">{titleText}</h2>
       </div>
 
       <Form {...form}>
@@ -338,7 +338,7 @@ export default function PortfolioForm({
           <div className="space-y-3 p-4 rounded-xl border border-border/40 bg-card/10">
             <div className="flex justify-between items-center mb-2">
               <span className="text-foreground/80 font-semibold text-sm">Gallery Image URLs</span>
-              <Button type="button" variant="outline" size="sm" onClick={addUrlRow} className="h-8 border-primary/40 hover:bg-primary/10">
+              <Button type="button" variant="outline" size="sm" onClick={addUrlRow} className="h-8 border-primary/40 hover:bg-primary/10 hover:text-none">
                 <Plus className="h-4 w-4 mr-1" /> Add Row
               </Button>
             </div>
@@ -585,7 +585,7 @@ export default function PortfolioForm({
                       htmlFor="featured-check"
                       className="text-sm font-semibold text-foreground/80 leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
-                      ⭐ Pin to Homepage Featured Carousel
+                      Pin to Homepage Carousel
                     </label>
                   </div>
                   <FormMessage />

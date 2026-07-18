@@ -131,7 +131,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
           Back to portfolio list
         </Link>
         {user && (
-          <Button asChild variant="outline" className="border-primary/40 hover:bg-primary/10 text-xs h-9 rounded-lg self-start sm:self-auto">
+          <Button asChild variant="outline" className="border-primary/40 hover:bg-primary/10 hover:text-none text-xs h-9 rounded-lg self-start sm:self-auto">
             <Link href={`/dashboard/portfolio/${project.id}/edit`} className="flex items-center gap-2">
               <Pencil className="h-4 w-4 text-accent" /> Edit Project
             </Link>
@@ -210,12 +210,13 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-['Orbitron'] font-black leading-tight tracking-tight text-foreground">
+            <h1 className="text-xl md:text-2xl font-['Orbitron'] font-black leading-tight tracking-tight text-foreground">
               {project.title}
             </h1>
-            <p className="text-muted-foreground text-sm leading-relaxed font-body">
+            {/* Short description - commented out */}
+            {/* <p className="text-muted-foreground text-sm leading-relaxed font-body">
               {project.shortDescription}
-            </p>
+            </p> */}
           </div>
 
           {/* Project Details Box */}
@@ -252,9 +253,9 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
                 Technologies Used
               </h3>
               <div className="flex flex-wrap gap-1.5">
-                {project.techStack.map((tech) => (
+                {project.techStack.map((tech,index) => (
                   <Badge
-                    key={tech}
+                    key={index}
                     variant="secondary"
                     className="bg-primary/10 border-primary/25 text-primary dark:text-accent-foreground text-xs font-medium px-2.5 py-0.5"
                   >
@@ -288,7 +289,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
 
               {project.githubUrl && (
-                <Button asChild variant="outline" className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/30">
+                <Button asChild variant="outline" className="flex-1 border-zinc-800 bg-black/[0.06] text-zinc-900 hover:bg-black/15 hover:text-zinc-900 dark:border-zinc-200/30 dark:bg-white/[0.06] dark:text-white dark:hover:bg-white/15 dark:hover:text-white font-semibold transition-colors">
                   <Link href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                     <Github className="h-4 w-4" /> Code
                   </Link>

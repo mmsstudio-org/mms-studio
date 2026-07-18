@@ -137,7 +137,7 @@ function SortableProjectRow({
         {/* Info */}
         <div className="min-w-0 flex-grow">
           <div className="flex flex-wrap items-center gap-2 mb-1">
-            <h3 className="font-heading font-semibold text-white truncate text-base hover:text-accent transition-colors">
+            <h3 className="font-heading font-semibold truncate text-base hover:text-accent transition-colors">
               <Link href={`/portfolio/${project.slug}`} target="_blank">
                 {project.title}
               </Link>
