@@ -27,6 +27,7 @@ import type { Feature } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { addFeature, updateFeature } from '@/lib/firestore-service';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 
 const formSchema = z.object({
   icon: z.string().optional(),
@@ -130,7 +131,11 @@ export default function FeatureEditModal({
                 <FormItem>
                   <FormLabel>Icon (Lucide name or URL)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Zap or https://example.com/icon.png" {...field} />
+                    <Input 
+                      placeholder="e.g., Zap or https://example.com/icon.png" 
+                      {...field} 
+                      onChange={(e) => field.onChange(convertDriveUrl(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
