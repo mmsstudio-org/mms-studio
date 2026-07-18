@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/carousel';
 import type { PortfolioProject } from '@/lib/types';
 import DOMPurify from 'isomorphic-dompurify';
+import { useAuth } from '@/hooks/use-auth';
 import {
   Calendar,
   User,
@@ -25,7 +26,8 @@ import {
   Smartphone,
   FolderGit2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Pencil
 } from 'lucide-react';
 
 interface PortfolioDetailClientProps {
@@ -94,6 +96,7 @@ function getProjectTypeLabel(type: 'app' | 'web' | 'both' | 'other') {
 }
 
 export default function PortfolioDetailClient({ project }: PortfolioDetailClientProps) {
+  const { user } = useAuth();
   // Combine cover image and gallery images
   const allImages = [project.coverImageUrl, ...(project.galleryImageUrls || [])].filter(Boolean);
   const isSlider = allImages.length > 1;
@@ -106,14 +109,23 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
 
   return (
     <div className="container mx-auto py-10 max-w-6xl px-4">
-      {/* Back Button */}
-      <Link
-        href="/portfolio"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors mb-8 group"
-      >
-        <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-        Back to portfolio list
-      </Link>
+      {/* Header Bar with Admin Edit Option */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <Link
+          href="/portfolio"
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-accent transition-colors group"
+        >
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+          Back to portfolio list
+        </Link>
+        {user && (
+          <Button asChild variant="outline" className="border-primary/40 hover:bg-primary/10 text-xs h-9 rounded-lg self-start sm:self-auto">
+            <Link href={`/dashboard/portfolio/${project.id}/edit`} className="flex items-center gap-2">
+              <Pencil className="h-4 w-4 text-accent" /> Edit Project
+            </Link>
+          </Button>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left Side - Image Slider/Gallery (7 cols on desktop) */}
@@ -135,18 +147,16 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
                     </CarouselItem>
                   ))}
                 </CarouselContent>
-                <div className="absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <CarouselPrevious className="relative translate-y-0 left-0 bg-background/80 hover:bg-background border-none text-foreground" />
-                  <CarouselNext className="relative translate-y-0 right-0 bg-background/80 hover:bg-background border-none text-foreground" />
-                </div>
+                <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 border-none text-white h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <ChevronLeft className="h-5 w-5" />
+                </CarouselPrevious>
+                <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 border-none text-white h-9 w-9 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <ChevronRight className="h-5 w-5" />
+                </CarouselNext>
               </Carousel>
-              <div className="text-center text-xs text-muted-foreground mt-2">
-                Drag to swipe / Use arrows to navigate ({allImages.length} images)
-              </div>
             </div>
           ) : (
-            // Static Cover Image only
-            <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-border/50 shadow-md">
+            <div className="relative w-full aspect-video overflow-hidden rounded-2xl border border-border/50 bg-card/10">
               <Image
                 src={project.coverImageUrl}
                 alt={project.title}
@@ -160,10 +170,10 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
         </div>
 
         {/* Right Side - Project Info (5 cols on desktop) */}
-        <div className="lg:col-span-5 space-y-6">
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2 items-center">
-              <Badge className="bg-primary/20 text-accent font-semibold tracking-wider uppercase text-[11px] py-1 flex items-center gap-1.5 border-primary/40">
+        <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge className="bg-primary/95 text-white font-semibold text-[11px] tracking-wider uppercase flex items-center gap-1.5 py-1">
                 {getProjectIcon(project.projectType)}
                 <span>{getProjectTypeLabel(project.projectType)}</span>
               </Badge>
@@ -174,7 +184,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
             </div>
 
-            <h1 className="text-3xl md:text-4xl font-['Orbitron'] font-black leading-tight tracking-tight text-white">
+            <h1 className="text-3xl md:text-4xl font-['Orbitron'] font-black leading-tight tracking-tight text-foreground">
               {project.title}
             </h1>
             <p className="text-muted-foreground text-sm leading-relaxed font-body">
@@ -185,25 +195,25 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
           {/* Project Details Box */}
           {(project.client || project.role || project.timeline) && (
             <div className="p-5 rounded-xl border border-border/50 bg-card/20 backdrop-blur-sm space-y-3 text-sm font-body">
-              <h3 className="font-heading text-xs font-semibold text-white tracking-widest uppercase border-b border-border/40 pb-2 mb-3">
+              <h3 className="font-heading text-xs font-semibold text-foreground tracking-widest uppercase border-b border-border/40 pb-2 mb-3">
                 Project Overview
               </h3>
               {project.client && (
                 <div className="flex justify-between items-center gap-4">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Briefcase className="h-4 w-4 text-accent" /> Client</span>
-                  <span className="font-semibold text-white text-right">{project.client}</span>
+                  <span className="font-semibold text-foreground text-right">{project.client}</span>
                 </div>
               )}
               {project.role && (
                 <div className="flex justify-between items-center gap-4">
                   <span className="text-muted-foreground flex items-center gap-1.5"><User className="h-4 w-4 text-accent" /> Role</span>
-                  <span className="font-semibold text-white text-right">{project.role}</span>
+                  <span className="font-semibold text-foreground text-right">{project.role}</span>
                 </div>
               )}
               {project.timeline && (
                 <div className="flex justify-between items-center gap-4">
                   <span className="text-muted-foreground flex items-center gap-1.5"><Calendar className="h-4 w-4 text-accent" /> Timeline</span>
-                  <span className="font-semibold text-white text-right">{project.timeline}</span>
+                  <span className="font-semibold text-foreground text-right">{project.timeline}</span>
                 </div>
               )}
             </div>
@@ -241,7 +251,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
               
               {project.storeUrl && (
-                <Button asChild variant="outline" className="flex-1 border-primary/30 text-white hover:bg-primary/10 font-semibold">
+                <Button asChild variant="outline" className="flex-1 border-primary/30 text-foreground dark:text-white hover:bg-primary/10 font-semibold">
                   <Link href={project.storeUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                     {getStoreLinkType(project.storeUrl) === 'apple' && <AppStoreIcon className="h-4 w-4 text-accent" />}
                     {getStoreLinkType(project.storeUrl) === 'google' && <PlayStoreIcon className="h-4 w-4 text-accent" />}
@@ -252,7 +262,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
               )}
 
               {project.githubUrl && (
-                <Button asChild variant="outline" className="border-border text-muted-foreground hover:text-white hover:bg-muted/30">
+                <Button asChild variant="outline" className="border-border text-muted-foreground hover:text-foreground hover:bg-muted/30">
                   <Link href={project.githubUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2">
                     <Github className="h-4 w-4" /> Code
                   </Link>
@@ -266,7 +276,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
       {/* Description Section */}
       {project.description && (
         <div className="mt-16 pt-8 border-t border-border/50">
-          <h2 className="text-2xl font-bold font-['Orbitron'] text-white mb-6 tracking-wide">
+          <h2 className="text-2xl font-bold font-['Orbitron'] text-foreground mb-6 tracking-wide">
             Project Case Study & Details
           </h2>
           <div

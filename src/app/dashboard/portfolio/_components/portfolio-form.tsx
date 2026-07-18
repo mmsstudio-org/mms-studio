@@ -64,7 +64,6 @@ const formSchema = z.object({
   title: z.string().min(3, { message: 'Title must be at least 3 characters.' }),
   slug: z.string().min(3, { message: 'Slug must be at least 3 characters.' }),
   shortDescription: z.string()
-    .max(200, { message: 'Short description should be under 200 characters.' })
     .optional()
     .or(z.literal('')),
   coverImageUrl: z.string().url({ message: 'Please enter a valid URL.' }),
@@ -186,13 +185,33 @@ export default function PortfolioForm({
     // Filter empty gallery URLs
     const cleanGalleryUrls = galleryUrls.map(url => url.trim()).filter(Boolean);
 
+    // Title limit slice warning logic
+    let finalTitle = values.title.trim();
+    if (finalTitle.length > 80) {
+      finalTitle = finalTitle.substring(0, 80).trim();
+      toast({
+        title: 'Title Truncated',
+        description: 'The project title was automatically sliced to the 80 character limit to fit the UI.',
+      });
+    }
+
+    // Short Description limit slice warning logic
+    let finalShortDescription = values.shortDescription?.trim();
+    if (finalShortDescription && finalShortDescription.length > 200) {
+      finalShortDescription = finalShortDescription.substring(0, 200).trim();
+      toast({
+        title: 'Short Description Truncated',
+        description: 'Your custom short description was automatically sliced to the 200 character limit.',
+      });
+    } else if (!finalShortDescription) {
+      finalShortDescription = generateShortDescription(values.description);
+    }
+
     const payload: PortfolioProject = {
       ...initialData,
-      title: values.title,
+      title: finalTitle,
       slug: values.slug,
-      shortDescription: values.shortDescription?.trim()
-        ? values.shortDescription.trim()
-        : generateShortDescription(values.description),
+      shortDescription: finalShortDescription,
       coverImageUrl: values.coverImageUrl,
       description: values.description,
       projectType: values.projectType,

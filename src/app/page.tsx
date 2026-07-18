@@ -372,7 +372,7 @@ export default function Home() {
                   return (
                     <Card
                       key={project.id}
-                      className="flex flex-col overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1 h-full bg-card/40 border-border/50 backdrop-blur-sm"
+                      className="flex flex-col overflow-hidden transition-all duration-300 border-primary shadow-md -translate-y-1 h-full bg-card/40 backdrop-blur-sm hover:border-border/50 hover:shadow-none hover:translate-y-0"
                     >
                       {project.coverImageUrl && (
                         <div className="relative w-full aspect-video border-b border-border/30 overflow-hidden">
@@ -397,7 +397,7 @@ export default function Home() {
                         </div>
                       )}
                       <CardHeader className="pb-3 flex-grow">
-                        <CardTitle className="text-xl font-bold leading-snug hover:text-accent transition-colors font-heading text-white line-clamp-2">
+                        <CardTitle className="text-xl font-bold leading-snug hover:text-accent transition-colors font-heading text-foreground line-clamp-2">
                           <Link href={`/portfolio/${project.slug}`}>{project.title}</Link>
                         </CardTitle>
                         <CardDescription className="line-clamp-3 text-sm text-muted-foreground mt-2 font-body">
@@ -408,7 +408,7 @@ export default function Home() {
                       {project.techStack && project.techStack.length > 0 && (
                         <div className="px-6 pb-4 flex flex-wrap gap-1.5">
                           {project.techStack.slice(0, 3).map((tech) => (
-                            <Badge key={tech} variant="secondary" className="bg-primary/10 border-primary/20 text-primary dark:text-accent-foreground text-[10px] font-medium">
+                            <Badge key={tech} variant="secondary" className="bg-primary/10 border-primary/20 text-primary dark:text-accent-foreground text-[10px] font-medium transition-colors hover:bg-muted/50 hover:text-muted-foreground hover:border-border/50">
                               {tech}
                             </Badge>
                           ))}
@@ -429,7 +429,7 @@ export default function Home() {
                         ) : (
                           <span />
                         )}
-                        <Link href={`/portfolio/${project.slug}`} className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:text-white transition-colors">
+                        <Link href={`/portfolio/${project.slug}`} className="inline-flex items-center gap-1 text-sm font-semibold text-accent hover:text-foreground transition-colors">
                           Details <ArrowRight className="h-3.5 w-3.5" />
                         </Link>
                       </CardFooter>
