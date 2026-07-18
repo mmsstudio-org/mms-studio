@@ -23,6 +23,7 @@ import { useToast } from '@/hooks/use-toast';
 import { addApp, checkCategorySlugUnique } from '@/lib/firestore-service';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 
 const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
@@ -219,7 +220,11 @@ export default function NewCategoryPage() {
                   <FormItem>
                     <FormLabel>Icon (Lucide name or URL)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g., Smartphone or https://example.com/icon.png" {...field} />
+                      <Input 
+                        placeholder="e.g., Smartphone or https://example.com/icon.png" 
+                        {...field} 
+                        onChange={(e) => field.onChange(convertDriveUrl(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

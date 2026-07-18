@@ -28,6 +28,7 @@ import type { AppDetail, Product } from '@/lib/types';
 import { Loader2, ArrowLeft, PlusCircle, Pencil, Trash2, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 
 const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 
@@ -277,7 +278,11 @@ export default function EditCategoryPage() {
                       <FormItem>
                         <FormLabel>Icon (Lucide name or URL)</FormLabel>
                         <FormControl>
-                          <Input placeholder="e.g., Smartphone or https://example.com/icon.png" {...field} />
+                          <Input 
+                            placeholder="e.g., Smartphone or https://example.com/icon.png" 
+                            {...field} 
+                            onChange={(e) => field.onChange(convertDriveUrl(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

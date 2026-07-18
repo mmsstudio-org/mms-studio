@@ -20,6 +20,7 @@ import FeatureEditModal from './_components/feature-edit-modal';
 import { ConfirmationDialog } from '../purchases/_components/confirmation-dialog';
 import * as LucideIcons from 'lucide-react';
 import Image from 'next/image';
+import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
 
 const siteInfoSchema = z.object({
   webName: z.string().min(3, 'Website name must be at least 3 characters.'),
@@ -225,7 +226,11 @@ export default function SiteInfoPage() {
                             <FormItem>
                                 <FormLabel>bKash QR Code Image URL</FormLabel>
                                 <FormControl>
-                                <Input {...field} />
+                                <Input 
+                                  placeholder="Direct URL or Google Drive share link"
+                                  {...field} 
+                                  onChange={(e) => field.onChange(convertDriveUrl(e.target.value))}
+                                />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
