@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Settings, LayoutGrid, ListOrdered, Ticket, BookOpen, Briefcase } from 'lucide-react';
+import { Settings, LayoutGrid, ListOrdered, Ticket, BookOpen, Briefcase, Users } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth();
@@ -105,6 +105,16 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
              </Link>
+             <Link href="/dashboard/users">
+                <Card className="hover:border-primary transition-colors h-full">
+                 <CardHeader>
+                   <CardTitle className="flex items-center gap-2"><Users className="h-5 w-5 text-accent" /> Manage Users</CardTitle>
+                 </CardHeader>
+                 <CardContent>
+                   <CardDescription>View application user details, UIDs, and FCM tokens.</CardDescription>
+                 </CardContent>
+               </Card>
+              </Link>
          </div>
       </div>
     </>

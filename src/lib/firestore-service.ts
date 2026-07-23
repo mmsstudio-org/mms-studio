@@ -1,9 +1,10 @@
 
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog, PortfolioProject } from './types';
+import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog, PortfolioProject, AppUser } from './types';
 
 // Collections
+const usersCollection = collection(db, 'users_v2');
 const productsCollection = collection(db, 'web-products');
 const appsCollection = collection(db, 'web-apps');
 const siteInfoCollection = collection(db, 'web-site-info');
@@ -694,6 +695,38 @@ export async function getFeaturedPortfolio(limitNum?: number): Promise<Portfolio
             console.error("Fallback failed in getFeaturedPortfolio:", fallbackErr);
             return [];
         }
+    }
+}
+
+export async function getUsers(): Promise<AppUser[]> {
+    try {
+        const q = query(usersCollection, orderBy('lastLogin', 'desc'));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
+    } catch (error) {
+        console.warn("Index may be missing for users. Falling back to default order.", error);
+        try {
+            const querySnapshot = await getDocs(usersCollection);
+            const list = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AppUser));
+            return list.sort((a, b) => (b.lastLogin || 0) - (a.lastLogin || 0));
+        } catch (fallbackErr) {
+            console.error("Failed to load users:", fallbackErr);
+            return [];
+        }
+    }
+}
+
+export async function getUserByUid(uid: string): Promise<AppUser | null> {
+    try {
+        const docRef = doc(db, 'users_v2', uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as AppUser;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching user by uid:", error);
+        return null;
     }
 }
 
