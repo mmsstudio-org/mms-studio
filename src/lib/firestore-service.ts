@@ -716,4 +716,18 @@ export async function getUsers(): Promise<AppUser[]> {
     }
 }
 
+export async function getUserByUid(uid: string): Promise<AppUser | null> {
+    try {
+        const docRef = doc(db, 'users_v2', uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as AppUser;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching user by uid:", error);
+        return null;
+    }
+}
+
 

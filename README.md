@@ -18,6 +18,7 @@ MMS Studio is a modern, full-stack e-commerce application designed for selling d
 - **Category & Product Management**: Admins can create, edit, and delete application categories and the products within them (both subscriptions and coin packs). The UI is fully responsive and provides a seamless management experience on any device.
 - **Purchase Management**: A centralized view to monitor all purchase submissions from the payment system. Admins can filter, search, and manage records, including batch deletion.
 - **Coupon Management**: A comprehensive interface to create, edit, clone, and delete coupons. Supports various coupon types (single-use, multiple-use, limited quantity) and provides robust search and batch deletion capabilities.
+- **User Management**: Monitor registered mobile/web app users and their metadata (UIDs, devices, FCM tokens, last login times) in a clear table view with search filtering, pagination, and easy copy-to-clipboard buttons for truncated keys.
 
 ## Tech Stack
 
@@ -83,6 +84,7 @@ Open [http://localhost:9002](http://localhost:9002) in your browser to see the a
   - `(public)/`: Publicly accessible routes like the homepage, shop, and login.
   - `api/`: Server-side API routes.
     - `redeem/route.ts`: Handles coupon redemption logic. Validates coupon code, usage limits, and expiration, then returns coupon data.
+    - `user/route.ts`: Lookup API to retrieve registered application user metadata (email, device, fcmToken, lastLogin) by `uid` query parameter.
     - `verify-payment/` & `coupon/`: Deprecated routes, no longer in use.
 - `src/components/`: Shared React components, including UI elements from ShadCN (`/ui`) and custom app components.
 - `src/lib/`: Core application logic.
