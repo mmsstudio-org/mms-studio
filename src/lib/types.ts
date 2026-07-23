@@ -126,4 +126,13 @@ export interface PortfolioProject {
   featured?: boolean;
 }
 
+export interface AppUser {
+  id: string; // Document ID / UID
+  uid: string;
+  email: string;
+  device?: string;
+  fcmToken?: string;
+  lastLogin?: number;
+}
+
 
