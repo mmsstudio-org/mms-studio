@@ -28,9 +28,12 @@ Here is the structure of the project's source code:
     - [`categories/page.tsx`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/dashboard/categories/page.tsx): App category creation, editing, and management interface.
     - [`coupons/page.tsx`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/dashboard/coupons/page.tsx): Coupon creation, cloning, deletion, and bulk actions.
     - [`purchases/page.tsx`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/dashboard/purchases/page.tsx): Payment tracking, validation records, and batch deletions.
+    - [`users/page.tsx`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/dashboard/users/page.tsx): App user accounts overview, metadata search, and UID/FCM token management.
     - [`site-info/page.tsx`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/dashboard/site-info/page.tsx): Configuration of branding metadata and global configurations.
   - [`api/`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/api/): API endpoints.
     - [`redeem/route.ts`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/api/redeem/route.ts): Handles validating and updating usage counts for digital asset coupon codes.
+    - [`user/route.ts`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/api/user/route.ts): Lookup endpoint fetching registered user details (email, device, FCM token, last login) by UID.
+    - [`purchase/verify/route.ts`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/app/api/purchase/verify/route.ts): Verifies payment transactions, checks amount thresholds, generates single-use coupons, and marks transactions redeemed.
 - [`src/components/`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/components/): Core component library.
   - [`ui/`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/components/ui/): Shared Shadcn primitives.
 - [`src/lib/`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/lib/): Architecture helpers & database services.
@@ -147,7 +150,20 @@ MMS Studio uses Firebase Firestore for data storage. All database operations are
      redeem_limit: number | null;
      redeem_count: number;
      note: string | null;
-     pkg?: string; // Restricts coupon usage to a package name
+     pkg?: string | null; // Restricts coupon usage to a package name
+   }
+   ```
+
+7. **App Users (`users_v2`)**
+   Document ID matches the user Auth UID. Defined by the [`AppUser`](file:///Volumes/AntiqueAPFS/a_projects/web/mms-studio/src/lib/types.ts#L129) interface:
+   ```typescript
+   export interface AppUser {
+     id: string; // Document ID / UID
+     uid: string;
+     email: string;
+     device?: string;
+     fcmToken?: string;
+     lastLogin?: number;
    }
    ```
 
