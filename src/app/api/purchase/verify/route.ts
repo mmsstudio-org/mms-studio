@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       finalValidityMs = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days default
     }
 
-    const finalPkg = pkg ? String(pkg).trim() : undefined;
+    const finalPkg = pkg ? String(pkg).trim() : null;
     const couponNote = note 
       ? `Purchased via API (৳${requestedAmount}) | Redeemed By ⇒ ${note}`
       : `Purchased via API (৳${requestedAmount})`;

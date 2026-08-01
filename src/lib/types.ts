@@ -84,7 +84,7 @@ export interface Coupon {
     redeem_limit: number | null;
     redeem_count: number;
     note: string | null;
-    pkg?: string; // Optional package name
+    pkg?: string | null; // Optional package name
 }
 
 export interface Blog {
