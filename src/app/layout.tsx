@@ -95,6 +95,7 @@ export default function RootLayout({
         />
       </head>
       <body
+        suppressHydrationWarning
         className={cn(
           "min-h-screen font-body antialiased futuristic-bg",
           "flex flex-col"
