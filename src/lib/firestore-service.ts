@@ -143,19 +143,24 @@ export async function getPurchases(): Promise<Purchase[]> {
 }
 
 export async function getPurchaseByTxnId(txnId: string): Promise<Purchase | null> {
+    // Direct O(1) Document ID Lookup
+    const docRef = doc(db, 'payment_sms', txnId);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Purchase;
+    }
+
+    /*
+    // Legacy fallback query search by field
     const q = query(purchasesCollection, where('txn_id', '==', txnId), limit(1));
     const querySnapshot = await getDocs(q);
-    if (querySnapshot.empty) {
-        // Fallback to check if the doc ID is the txnId
-        const docRef = doc(db, 'payment_sms', txnId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return { id: docSnap.id, ...docSnap.data() } as Purchase;
-        }
-        return null;
+    if (!querySnapshot.empty) {
+        const purchaseDoc = querySnapshot.docs[0];
+        return { id: purchaseDoc.id, ...purchaseDoc.data() } as Purchase;
     }
-    const purchaseDoc = querySnapshot.docs[0];
-    return { id: purchaseDoc.id, ...purchaseDoc.data() } as Purchase;
+    */
+
+    return null;
 }
 
 export async function updatePurchaseRedeemedStatus(purchaseId: string, is_redeemed: boolean): Promise<void> {
