@@ -147,24 +147,27 @@ export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, on
             }
 
             const couponData = {
-                ...values,
+                code: values.code,
+                coins: values.coins,
                 validity: values.validity.getTime(),
+                type: values.type,
                 redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
-                note: values.note || null,
-                pkg: values.pkg || undefined,
+                show_ads: values.show_ads,
+                note: values.note ? values.note.trim() : null,
+                pkg: values.pkg ? values.pkg.trim() : null,
             };
 
             console.log("Prepared coupon data:", couponData);
 
             if (mode === 'edit' && coupon) {
-                await updateCoupon(coupon.id, couponData);
+                await updateCoupon(coupon.id, couponData as any);
                 toast({ title: 'Coupon Updated' });
             } else {
-                const finalData = {
+                const finalData: Omit<Coupon, 'id'> = {
                     ...couponData,
                     created: Date.now(),
                     redeem_count: 0,
-                };
+                } as any;
                 console.log("Creating new coupon with final data:", finalData);
                 await addCoupon(finalData);
                 toast({ title: 'Coupon Created' });
