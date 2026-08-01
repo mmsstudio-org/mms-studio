@@ -2,12 +2,12 @@
 'use client';
 
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,13 +16,13 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
+    Form,
+    FormControl,
+    FormDescription,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import type { Coupon } from '@/lib/types';
@@ -30,11 +30,11 @@ import { useEffect, useState } from 'react';
 import { Loader2, Calendar as CalendarIcon } from 'lucide-react';
 import { addCoupon, updateCoupon, getCoupon } from '@/lib/firestore-service';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "@/components/ui/select"
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -43,14 +43,14 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 const formSchema = z.object({
-  code: z.string().min(3, 'Code must be at least 3 characters.').transform(val => val.toUpperCase().replace(/\s+/g, '')),
-  coins: z.coerce.number().min(0),
-  validity: z.date({ required_error: "A validity date is required."}),
-  type: z.enum(['single', 'certain amount', 'multiple']),
-  redeem_limit: z.coerce.number().positive().optional().or(z.literal('')),
-  show_ads: z.boolean(),
-  note: z.string().optional(),
-  pkg: z.string().optional(),
+    code: z.string().min(3, 'Code must be at least 3 characters.').transform(val => val.toUpperCase().replace(/\s+/g, '')),
+    coins: z.coerce.number().min(0),
+    validity: z.date({ required_error: "A validity date is required." }),
+    type: z.enum(['single', 'certain amount', 'multiple']),
+    redeem_limit: z.coerce.number().positive().optional().or(z.literal('')),
+    show_ads: z.boolean(),
+    note: z.string().optional(),
+    pkg: z.string().optional(),
 }).refine(data => {
     if (data.type === 'certain amount') {
         return !!data.redeem_limit && Number(data.redeem_limit) > 0;
@@ -62,298 +62,301 @@ const formSchema = z.object({
 });
 
 type CouponEditModalProps = {
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
-  coupon: Coupon | null;
-  mode: 'add' | 'edit' | 'clone';
-  onCouponUpdate: () => void;
+    isOpen: boolean;
+    onOpenChange: (isOpen: boolean) => void;
+    coupon: Coupon | null;
+    mode: 'add' | 'edit' | 'clone';
+    onCouponUpdate: () => void;
 };
 
 export default function CouponEditModal({ isOpen, onOpenChange, coupon, mode, onCouponUpdate }: CouponEditModalProps) {
-  const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
+    const { toast } = useToast();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [calendarMonth, setCalendarMonth] = useState<Date>(new Date());
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-        code: '',
-        coins: 0,
-        validity: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
-        type: 'single',
-        redeem_limit: '',
-        show_ads: false,
-        note: '',
-        pkg: '',
-    },
-  });
-  
-  const couponType = form.watch('type');
-  const modalTitle = mode === 'add' ? 'Create New Coupon' : mode === 'edit' ? 'Edit Coupon' : 'Clone Coupon';
-  const isCodeDisabled = mode === 'edit';
+    const form = useForm<z.infer<typeof formSchema>>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            code: '',
+            coins: 0,
+            validity: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+            type: 'single',
+            redeem_limit: '',
+            show_ads: false,
+            note: '',
+            pkg: '',
+        },
+    });
 
-  useEffect(() => {
-    if(isOpen) {
-        const defaultValidity = new Date();
-        defaultValidity.setDate(defaultValidity.getDate() + 30);
-        
-        let initialDate;
-        if (coupon) {
-          initialDate = new Date(coupon.validity);
-          form.reset({
-            code: mode === 'clone' ? '' : coupon.code,
-            coins: coupon.coins,
-            validity: initialDate,
-            type: coupon.type,
-            redeem_limit: coupon.redeem_limit || '',
-            show_ads: coupon.show_ads,
-            note: coupon.note || '',
-            pkg: coupon.pkg || '',
-          });
-        } else {
-            initialDate = defaultValidity;
-            form.reset({
-                code: '',
-                coins: 0,
-                validity: defaultValidity,
-                type: 'single',
-                redeem_limit: '',
-                show_ads: false,
-                note: '',
-                pkg: '',
-            });
-        }
-        setCalendarMonth(initialDate);
-    }
-  }, [coupon, mode, form, isOpen]);
+    const couponType = form.watch('type');
+    const modalTitle = mode === 'add' ? 'Create New Coupon' : mode === 'edit' ? 'Edit Coupon' : 'Clone Coupon';
+    const isCodeDisabled = mode === 'edit';
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    
-    try {
-        console.log("Submitting values:", values);
+    useEffect(() => {
+        if (isOpen) {
+            const defaultValidity = new Date();
+            defaultValidity.setDate(defaultValidity.getDate() + 30);
 
-        if (mode === 'add' || mode === 'clone') {
-            const existingCoupon = await getCoupon(values.code);
-            if (existingCoupon) {
-                toast({
-                    variant: 'destructive',
-                    title: 'Coupon Exists',
-                    description: `A coupon with the code "${values.code}" already exists.`,
+            let initialDate;
+            if (coupon) {
+                initialDate = new Date(coupon.validity);
+                form.reset({
+                    code: mode === 'clone' ? '' : coupon.code,
+                    coins: coupon.coins,
+                    validity: initialDate,
+                    type: coupon.type,
+                    redeem_limit: coupon.redeem_limit || '',
+                    show_ads: coupon.show_ads,
+                    note: coupon.note || '',
+                    pkg: coupon.pkg || '',
                 });
-                setIsSubmitting(false);
-                return;
+            } else {
+                initialDate = defaultValidity;
+                form.reset({
+                    code: '',
+                    coins: 0,
+                    validity: defaultValidity,
+                    type: 'single',
+                    redeem_limit: '',
+                    show_ads: false,
+                    note: '',
+                    pkg: '',
+                });
             }
+            setCalendarMonth(initialDate);
         }
+    }, [coupon, mode, form, isOpen]);
 
-        const couponData = {
-            ...values,
-            validity: values.validity.getTime(),
-            redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
-            note: values.note || null,
-            pkg: values.pkg || undefined,
-        };
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        setIsSubmitting(true);
 
-        console.log("Prepared coupon data:", couponData);
+        try {
+            console.log("Submitting values:", values);
 
-        if (mode === 'edit' && coupon) {
-            await updateCoupon(coupon.id, couponData);
-            toast({ title: 'Coupon Updated'});
-        } else {
-            const finalData = {
-                ...couponData,
-                created: Date.now(),
-                redeem_count: 0,
+            if (mode === 'add' || mode === 'clone') {
+                const existingCoupon = await getCoupon(values.code);
+                if (existingCoupon) {
+                    toast({
+                        variant: 'destructive',
+                        title: 'Coupon Exists',
+                        description: `A coupon with the code "${values.code}" already exists.`,
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
+            }
+
+            const couponData = {
+                code: values.code,
+                coins: values.coins,
+                validity: values.validity.getTime(),
+                type: values.type,
+                redeem_limit: values.type === 'certain amount' ? Number(values.redeem_limit) : null,
+                show_ads: values.show_ads,
+                note: values.note ? values.note.trim() : null,
+                pkg: values.pkg ? values.pkg.trim() : null,
             };
-            console.log("Creating new coupon with final data:", finalData);
-            await addCoupon(finalData);
-            toast({ title: 'Coupon Created' });
+
+            console.log("Prepared coupon data:", couponData);
+
+            if (mode === 'edit' && coupon) {
+                await updateCoupon(coupon.id, couponData as any);
+                toast({ title: 'Coupon Updated' });
+            } else {
+                const finalData: Omit<Coupon, 'id'> = {
+                    ...couponData,
+                    created: Date.now(),
+                    redeem_count: 0,
+                } as any;
+                console.log("Creating new coupon with final data:", finalData);
+                await addCoupon(finalData);
+                toast({ title: 'Coupon Created' });
+            }
+            onCouponUpdate();
+            onOpenChange(false);
+        } catch (error) {
+            console.error("Error saving coupon:", error);
+            toast({ variant: 'destructive', title: 'Save Failed', description: 'An unexpected error occurred. Check the console for details.' });
+        } finally {
+            setIsSubmitting(false);
         }
-        onCouponUpdate();
-        onOpenChange(false);
-    } catch (error) {
-        console.error("Error saving coupon:", error);
-        toast({ variant: 'destructive', title: 'Save Failed', description: 'An unexpected error occurred. Check the console for details.' });
-    } finally {
-        setIsSubmitting(false);
     }
-  }
 
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{modalTitle}</DialogTitle>
-          <DialogDescription>
-            Fill in the details for the coupon. Document ID will be the coupon code.
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-             <FormField
-                control={form.control}
-                name="code"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Coupon Code</FormLabel>
-                    <FormControl>
-                        <Input placeholder="e.g., SUMMER24" {...field} disabled={isCodeDisabled} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            <FormField
-                control={form.control}
-                name="coins"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Coins</FormLabel>
-                    <FormControl>
-                       <Input type="number" placeholder="e.g., 100" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-
-            <FormField
-                control={form.control}
-                name="validity"
-                render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                    <FormLabel>Validity Date</FormLabel>
-                    <Popover>
-                        <PopoverTrigger asChild>
-                        <FormControl>
-                            <Button
-                            variant={"outline"}
-                            className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
+    return (
+        <Dialog open={isOpen} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-lg">
+                <DialogHeader>
+                    <DialogTitle>{modalTitle}</DialogTitle>
+                    <DialogDescription>
+                        Fill in the details for the coupon. Document ID will be the coupon code.
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 max-h-[70vh] overflow-y-auto p-1 pr-4" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                        <FormField
+                            control={form.control}
+                            name="code"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Coupon Code</FormLabel>
+                                    <FormControl>
+                                        <Input placeholder="e.g., SUMMER24" {...field} disabled={isCodeDisabled} onChange={e => field.onChange(e.target.value.toUpperCase().replace(/\s+/g, ''))} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
                             )}
-                            >
-                            {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        />
+                        <FormField
+                            control={form.control}
+                            name="coins"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Coins</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" placeholder="e.g., 100" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="validity"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Validity Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button
+                                                    variant={"outline"}
+                                                    className={cn(
+                                                        "w-full pl-3 text-left font-normal",
+                                                        !field.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar
+                                                mode="single"
+                                                selected={field.value}
+                                                onSelect={field.onChange}
+                                                month={calendarMonth}
+                                                onMonthChange={setCalendarMonth}
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <FormField
+                                control={form.control}
+                                name="type"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Type</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Select a type" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="single">Single</SelectItem>
+                                                <SelectItem value="certain amount">Certain Amount</SelectItem>
+                                                <SelectItem value="multiple">Multiple</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {couponType === 'certain amount' && (
+                                <FormField
+                                    control={form.control}
+                                    name="redeem_limit"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Usage Limit</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g., 10" {...field} />
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            )}
+                        </div>
+
+                        <FormField
+                            control={form.control}
+                            name="pkg"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Package Name (Optional)</FormLabel>
+                                    <FormDescription>
+                                        If set, the redemption request must include this exact package name.
+                                    </FormDescription>
+                                    <FormControl>
+                                        <Input placeholder="com.example.app" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="show_ads"
+                            render={({ field }) => (
+                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                                    <div className="space-y-0.5">
+                                        <FormLabel>Show Ads</FormLabel>
+                                        <FormDescription>
+                                            If enabled, ads will be shown to the user.
+                                        </FormDescription>
+                                    </div>
+                                    <FormControl>
+                                        <Switch
+                                            checked={field.value}
+                                            onCheckedChange={field.onChange}
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="note"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Note (Optional)</FormLabel>
+                                    <FormControl>
+                                        <Textarea placeholder="Add a note for this coupon..." {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-end sm:items-center gap-2">
+                            <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-first sm:order-last">
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                Save Coupon
                             </Button>
-                        </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            month={calendarMonth}
-                            onMonthChange={setCalendarMonth}
-                        />
-                        </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                    </FormItem>
-                )}
-             />
-
-            <div className="grid grid-cols-2 gap-4">
-                 <FormField
-                    control={form.control}
-                    name="type"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Type</FormLabel>
-                         <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                            <FormControl>
-                                <SelectTrigger>
-                                    <SelectValue placeholder="Select a type" />
-                                </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                               <SelectItem value="single">Single</SelectItem>
-                               <SelectItem value="certain amount">Certain Amount</SelectItem>
-                               <SelectItem value="multiple">Multiple</SelectItem>
-                            </SelectContent>
-                        </Select>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                 {couponType === 'certain amount' && (
-                    <FormField
-                        control={form.control}
-                        name="redeem_limit"
-                        render={({ field }) => (
-                            <FormItem>
-                            <FormLabel>Usage Limit</FormLabel>
-                            <FormControl>
-                            <Input type="number" placeholder="e.g., 10" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                            </FormItem>
-                        )}
-                    />
-                )}
-            </div>
-            
-            <FormField
-                control={form.control}
-                name="pkg"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Package Name (Optional)</FormLabel>
-                     <FormDescription>
-                        If set, the redemption request must include this exact package name.
-                    </FormDescription>
-                    <FormControl>
-                        <Input placeholder="com.example.app" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-
-            <FormField
-                control={form.control}
-                name="show_ads"
-                render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                    <div className="space-y-0.5">
-                        <FormLabel>Show Ads</FormLabel>
-                        <FormDescription>
-                           If enabled, ads will be shown to the user.
-                        </FormDescription>
-                    </div>
-                    <FormControl>
-                        <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                        />
-                    </FormControl>
-                    </FormItem>
-                )}
-            />
-
-             <FormField
-                control={form.control}
-                name="note"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Note (Optional)</FormLabel>
-                    <FormControl>
-                        <Textarea placeholder="Add a note for this coupon..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-            />
-            
-            <DialogFooter className="pt-4 flex-col sm:flex-row sm:justify-end sm:items-center gap-2">
-              <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto order-first sm:order-last">
-                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Coupon
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  );
+                        </DialogFooter>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
 }

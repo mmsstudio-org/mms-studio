@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
     // Check package name if required
     if (coupon.pkg && coupon.pkg !== pkg) {
-        return NextResponse.json({success: false, message: 'This coupon is not valid for this application.'}, {status: 403});
+      return NextResponse.json({success: false, message: 'This coupon is not valid for this application.'}, {status: 403});
     }
     
     // Check validity
