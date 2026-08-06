@@ -114,7 +114,7 @@ export default function NewProductPage() {
     setIsSubmitting(true);
     
     const discPrice = values.discountedPrice === '' ? undefined : Number(values.discountedPrice);
-    const coinAmt = values.type === 'coins' ? values.coinAmount : 0;
+    const coinAmt = values.coinAmount || 0;
     const subDays = values.type === 'subscription' ? values.subscriptionDays : undefined;
 
     const productPayload: any = {

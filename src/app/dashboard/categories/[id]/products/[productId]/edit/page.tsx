@@ -136,7 +136,7 @@ export default function EditProductPage() {
     setIsSubmitting(true);
     
     const discPrice = values.discountedPrice === '' ? null : Number(values.discountedPrice);
-    const coinAmt = values.type === 'coins' ? values.coinAmount : 0;
+    const coinAmt = values.coinAmount || 0;
     const subDays = values.type === 'subscription' ? values.subscriptionDays : null;
 
     const productPayload: any = {
