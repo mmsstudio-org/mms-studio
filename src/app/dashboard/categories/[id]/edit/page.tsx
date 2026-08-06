@@ -72,7 +72,7 @@ export default function EditCategoryPage() {
   }
 
   return (
-    <div className="container py-10 px-4 max-w-2xl space-y-6">
+    <div className="container py-10 px-4 space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Button asChild variant="ghost" size="sm">
           <Link href="/dashboard/categories" className="flex items-center gap-2">
