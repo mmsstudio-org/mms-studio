@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
       success: true,
       data: {
         txn: coupon.code,
-        credit: coupon.coins,
+        credits: coupon.coins,
         show_ads: coupon.show_ads,
         validity_millis: validityMs,
         valid_days: remainingDays,

@@ -29,7 +29,7 @@ import {
  * @apiBody {String} txnId The unique transaction ID (e.g., "DGM9LRKWL3") [Required]
  * @apiBody {Number} amount The requested item price/amount to match [Required]
  * @apiBody {String} [note] Optional note or redeemer identifier
- * @apiBody {Number} [credit] Optional credit/coin amount to issue (Default: 0)
+ * @apiBody {Number} [credits] Optional credit/coin amount to issue (Default: 0)
  * @apiBody {Boolean} [show_ads] Optional ad visibility override (Default: true)
  * @apiBody {Number} [validity_days] Optional validity in days (e.g. 30) 
  * @apiBody {String} [pkg] Optional app package identifier restriction
@@ -47,7 +47,7 @@ import {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { txnId, amount, note, credit, show_ads, showAds, validity_days, pkg } = body;
+    const { txnId, amount, note, credits, show_ads, showAds, validity_days, pkg } = body;
 
     // 1. Validate Required Inputs
     if (!txnId) {
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         message: 'Transaction verified and existing coupon marked as redeemed.',
         data: {
           txn: existingCouponToRedeem.code,
-          credit: existingCouponToRedeem.coins,
+          credits: existingCouponToRedeem.coins,
           show_ads: existingCouponToRedeem.show_ads,
           validity_millis: validityMs,
           valid_days: remainingDays,
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Case B: Unredeemed Purchase -> Create new coupon & mark purchase as redeemed
-    const finalCredit = credit !== undefined && credit !== null && !isNaN(Number(credit)) ? Number(credit) : 0;
+    const finalCredits = credits !== undefined && credits !== null && !isNaN(Number(credits)) ? Number(credits) : 0;
     const parsedShowAds = show_ads !== undefined && show_ads !== null ? Boolean(show_ads) : (showAds !== undefined && showAds !== null ? Boolean(showAds) : true);
 
     // validity_days is provided as a day count
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
     const newCoupon = {
       code: normalizedTxnId,
       validity: finalValidityMs,
-      coins: finalCredit,
+      coins: finalCredits,
       type: 'single' as const,
       show_ads: parsedShowAds,
       note: couponNote,
@@ -193,7 +193,7 @@ export async function POST(request: NextRequest) {
       message: 'Transaction verified and redeemed successfully.',
       data: {
         txn: newCoupon.code,
-        credit: newCoupon.coins,
+        credits: newCoupon.coins,
         show_ads: newCoupon.show_ads,
         validity_millis: finalValidityMs,
         valid_days: finalValidityDays,
