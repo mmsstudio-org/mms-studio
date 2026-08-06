@@ -136,4 +136,17 @@ export interface AppUser {
   lastLogin?: number;
 }
 
+export interface DynamicPage {
+  id?: string; // Firestore document ID
+  slug: string; // URL-safe, unique, lowercase, hyphenated (e.g. "privacy-policy")
+  title: string; // Page title, also used in <title> tag / metadata
+  content: string; // HTML (from the shared rich text editor)
+  status: 'published' | 'draft'; // Only published pages are publicly accessible
+  showInFooter: boolean; // Controls footer link visibility
+  order: number; // Controls footer link ordering
+  metaDescription?: string; // SEO
+  createdAt: number; // Unix timestamp in ms
+  updatedAt: number; // Unix timestamp in ms
+}
+
 

@@ -54,5 +54,11 @@ service cloud.firestore {
       allow read: if true; // Allow client/API validation
       allow write: if isAdmin();
     }
+
+    // Rules for dynamic pages collection
+    match /web-dynamic-pages/{pageId} {
+      allow read: if resource.data.status == 'published' || isAdmin();
+      allow write: if isAdmin();
+    }
   }
 }
