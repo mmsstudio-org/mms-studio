@@ -22,6 +22,7 @@ export interface AppDetail {
   icon?: string; // URL to an icon or a lucide-icon name
   youtubeVideoId?: string; // YouTube video ID
   pkg?: string; // Optional package name
+  appUrl?: string; // Optional external URL (e.g., app store link or official website)
 }
 
 export interface Purchase {

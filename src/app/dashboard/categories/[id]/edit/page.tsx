@@ -1,18 +1,16 @@
-"use client";
+'use client';
 
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useAuth } from '@/hooks/use-auth';
+import { useRouter, useParams } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -20,30 +18,16 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { useToast } from "@/hooks/use-toast";
-import { useConfirm } from "@/components/ui/confirm-provider";
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { useToast } from '@/hooks/use-toast';
+import { useConfirm } from '@/components/ui/confirm-provider';
 import {
   getApp,
-  updateApp,
-  checkCategorySlugUnique,
   getProductsForApp,
   deleteProduct,
-} from "@/lib/firestore-service";
-import type { AppDetail, Product } from "@/lib/types";
+} from '@/lib/firestore-service';
+import type { AppDetail, Product } from '@/lib/types';
 import {
   Loader2,
   ArrowLeft,
@@ -54,58 +38,20 @@ import {
   CircleDollarSign,
   CalendarDays,
   Zap,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { convertDriveUrl } from "@/app/dashboard/blogs/_components/blog-form";
-
-const youtubeRegex =
-  /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-
-const youtubeIdOrUrlSchema = z
-  .string()
-  .optional()
-  .refine(
-    (val) => {
-      if (!val) return true;
-      if (youtubeRegex.test(val)) return true;
-      if (val.length === 11 && /^[a-zA-Z0-9_-]+$/.test(val)) return true;
-      return false;
-    },
-    {
-      message: "Please enter a valid YouTube video URL or Video ID.",
-    },
-  );
-
-const formSchema = z.object({
-  name: z.string().min(3, { message: "Name must be at least 3 characters." }),
-  slug: z
-    .string()
-    .min(2, { message: "Slug must be at least 2 characters." })
-    .regex(/^[a-z0-9-]+$/, {
-      message: "Slug can only contain lowercase letters, numbers, and hyphens.",
-    }),
-  description: z.string().optional(),
-  icon: z
-    .union([
-      z.string().url(),
-      z.string().length(0),
-      z.string().refine((s) => !s.startsWith("http")),
-    ])
-    .optional(),
-  youtubeVideoUrl: youtubeIdOrUrlSchema,
-  pkg: z.string().optional(),
-});
+} from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import CategoryForm from '../../_components/category-form';
 
 function formatSubscriptionDuration(days?: number) {
   if (!days) return null;
   if (days >= 365) {
     const years = Math.floor(days / 365);
-    return `${years} ${years > 1 ? "years" : "year"}`;
+    return `${years} ${years > 1 ? 'years' : 'year'}`;
   }
   if (days >= 30) {
     const months = Math.floor(days / 30);
-    return `${months} ${months > 1 ? "months" : "month"}`;
+    return `${months} ${months > 1 ? 'months' : 'month'}`;
   }
   return `${days} days`;
 }
@@ -121,20 +67,6 @@ export default function EditCategoryPage() {
   const [app, setApp] = useState<AppDetail | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingData, setLoadingData] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [slugConflict, setSlugConflict] = useState("");
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      slug: "",
-      description: "",
-      icon: "",
-      youtubeVideoUrl: "",
-      pkg: "",
-    },
-  });
 
   const fetchData = useCallback(async () => {
     setLoadingData(true);
@@ -142,117 +74,44 @@ export default function EditCategoryPage() {
       const categorySnap = await getApp(categoryId);
       if (categorySnap) {
         setApp(categorySnap);
-        form.reset({
-          name: categorySnap.name,
-          slug: categorySnap.slug || "",
-          description: categorySnap.description || "",
-          icon: categorySnap.icon || "",
-          youtubeVideoUrl: categorySnap.youtubeVideoId || "",
-          pkg: categorySnap.pkg || "",
-        });
-
         const appProducts = await getProductsForApp(categoryId);
         setProducts(appProducts);
       } else {
         toast({
-          variant: "destructive",
-          title: "Not Found",
-          description: "Category does not exist.",
+          variant: 'destructive',
+          title: 'Not Found',
+          description: 'Category does not exist.',
         });
-        router.push("/dashboard/categories");
+        router.push('/dashboard/categories');
       }
     } catch (e) {
       console.error(e);
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to fetch details.",
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to fetch details.',
       });
     } finally {
       setLoadingData(false);
     }
-  }, [categoryId, form, router, toast]);
+  }, [categoryId, router, toast]);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      router.push("/login");
+      router.push('/login');
     }
     if (user) {
       fetchData();
     }
   }, [user, authLoading, router, fetchData]);
 
-  function getYouTubeVideoId(urlOrId: string): string {
-    if (!urlOrId) return "";
-    const match = urlOrId.match(youtubeRegex);
-    if (match && match[1]) {
-      return match[1];
-    }
-    if (urlOrId.length === 11 && /^[a-zA-Z0-9_-]+$/.test(urlOrId)) {
-      return urlOrId;
-    }
-    return "";
-  }
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    setSlugConflict("");
-
-    try {
-      // Validate unique slug
-      const isUnique = await checkCategorySlugUnique(values.slug, categoryId);
-      if (!isUnique) {
-        setSlugConflict(
-          "This slug is already taken. Please enter a unique slug.",
-        );
-        form.setError("slug", {
-          type: "manual",
-          message: "This slug is already taken.",
-        });
-        toast({
-          variant: "destructive",
-          title: "Slug conflict",
-          description: "Please use a unique slug.",
-        });
-        setIsSubmitting(false);
-        return;
-      }
-
-      const videoId = getYouTubeVideoId(values.youtubeVideoUrl || "");
-      const appData = {
-        name: values.name,
-        slug: values.slug,
-        description: values.description || "",
-        icon: values.icon || "",
-        youtubeVideoId: videoId,
-        pkg: values.pkg || "",
-      };
-
-      await updateApp(categoryId, appData);
-      toast({
-        title: "Success",
-        description: "Category updated successfully.",
-      });
-      fetchData();
-    } catch (error) {
-      console.error("Error updating category:", error);
-      toast({
-        variant: "destructive",
-        title: "Update Failed",
-        description: "An unexpected error occurred.",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
   const handleDeleteProduct = async (productId: string, name: string) => {
     const confirmed = await confirm({
-      title: "Delete Product",
+      title: 'Delete Product',
       description: `Are you sure you want to delete the product "${name}"? This cannot be undone.`,
-      confirmText: "Delete",
-      cancelText: "Cancel",
-      variant: "destructive",
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      variant: 'destructive',
     });
     if (!confirmed) {
       return;
@@ -260,14 +119,14 @@ export default function EditCategoryPage() {
 
     try {
       await deleteProduct(productId);
-      toast({ title: "Success", description: "Product deleted successfully." });
+      toast({ title: 'Success', description: 'Product deleted successfully.' });
       setProducts((prev) => prev.filter((p) => p.id !== productId));
     } catch (error) {
       console.error(error);
       toast({
-        variant: "destructive",
-        title: "Delete Failed",
-        description: "Failed to delete product.",
+        variant: 'destructive',
+        title: 'Delete Failed',
+        description: 'Failed to delete product.',
       });
     }
   };
@@ -306,137 +165,13 @@ export default function EditCategoryPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Category Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., BNC Status App"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Slug (URL Path)</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., bnc-status-app"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                        {slugConflict && (
-                          <p className="text-sm font-medium text-destructive mt-1">
-                            {slugConflict}
-                          </p>
-                        )}
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Describe this category..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="icon"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Icon (Lucide name or URL)</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., Smartphone or https://example.com/icon.png"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(convertDriveUrl(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="pkg"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Package Name</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., com.example.app"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="youtubeVideoUrl"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          Tutorial Video (YouTube URL or ID)
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder="e.g., https://www.youtube.com/watch?v=..."
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <div className="pt-2">
-                    <Button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full"
-                    >
-                      {isSubmitting && (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      )}
-                      Save Changes
-                    </Button>
-                  </div>
-                </form>
-              </Form>
+              <CategoryForm
+                mode="edit"
+                categoryId={categoryId}
+                initialData={app}
+                onSuccess={fetchData}
+                submitLabel="Save Changes"
+              />
             </CardContent>
           </Card>
         </div>
@@ -492,7 +227,7 @@ export default function EditCategoryPage() {
                                   className="object-cover"
                                 />
                               </div>
-                            ) : product.type === "subscription" ? (
+                            ) : product.type === 'subscription' ? (
                               <Package className="h-6 w-6 text-muted-foreground" />
                             ) : (
                               <CircleDollarSign className="h-6 w-6 text-muted-foreground" />
@@ -523,7 +258,7 @@ export default function EditCategoryPage() {
                             )}
                           </TableCell>
                           <TableCell className="text-xs text-muted-foreground space-y-1">
-                            {product.type === "subscription" &&
+                            {product.type === 'subscription' &&
                               product.subscriptionDays && (
                                 <div className="flex items-center gap-1">
                                   <CalendarDays className="h-3 w-3" />

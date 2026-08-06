@@ -7,7 +7,7 @@ import type { Product, AppDetail } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getProductsForApp, getAppBySlug } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
-import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star } from 'lucide-react';
+import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star, ExternalLink } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -148,6 +148,13 @@ export default function ShopSlugPage() {
         <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto whitespace-pre-wrap">
           {app.description}
         </p>
+        {app.appUrl && (
+          <Button asChild variant="outline" size="lg" className="mt-2">
+            <a href={app.appUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+              <ExternalLink className="h-4 w-4" /> Visit App
+            </a>
+          </Button>
+        )}
       </div>
 
       {hasMultipleSections && (
