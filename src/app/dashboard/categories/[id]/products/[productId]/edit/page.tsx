@@ -182,7 +182,7 @@ export default function EditProductPage() {
   }
 
   return (
-    <div className="container py-10 px-4 max-w-2xl">
+    <div className="container py-10 px-4">
       <div className="mb-6">
         <Button asChild variant="ghost" size="sm">
           <Link href={`/dashboard/categories/${categoryId}/edit`} className="flex items-center gap-2">
