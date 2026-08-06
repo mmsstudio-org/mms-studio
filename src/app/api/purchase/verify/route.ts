@@ -115,6 +115,16 @@ export async function POST(request: NextRequest) {
 
     // 5. Case A: Purchase was marked redeemed, but has an unused valid coupon -> Redeem it now
     if (existingCouponToRedeem) {
+      // Validate pkg match if the coupon was purchased for a specific package
+      const couponPkg = existingCouponToRedeem.pkg ? String(existingCouponToRedeem.pkg).trim() : null;
+      const requestPkg = pkg ? String(pkg).trim() : null;
+      if (couponPkg && couponPkg !== requestPkg) {
+        return NextResponse.json({
+          success: false,
+          message: 'This coupon is not valid for this service, it\'s purchased for another one. Please use it where you purchased it.'
+        }, { status: 400 });
+      }
+
       const updatedNote = note 
         ? `${existingCouponToRedeem.note || ''} | Redeemed By ⇒ ${note}`.trim()
         : existingCouponToRedeem.note;
