@@ -200,8 +200,8 @@ export default function ProductFormModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-3xl lg:max-w-4xl p-0 gap-0 flex flex-col max-h-[90vh]">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
           <DialogTitle className="font-['Orbitron']">
             {productId ? `Edit Product${categoryName ? ` in ${categoryName}` : ''}` : `Add Product${categoryName ? ` to ${categoryName}` : ''}`}
           </DialogTitle>
@@ -210,13 +210,14 @@ export default function ProductFormModal({
           </DialogDescription>
         </DialogHeader>
 
+        <div className="overflow-y-auto px-6 py-4 flex-1">
         {isLoading && productId ? (
           <div className="py-10 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto text-accent" />
           </div>
         ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="appId"
@@ -400,15 +401,17 @@ export default function ProductFormModal({
                 )}
               />
 
-              <DialogFooter className="pt-4">
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  {productId ? 'Save Changes' : 'Add Product'}
-                </Button>
-              </DialogFooter>
             </form>
           </Form>
         )}
+        </div>
+
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button type="submit" form="product-form" disabled={isSubmitting} className="w-full">
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {productId ? 'Save Changes' : 'Add Product'}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
