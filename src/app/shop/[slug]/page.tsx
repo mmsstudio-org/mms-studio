@@ -9,17 +9,7 @@ import { getProductsForApp, getAppBySlug } from '@/lib/firestore-service';
 import { Button } from '@/components/ui/button';
 import { ArrowUpNarrowWide, ArrowDownWideNarrow, Package, Coins, Star } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
-import * as LucideIcons from 'lucide-react';
-
-const Icon = ({ name, className }: { name: string; className: string }) => {
-  const LucideIcon = (LucideIcons as any)[name];
-  if (!LucideIcon) {
-    return null;
-  }
-  return <LucideIcon className={className} />;
-};
+import AppHeader from '../_components/app-header';
 
 export default function ShopSlugPage() {
   const params = useParams();
@@ -132,23 +122,7 @@ export default function ShopSlugPage() {
 
   return (
     <div className="container mx-auto py-10">
-      <div className="text-center mb-12 flex flex-col items-center gap-4">
-        {app.icon && app.icon.startsWith('http') ? (
-            <Image src={app.icon} alt={app.name} width={64} height={64} className="rounded-lg" />
-        ) : app.icon ? (
-            <Icon name={app.icon} className="h-16 w-16 text-accent" />
-        ) : (
-            <div className="h-16 w-16 bg-muted rounded-lg flex items-center justify-center text-accent font-bold text-3xl">
-                {app.name.charAt(0)}
-            </div>
-        )}
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          {app.name}
-        </h1>
-        <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto whitespace-pre-wrap">
-          {app.description}
-        </p>
-      </div>
+      <AppHeader app={app} />
 
       {hasMultipleSections && (
         <div className="py-4 mb-8 -mx-4 px-4 overflow-x-auto"
@@ -179,7 +153,7 @@ export default function ShopSlugPage() {
         {coins.length > 0 && (
           <section id="coins" className="scroll-mt-24">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
+              <h2 className="text-2xl md:text-3xl font-bold">Credits</h2>
               <Button variant="ghost" onClick={() => handleSortToggle('coins')} className="text-xs md:text-sm">
                 Sort by price
                 {sortOrders.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}

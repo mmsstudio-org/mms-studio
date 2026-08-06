@@ -8,29 +8,30 @@ import {
 } from '@/lib/firestore-service';
 
 /**
- * POST /api/purchase/verify
+ * POST /api/v2/purchase-verify
  * Example Body:
   {
-    "txnId": "TXN123456789",
-    "amount": 250,
-    "note": "User 123",
-    "coins": 1000,
+    "txnId": "DGM9LRKWL3",
+    "amount": 10,
+    // below fields are optional...
+    "note": "hi this is the note",
+    "credits": 1000,
     "show_ads": false,
-    "validity": 30,
+    "validity_days": 30, // as day count
     "pkg": "com.mms.app"
   }
  */
 
 /**
- * @api {post} /api/purchase/verify Verify Purchase & Issue/Redeem Coupon
+ * @api {post} /api/v2/purchase-verify Verify Purchase & Issue/Redeem Coupon (v2)
  * @apiDescription Verifies a payment transaction from database by unique Txn ID (O(1) direct lookup), checks redemption status first, matches paid amount, and issues/redeems coupons.
  * 
- * @apiBody {String} txnId The unique transaction ID (e.g., "TXN123456789") [Required]
+ * @apiBody {String} txnId The unique transaction ID (e.g., "DGM9LRKWL3") [Required]
  * @apiBody {Number} amount The requested item price/amount to match [Required]
  * @apiBody {String} [note] Optional note or redeemer identifier
- * @apiBody {Number} [coins] Optional coin amount to issue (Default: 0)
+ * @apiBody {Number} [credits] Optional credit/coin amount to issue (Default: 0)
  * @apiBody {Boolean} [show_ads] Optional ad visibility override (Default: true)
- * @apiBody {Number} [validity] Optional validity in days (e.g. 30) or timestamp in ms
+ * @apiBody {Number} [validity_days] Optional validity in days (e.g. 30) 
  * @apiBody {String} [pkg] Optional app package identifier restriction
  * 
  * @apiSuccess (200 OK) {Boolean} success Indicates request success
@@ -40,12 +41,13 @@ import {
  * @apiError (400 Bad Request) MissingParameters Required parameters are missing
  * @apiError (400 Bad Request) AlreadyRedeemed The transaction / coupon has already been redeemed or expired
  * @apiError (400 Bad Request) AmountMismatch Paid amount is less than requested amount
+ * @apiError (400 Bad Request) PkgMismatch Coupon was purchased for a different package
  * @apiError (404 Not Found) InvalidTransaction The transaction ID does not exist in payment_sms
  */
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => ({}));
-    const { txnId, amount, note, coins, show_ads, showAds, validity, pkg } = body;
+    const { txnId, amount, note, credits, show_ads, showAds, validity_days, pkg } = body;
 
     // 1. Validate Required Inputs
     if (!txnId) {
@@ -134,29 +136,36 @@ export async function POST(request: NextRequest) {
         ...(updatedNote ? { note: updatedNote } : {})
       });
 
+      const validityMs = existingCouponToRedeem.validity;
+      const remainingDays = Math.max(1, Math.round((validityMs - Date.now()) / (24 * 60 * 60 * 1000)));
+
       return NextResponse.json({
         success: true,
         message: 'Transaction verified and existing coupon marked as redeemed.',
         data: {
-          code: existingCouponToRedeem.code,
-          coins: existingCouponToRedeem.coins,
+          txn: existingCouponToRedeem.code,
+          credits: existingCouponToRedeem.coins,
           show_ads: existingCouponToRedeem.show_ads,
-          validity: existingCouponToRedeem.validity,
+          validity_millis: validityMs,
+          valid_days: remainingDays,
+          validity_date: formatValidityDate(validityMs),
         }
       });
     }
 
     // 6. Case B: Unredeemed Purchase -> Create new coupon & mark purchase as redeemed
-    const finalCoins = coins !== undefined && coins !== null && !isNaN(Number(coins)) ? Number(coins) : 0;
+    const finalCredits = credits !== undefined && credits !== null && !isNaN(Number(credits)) ? Number(credits) : 0;
     const parsedShowAds = show_ads !== undefined && show_ads !== null ? Boolean(show_ads) : (showAds !== undefined && showAds !== null ? Boolean(showAds) : true);
 
-    let finalValidityMs: number;
-    if (validity !== undefined && validity !== null && !isNaN(Number(validity))) {
-      const numVal = Number(validity);
-      finalValidityMs = numVal > 10000000000 ? numVal : Date.now() + numVal * 24 * 60 * 60 * 1000;
+    // validity_days is provided as a day count
+    let finalValidityDays: number;
+    if (validity_days !== undefined && validity_days !== null && !isNaN(Number(validity_days))) {
+      finalValidityDays = Math.floor(Number(validity_days));
     } else {
-      finalValidityMs = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days default
+      finalValidityDays = 30; // 30 days default
     }
+
+    const finalValidityMs = Date.now() + finalValidityDays * 24 * 60 * 60 * 1000;
 
     const finalPkg = pkg ? String(pkg).trim() : null;
     const couponNote = note 
@@ -166,7 +175,7 @@ export async function POST(request: NextRequest) {
     const newCoupon = {
       code: normalizedTxnId,
       validity: finalValidityMs,
-      coins: finalCoins,
+      coins: finalCredits,
       type: 'single' as const,
       show_ads: parsedShowAds,
       note: couponNote,
@@ -181,19 +190,28 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: 'Transaction verified and redeemed.',
+      message: 'Transaction verified and redeemed successfully.',
       data: {
-        code: newCoupon.code,
-        coins: newCoupon.coins,
+        txn: newCoupon.code,
+        credits: newCoupon.coins,
         show_ads: newCoupon.show_ads,
-        validity: newCoupon.validity,
+        validity_millis: finalValidityMs,
+        valid_days: finalValidityDays,
+        validity_date: formatValidityDate(finalValidityMs),
       }
     });
 
   } catch (error) {
-    console.error('Error in purchase verify route:', error);
+    console.error('Error in v2 purchase verify route:', error);
     return NextResponse.json({ success: false, message: 'An internal server error occurred.' }, { status: 500 });
   }
+}
+
+function formatValidityDate(validityMs: number): string {
+  const date = new Date(validityMs);
+  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${months[date.getMonth()]} ${day} ${date.getFullYear()}`;
 }
 
 // Block non-POST HTTP methods

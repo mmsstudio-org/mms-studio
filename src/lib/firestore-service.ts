@@ -1,7 +1,7 @@
 
 import { db } from './firebase';
 import { collection, getDocs, query, where, doc, updateDoc, addDoc, deleteDoc, getDoc, serverTimestamp, orderBy, setDoc, writeBatch, limit, startAfter, QueryDocumentSnapshot, DocumentData } from 'firebase/firestore';
-import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog, PortfolioProject, AppUser } from './types';
+import type { Product, AppDetail, Feature, SiteInfo, Purchase, Coupon, Blog, PortfolioProject, AppUser, DynamicPage } from './types';
 
 // Collections
 const usersCollection = collection(db, 'users_v2');
@@ -13,6 +13,7 @@ const purchasesCollection = collection(db, 'payment_sms');
 const couponsCollection = collection(db, 'web-coupons');
 const blogsCollection = collection(db, 'web-blogs');
 const portfolioCollection = collection(db, 'web-portfolio');
+const dynamicPagesCollection = collection(db, 'web-dynamic-pages');
 
 
 // Product Functions
@@ -733,6 +734,112 @@ export async function getUserByUid(uid: string): Promise<AppUser | null> {
         console.error("Error fetching user by uid:", error);
         return null;
     }
+}
+
+// Dynamic Pages Functions
+export async function getDynamicPages(): Promise<DynamicPage[]> {
+    try {
+        const querySnapshot = await getDocs(query(dynamicPagesCollection, orderBy('order', 'asc')));
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as DynamicPage));
+    } catch (error) {
+        console.error("Error in getDynamicPages:", error);
+        try {
+            const querySnapshot = await getDocs(dynamicPagesCollection);
+            return querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() } as DynamicPage))
+                .sort((a, b) => a.order - b.order);
+        } catch (fallbackErr) {
+            console.error("Fallback failed in getDynamicPages:", fallbackErr);
+            return [];
+        }
+    }
+}
+
+export async function getPublishedDynamicPages(): Promise<DynamicPage[]> {
+    try {
+        const querySnapshot = await getDocs(dynamicPagesCollection);
+        return querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as DynamicPage))
+            .filter(page => page.status === 'published')
+            .sort((a, b) => a.order - b.order);
+    } catch (error) {
+        console.error("Error in getPublishedDynamicPages:", error);
+        return [];
+    }
+}
+
+export async function getFooterDynamicPages(): Promise<DynamicPage[]> {
+    try {
+        const querySnapshot = await getDocs(dynamicPagesCollection);
+        return querySnapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as DynamicPage))
+            .filter(page => page.status === 'published' && page.showInFooter)
+            .sort((a, b) => a.order - b.order);
+    } catch (error) {
+        console.error("Error in getFooterDynamicPages:", error);
+        return [];
+    }
+}
+
+export async function getDynamicPageById(id: string): Promise<DynamicPage | null> {
+    try {
+        const docRef = doc(db, 'web-dynamic-pages', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as DynamicPage;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error in getDynamicPageById:", error);
+        return null;
+    }
+}
+
+export async function getDynamicPageBySlug(slug: string): Promise<DynamicPage | null> {
+    try {
+        const q = query(dynamicPagesCollection, where('slug', '==', slug), limit(1));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return null;
+        }
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() } as DynamicPage;
+    } catch (error) {
+        console.error("Error in getDynamicPageBySlug:", error);
+        return null;
+    }
+}
+
+export async function checkDynamicPageSlugUnique(slug: string, excludeId?: string): Promise<boolean> {
+    try {
+        const q = query(dynamicPagesCollection, where('slug', '==', slug));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) {
+            return true;
+        }
+        if (excludeId) {
+            return querySnapshot.docs.every(doc => doc.id === excludeId);
+        }
+        return false;
+    } catch (error) {
+        console.error("Error in checkDynamicPageSlugUnique:", error);
+        return true;
+    }
+}
+
+export async function addDynamicPage(page: Omit<DynamicPage, 'id'>): Promise<string> {
+    const docRef = await addDoc(dynamicPagesCollection, page);
+    return docRef.id;
+}
+
+export async function updateDynamicPage(id: string, pageData: Partial<Omit<DynamicPage, 'id'>>): Promise<void> {
+    const docRef = doc(db, 'web-dynamic-pages', id);
+    await updateDoc(docRef, pageData);
+}
+
+export async function deleteDynamicPage(id: string): Promise<void> {
+    const docRef = doc(db, 'web-dynamic-pages', id);
+    await deleteDoc(docRef);
 }
 
 

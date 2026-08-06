@@ -22,6 +22,7 @@ export interface AppDetail {
   icon?: string; // URL to an icon or a lucide-icon name
   youtubeVideoId?: string; // YouTube video ID
   pkg?: string; // Optional package name
+  appUrl?: string; // Optional external URL (e.g., app store link or official website)
 }
 
 export interface Purchase {
@@ -133,6 +134,19 @@ export interface AppUser {
   device?: string;
   fcmToken?: string;
   lastLogin?: number;
+}
+
+export interface DynamicPage {
+  id?: string; // Firestore document ID
+  slug: string; // URL-safe, unique, lowercase, hyphenated (e.g. "privacy-policy")
+  title: string; // Page title, also used in <title> tag / metadata
+  content: string; // HTML (from the shared rich text editor)
+  status: 'published' | 'draft'; // Only published pages are publicly accessible
+  showInFooter: boolean; // Controls footer link visibility
+  order: number; // Controls footer link ordering
+  metaDescription?: string; // SEO
+  createdAt: number; // Unix timestamp in ms
+  updatedAt: number; // Unix timestamp in ms
 }
 
 

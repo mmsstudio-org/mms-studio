@@ -1,13 +1,18 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
-import { useRouter, useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -21,11 +26,10 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { addProduct, getApp, getApps } from '@/lib/firestore-service';
+import { addProduct, updateProduct, getProduct, getApps } from '@/lib/firestore-service';
 import { convertDriveUrl } from '@/app/dashboard/blogs/_components/blog-form';
-import { Loader2, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
-import type { AppDetail } from '@/lib/types';
+import type { AppDetail, Product } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(3, { message: 'Name must be at least 3 characters.' }),
@@ -44,22 +48,39 @@ const formSchema = z.object({
   }
   return true;
 }, {
-  message: "Discounted price must be less than the regular price.",
-  path: ["discountedPrice"],
+  message: 'Discounted price must be less than the regular price.',
+  path: ['discountedPrice'],
 });
 
-export default function NewProductPage() {
-  const { user, loading: authLoading } = useAuth();
-  const router = useRouter();
-  const params = useParams();
-  const categoryId = params.id as string;
-  
+type ProductFormValues = z.infer<typeof formSchema>;
+
+type ProductFormModalProps = {
+  /** Open state */
+  isOpen: boolean;
+  /** Close handler */
+  onOpenChange: (isOpen: boolean) => void;
+  /** Default category ID (used for the route-level page) */
+  defaultAppId?: string;
+  /** Product ID when editing; null/undefined for create */
+  productId?: string | null;
+  /** Called after successful save */
+  onSaved?: () => void;
+};
+
+export default function ProductFormModal({
+  isOpen,
+  onOpenChange,
+  defaultAppId,
+  productId,
+  onSaved,
+}: ProductFormModalProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [categoryName, setCategoryName] = useState('');
   const [apps, setApps] = useState<AppDetail[]>([]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ProductFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -70,51 +91,71 @@ export default function NewProductPage() {
       type: 'subscription',
       coinAmount: 0,
       subscriptionDays: 30,
-      appId: categoryId,
+      appId: defaultAppId || '',
     },
   });
 
   const productType = form.watch('type');
 
+  // Reset form when modal opens / productId changes
   useEffect(() => {
-    if (categoryId) {
-      form.setValue('appId', categoryId);
-    }
-  }, [categoryId, form]);
+    if (!isOpen) return;
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-    }
-    
-    async function fetchCategoryAndApps() {
-      if (user && categoryId) {
-        try {
-          const cat = await getApp(categoryId);
-          if (cat) {
-            setCategoryName(cat.name);
+    // Fetch apps for category dropdown
+    getApps()
+      .then((list) => setApps(list))
+      .catch((e) => console.error(e));
+
+    if (productId) {
+      // Edit mode: load product details
+      setIsLoading(true);
+      getProduct(productId)
+        .then((prod: Product | null) => {
+          if (prod) {
+            setCategoryName(prod.name);
+            form.reset({
+              name: prod.name,
+              description: prod.description || '',
+              regularPrice: prod.regularPrice,
+              discountedPrice: prod.discountedPrice !== undefined && prod.discountedPrice !== null ? prod.discountedPrice : '',
+              imageUrl: prod.imageUrl || '',
+              type: prod.type,
+              coinAmount: prod.coinAmount || 0,
+              subscriptionDays: prod.subscriptionDays || 30,
+              appId: prod.appId || defaultAppId || '',
+            });
           } else {
-            toast({ variant: 'destructive', title: 'Error', description: 'Category not found.' });
-            router.push('/dashboard/categories');
-            return;
+            toast({ variant: 'destructive', title: 'Not Found', description: 'Product does not exist.' });
+            onOpenChange(false);
           }
-          
-          const list = await getApps();
-          setApps(list);
-        } catch (e) {
+        })
+        .catch((e) => {
           console.error(e);
-        }
-      }
+          toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch product details.' });
+        })
+        .finally(() => setIsLoading(false));
+    } else {
+      // Create mode
+      setCategoryName('');
+      form.reset({
+        name: '',
+        description: '',
+        regularPrice: 0,
+        discountedPrice: '',
+        imageUrl: '',
+        type: 'subscription',
+        coinAmount: 0,
+        subscriptionDays: 30,
+        appId: defaultAppId || '',
+      });
     }
-    
-    fetchCategoryAndApps();
-  }, [user, authLoading, categoryId, router, toast]);
+  }, [isOpen, productId, form, defaultAppId, toast, onOpenChange]);
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: ProductFormValues) {
     setIsSubmitting(true);
-    
+
     const discPrice = values.discountedPrice === '' ? undefined : Number(values.discountedPrice);
-    const coinAmt = values.type === 'coins' ? values.coinAmount : 0;
+    const coinAmt = values.coinAmount || 0;
     const subDays = values.type === 'subscription' ? values.subscriptionDays : undefined;
 
     const productPayload: any = {
@@ -130,48 +171,53 @@ export default function NewProductPage() {
     if (discPrice !== undefined) {
       productPayload.discountedPrice = discPrice;
     }
+
     if (subDays !== undefined) {
       productPayload.subscriptionDays = subDays;
     }
 
     try {
-      await addProduct(productPayload);
-      toast({ title: 'Success', description: 'Product added successfully.' });
-      router.push(`/dashboard/categories/${values.appId}/edit`);
+      if (productId) {
+        await updateProduct(productId, productPayload);
+        toast({ title: 'Success', description: 'Product updated successfully.' });
+      } else {
+        await addProduct(productPayload);
+        toast({ title: 'Success', description: 'Product added successfully.' });
+      }
+      onSaved?.();
+      onOpenChange(false);
     } catch (error) {
       console.error(error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to add product.' });
+      toast({
+        variant: 'destructive',
+        title: productId ? 'Error' : 'Error',
+        description: productId ? 'Failed to update product.' : 'Failed to add product.',
+      });
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  if (authLoading || !user) {
-    return (
-      <div className="container py-10 text-center">
-        <Loader2 className="h-8 w-8 animate-spin mx-auto text-accent" />
-      </div>
-    );
-  }
-
   return (
-    <div className="container py-10 px-4 max-w-2xl">
-      <div className="mb-6">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/dashboard/categories/${categoryId}/edit`} className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" /> Back to Edit Category
-          </Link>
-        </Button>
-      </div>
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-3xl lg:max-w-4xl p-0 gap-0 flex flex-col max-h-[90vh]">
+        <DialogHeader className="px-6 pt-6 pb-4 border-b shrink-0">
+          <DialogTitle className="font-['Orbitron']">
+            {productId ? `Edit Product${categoryName ? ` in ${categoryName}` : ''}` : `Add Product${categoryName ? ` to ${categoryName}` : ''}`}
+          </DialogTitle>
+          <DialogDescription>
+            {productId ? 'Update purchase option or package plan details.' : 'Create a new purchase option or package plan.'}
+          </DialogDescription>
+        </DialogHeader>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="font-['Orbitron']">Add Product to {categoryName || 'Category'}</CardTitle>
-          <CardDescription>Create a new purchase option or package plan.</CardDescription>
-        </CardHeader>
-        <CardContent>
+        <div className="overflow-y-auto px-6 py-4 flex-1">
+        {isLoading && productId ? (
+          <div className="py-10 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto text-accent" />
+          </div>
+        ) : (
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <form id="product-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
                 name="appId"
@@ -203,7 +249,7 @@ export default function NewProductPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Product Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select type" />
@@ -338,7 +384,7 @@ export default function NewProductPage() {
                   <FormItem>
                     <FormLabel>Image URL (Optional)</FormLabel>
                     <FormControl>
-                      <Input 
+                      <Input
                         placeholder="Direct URL or Google Drive share link"
                         value={field.value}
                         onChange={(e) => {
@@ -355,16 +401,18 @@ export default function NewProductPage() {
                 )}
               />
 
-              <div className="pt-4">
-                <Button type="submit" disabled={isSubmitting} className="w-full">
-                  {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Add Product
-                </Button>
-              </div>
             </form>
           </Form>
-        </CardContent>
-      </Card>
-    </div>
+        )}
+        </div>
+
+        <DialogFooter className="px-6 py-4 border-t shrink-0">
+          <Button type="submit" form="product-form" disabled={isSubmitting} className="w-full">
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {productId ? 'Save Changes' : 'Add Product'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
