@@ -1,11 +1,25 @@
-import Image from 'next/image';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import type { Product } from '@/lib/types';
-import { ShoppingCart, Pencil, Package, CircleDollarSign, CalendarDays } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
-import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
+import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import type { Product } from "@/lib/types";
+import {
+  ShoppingCart,
+  Pencil,
+  Package,
+  CircleDollarSign,
+  CalendarDays,
+  Zap,
+} from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 type ProductCardProps = {
   product: Product;
@@ -17,29 +31,39 @@ function formatSubscriptionDuration(days?: number) {
   if (!days) return null;
   if (days >= 365) {
     const years = Math.floor(days / 365);
-    return `per ${years > 1 ? `${years} years` : 'year'}`;
+    return `per ${years > 1 ? `${years} years` : "year"}`;
   }
   if (days >= 30) {
     const months = Math.floor(days / 30);
-    return `per ${months > 1 ? `${months} months` : 'month'}`;
+    return `per ${months > 1 ? `${months} months` : "month"}`;
   }
   return `for ${days} days`;
 }
 
-export default function ProductCard({ product, onPurchaseClick, onEditClick }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  onPurchaseClick,
+  onEditClick,
+}: ProductCardProps) {
   const { user } = useAuth();
 
-  const dataAiHint = product.type === 'subscription' ? 'subscription package' : 'coin package';
+  const dataAiHint =
+    product.type === "subscription" ? "subscription package" : "coin package";
 
-  const savedAmount = product.discountedPrice ? product.regularPrice - product.discountedPrice : 0;
-  const savedPercentage = product.discountedPrice ? Math.round((savedAmount / product.regularPrice) * 100) : 0;
+  const savedAmount = product.discountedPrice
+    ? product.regularPrice - product.discountedPrice
+    : 0;
+  const savedPercentage = product.discountedPrice
+    ? Math.round((savedAmount / product.regularPrice) * 100)
+    : 0;
 
   return (
     <Card className="flex flex-col overflow-hidden transition-all duration-300 hover:border-primary hover:shadow-lg hover:-translate-y-1 h-full">
       <div
         className={cn(
-          'relative w-full aspect-video flex items-center justify-center',
-          !product.imageUrl && 'bg-gradient-to-br from-primary/10 via-background to-accent/10'
+          "relative w-full aspect-video flex items-center justify-center",
+          !product.imageUrl &&
+            "bg-gradient-to-br from-primary/10 via-background to-accent/10",
         )}
       >
         {product.imageUrl ? (
@@ -51,48 +75,56 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
             className="object-cover"
             data-ai-hint={dataAiHint}
           />
-        ) : product.type === 'subscription' ? (
+        ) : product.type === "subscription" ? (
           <Package className="h-24 w-24 text-foreground/50" />
         ) : (
           <CircleDollarSign className="h-24 w-24 text-foreground/50" />
         )}
         {savedPercentage > 0 && (
-            <Badge variant="destructive" className="absolute top-2 right-2">
-                Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
-            </Badge>
+          <Badge variant="destructive" className="absolute top-2 right-2">
+            Save ৳{savedAmount.toFixed(0)} ({savedPercentage}%)
+          </Badge>
         )}
       </div>
       <CardHeader>
         <CardTitle>{product.name}</CardTitle>
-        <CardDescription className="flex-grow min-h-[40px] whitespace-pre-wrap">{product.description}</CardDescription>
+        <CardDescription className="flex-grow min-h-[40px] whitespace-pre-wrap">
+          {product.description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="flex-grow">
         <div className="flex items-baseline gap-2 flex-wrap">
           {product.discountedPrice && product.discountedPrice > 0 ? (
             <>
-              <span className="text-3xl font-bold text-accent">৳{product.discountedPrice}</span>
-              <span className="text-lg text-muted-foreground line-through">৳{product.regularPrice}</span>
+              <span className="text-3xl font-bold text-accent">
+                ৳{product.discountedPrice}
+              </span>
+              <span className="text-lg text-muted-foreground line-through">
+                ৳{product.regularPrice}
+              </span>
             </>
           ) : (
             <span className="text-3xl font-bold">৳{product.regularPrice}</span>
           )}
-
         </div>
 
         <div className="mt-4 space-y-1">
-            {product.type === 'subscription' && product.subscriptionDays && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                    <CalendarDays className="h-4 w-4" />
-                    <span>{formatSubscriptionDuration(product.subscriptionDays)}</span>
-                </p>
-            )}
+          {product.type === "subscription" && product.subscriptionDays && (
+            <p className="text-sm text-muted-foreground flex items-center gap-1">
+              <CalendarDays className="h-4 w-4" />
+              <span>
+                {formatSubscriptionDuration(product.subscriptionDays)}
+              </span>
+            </p>
+          )}
 
-            {product.coinAmount && product.coinAmount > 0 ? (
-                 <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
-                    {product.type === 'subscription' && <span>+</span>}
-                    <span>🪙 {product.coinAmount.toLocaleString()} Coins</span>
-                </p>
-            ) : null}
+          {product.coinAmount && product.coinAmount > 0 ? (
+            <p className="text-sm font-bold text-amber-500 flex items-center gap-1">
+              {product.type === "subscription" && <span>+</span>}
+              <Zap className="w-4 h-4 fill-amber-500" />
+              <span>{product.coinAmount.toLocaleString()} Credits</span>
+            </p>
+          ) : null}
         </div>
       </CardContent>
       <CardFooter className="mt-auto">
@@ -102,7 +134,10 @@ export default function ProductCard({ product, onPurchaseClick, onEditClick }: P
             Edit
           </Button>
         ) : (
-          <Button className="w-full bg-primary hover:bg-primary/90" onClick={onPurchaseClick}>
+          <Button
+            className="w-full bg-primary hover:bg-primary/90"
+            onClick={onPurchaseClick}
+          >
             <ShoppingCart className="mr-2 h-4 w-4" />
             Purchase
           </Button>

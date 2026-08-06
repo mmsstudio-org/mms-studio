@@ -179,7 +179,7 @@ export default function ShopSlugPage() {
         {coins.length > 0 && (
           <section id="coins" className="scroll-mt-24">
             <div className="flex flex-wrap justify-between items-center mb-6 gap-2">
-              <h2 className="text-2xl md:text-3xl font-bold">Coins</h2>
+              <h2 className="text-2xl md:text-3xl font-bold">Credits</h2>
               <Button variant="ghost" onClick={() => handleSortToggle('coins')} className="text-xs md:text-sm">
                 Sort by price
                 {sortOrders.coins === 'asc' ? <ArrowUpNarrowWide className="ml-2 h-4 w-4 md:h-5 md:w-5" /> : <ArrowDownWideNarrow className="ml-2 h-4 w-4 md:h-5 md:w-5" />}
