@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { getDynamicPageById, updateDynamicPage, deleteDynamicPage } from '@/lib/firestore-service';
 import type { DynamicPage } from '@/lib/types';
-import DynamicPageForm from '../../_components/dynamic-page-form';
+import DynamicPageForm from '../_components/dynamic-page-form';
 import { Button } from '@/components/ui/button';
 import { Trash2, ArrowLeft } from 'lucide-react';
 import { useConfirm } from '@/components/ui/confirm-provider';
@@ -99,7 +99,7 @@ export default function EditDynamicPage() {
 
   return (
     <div className="container py-10 px-4">
-      <div className="flex items-center justify-between mb-6">
+      {/* <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Button asChild variant="outline" size="icon">
             <Link href="/dashboard/dynamic-pages">
@@ -116,7 +116,7 @@ export default function EditDynamicPage() {
         >
           <Trash2 className="mr-2 h-4 w-4" /> Delete Page
         </Button>
-      </div>
+      </div> */}
 
       <DynamicPageForm
         titleText="Edit Page"

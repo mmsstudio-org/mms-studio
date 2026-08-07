@@ -22,7 +22,7 @@ export default function DynamicPageClient({ page }: Props) {
             {page.status === 'draft' && <Badge variant="destructive">Draft Mode</Badge>}
           </div>
           <Button asChild variant="outline" size="sm">
-            <Link href={`/dashboard/dynamic-pages/${page.id}/edit`}>
+            <Link href={`/dashboard/dynamic-pages/${page.id}`}>
               <Pencil className="mr-2 h-4 w-4" /> Edit in Dashboard
             </Link>
           </Button>

@@ -132,7 +132,7 @@ export default function PortfolioDetailClient({ project }: PortfolioDetailClient
         </Link>
         {user && (
           <Button asChild variant="outline" className="border-primary/40 hover:bg-primary/10 hover:text-none text-xs h-9 rounded-lg self-start sm:self-auto">
-            <Link href={`/dashboard/portfolio/${project.id}/edit`} className="flex items-center gap-2">
+            <Link href={`/dashboard/portfolio/${project.id}`} className="flex items-center gap-2">
               <Pencil className="h-4 w-4 text-accent" /> Edit Project
             </Link>
           </Button>

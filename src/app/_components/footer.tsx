@@ -188,12 +188,12 @@ export default function Footer() {
             )}
 
             {/* Connect */}
-            <div className={hasPages ? "md:col-span-4" : ""}>
+            <div className={`${hasPages ? "md:col-span-4" : ""}`}>
               <div className="flex flex-col items-center md:items-start gap-4">
-                <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground/70">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-foreground/70 text-center md:text-right w-full">
                   Connect
                 </h3>
-                <div className="flex flex-wrap justify-center md:justify-start items-center gap-4">
+                <div className="flex flex-wrap justify-center md:justify-end items-center gap-4 w-full">
                   <Link
                     href="/"
                     title="Home"
