@@ -295,7 +295,7 @@ export default function DashboardPortfolioPage() {
   };
 
   const handleEdit = (id: string) => {
-    router.push(`/dashboard/portfolio/${id}/edit`);
+    router.push(`/dashboard/portfolio/${id}`);
   };
 
   const handleDelete = async (id: string, title: string) => {
@@ -365,7 +365,7 @@ export default function DashboardPortfolioPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 max-w-5xl">
+    <div className="container mx-auto py-10 px-4">
       {/* Header Navigation */}
       <div className="flex items-center gap-2 mb-6 text-sm text-muted-foreground">
         <Link href="/dashboard" className="hover:text-accent transition-colors flex items-center gap-1">

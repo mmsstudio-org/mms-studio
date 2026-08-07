@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { updatePortfolioProject } from '@/lib/firestore-service';
 import type { PortfolioProject } from '@/lib/types';
-import PortfolioForm from '../../_components/portfolio-form';
+import PortfolioForm from '../_components/portfolio-form';
 
 interface EditPortfolioClientProps {
   project: PortfolioProject;
@@ -32,7 +32,7 @@ export default function EditPortfolioClient({ project }: EditPortfolioClientProp
   };
 
   return (
-    <div className="container mx-auto py-10 max-w-4xl px-4">
+    <div className="container mx-auto py-10 px-4">
       <PortfolioForm
         initialData={project}
         onSubmit={handleSubmit}
