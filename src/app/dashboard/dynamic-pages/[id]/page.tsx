@@ -99,7 +99,7 @@ export default function EditDynamicPage() {
 
   return (
     <div className="container py-10 px-4">
-      <div className="flex items-center justify-between mb-6">
+      {/* <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
           <Button asChild variant="outline" size="icon">
             <Link href="/dashboard/dynamic-pages">
@@ -116,7 +116,7 @@ export default function EditDynamicPage() {
         >
           <Trash2 className="mr-2 h-4 w-4" /> Delete Page
         </Button>
-      </div>
+      </div> */}
 
       <DynamicPageForm
         titleText="Edit Page"
