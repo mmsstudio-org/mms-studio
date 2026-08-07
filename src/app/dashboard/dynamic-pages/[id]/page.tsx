@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { getDynamicPageById, updateDynamicPage, deleteDynamicPage } from '@/lib/firestore-service';
 import type { DynamicPage } from '@/lib/types';
-import DynamicPageForm from '../../_components/dynamic-page-form';
+import DynamicPageForm from '../_components/dynamic-page-form';
 import { Button } from '@/components/ui/button';
 import { Trash2, ArrowLeft } from 'lucide-react';
 import { useConfirm } from '@/components/ui/confirm-provider';

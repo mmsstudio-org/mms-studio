@@ -173,7 +173,7 @@ export default function DynamicPagesPage() {
                             </Button>
                           )}
                           <Button asChild variant="outline" size="icon" title="Edit Page">
-                            <Link href={`/dashboard/dynamic-pages/${page.id}/edit`}>
+                            <Link href={`/dashboard/dynamic-pages/${page.id}`}>
                               <Pencil className="h-4 w-4" />
                             </Link>
                           </Button>
